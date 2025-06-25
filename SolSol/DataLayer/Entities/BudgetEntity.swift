@@ -8,6 +8,7 @@
 import Foundation
 import GRDB
 
+/// 예산 엔티티
 public struct BudgetEntity: BaseEntitiy {
     public var id: Int64?
     public var userId: String

@@ -20,6 +20,6 @@ public protocol SQLAccessable: SQLAccessAdapterable {
     func updateAll<T: PersistableRecord>(type: T.Type, queryRequest: QueryInterfaceRequest<T>) async -> Bool
     func deleteOne<T: PersistableRecord>(to object: T) async -> Bool
     func deleteAll<T: PersistableRecord>(type: T.Type, filter: SQLExpression?) async -> Bool
-    func observeAll<T: PersistableRecord & FetchableRecord>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?) -> ValueObservation<ValueReducers.Fetch<[T]?>>
-    func observeOne<T: PersistableRecord & FetchableRecord>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?) -> ValueObservation<ValueReducers.Fetch<T?>>
+    nonisolated func observeAll<T: PersistableRecord & FetchableRecord>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?) -> ValueObservation<ValueReducers.Fetch<[T]?>>
+    nonisolated func observeOne<T: PersistableRecord & FetchableRecord>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?) -> ValueObservation<ValueReducers.Fetch<T?>>
 }

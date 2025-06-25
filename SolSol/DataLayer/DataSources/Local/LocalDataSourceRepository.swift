@@ -20,5 +20,19 @@ public protocol UserLocalDataSourceRepository: LocalDataSourceRepository {
 }
 
 // MARK: - Budget
-public protocol BudgetLocalDataSourceRepository: LocalDataSourceRepository {}
+public protocol BudgetLocalDataSourceRepository: LocalDataSourceRepository {
+    func getCurrentBudget() async -> BudgetEntity?
+    func getRemainingBudgetExpirationDate() async -> TimeInterval
+    func saveBudget(_ budget: BudgetModel) async -> Bool
+    func updateBudget(_ budget: BudgetModel) async -> Bool
+    func deleteBudget(_ budget: BudgetModel) async -> Bool
+}
 
+//MARK: - Category
+public protocol CategoryLocalDataSourceRepository: LocalDataSourceRepository {}
+
+//MARK: - Notification
+public protocol NotificationLocalDataSourceRepository: LocalDataSourceRepository {}
+
+//MARK: - Transaction
+public protocol TransactionLocalDataSourceRepository: LocalDataSourceRepository {}

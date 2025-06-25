@@ -17,70 +17,48 @@ public final class UserRepositoryImpl: UserRepositoryProtocol {
     }
     
     public func getUser() -> AnyPublisher<UserModel, any Error> {
-        return Future { promise in
-            Task {
-                if let result = await self.localDataSource.getUser() {
-                    let userDomainModel = UserMapper.toDomain(to: result)
-                    promise(.success(userDomainModel))
-                }
-                else {
-                    promise(.failure(NSError(domain: "", code: -1)))
-                }
+        return Publishers.Async {
+            guard let result = await self.localDataSource.getUser() else {
+                throw NSError(domain: "", code: -1)
             }
+            return UserMapper.toDomain(to: result)
         }
         .eraseToAnyPublisher()
     }
     
     public func getUsers() -> AnyPublisher<[UserModel], any Error> {
-        return Future { promise in
-            Task {
-                let result = await self.localDataSource.getUsers()
-                let models = result.map { UserMapper.toDomain(to: $0) }
-                promise(.success(models))
-            }
+        return Publishers.Async {
+            let result = await self.localDataSource.getUsers()
+            return result.map { UserMapper.toDomain(to: $0) }
         }
         .eraseToAnyPublisher()
     }
     
     public func saveUser(user: UserModel) -> AnyPublisher<Bool, any Error> {
-        return Future { promise in
-            Task {
-                let isSuccess = await self.localDataSource.saveUser(user)
-                promise(.success(isSuccess))
-            }
+        return Publishers.Async {
+            return await self.localDataSource.saveUser(user)
         }
         .eraseToAnyPublisher()
     }
     
     public func saveUsers(users: [UserModel]) -> AnyPublisher<Bool, any Error> {
-        return Future { promise in
-            Task {
-                let isSuccess = await self.localDataSource.saveUsers(users: users)
-                promise(.success(isSuccess))
-            }
+        return Publishers.Async {
+            return await self.localDataSource.saveUsers(users: users)
         }
         .eraseToAnyPublisher()
     }
     
     public func updateUser(user: UserModel) -> AnyPublisher<Bool, any Error> {
-        return Future { promise in
-            Task {
-                let isSuccess = await self.localDataSource.updateUser(user)
-                promise(.success(isSuccess))
-            }
+        return Publishers.Async {
+            return await self.localDataSource.updateUser(user)
         }
         .eraseToAnyPublisher()
     }
     
     public func deleteUser(user: UserModel) -> AnyPublisher<Bool, any Error> {
-        return Future { promise in
-            Task {
-                let isSuccess = await self.localDataSource.deleteUser(user)
-                promise(.success(isSuccess))
-            }
+        return Publishers.Async {
+            return await self.localDataSource.deleteUser(user)
         }
         .eraseToAnyPublisher()
     }
-    
-    
 }

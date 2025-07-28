@@ -10,9 +10,4 @@ import Foundation
 public protocol Mappable {
     associatedtype DomainType: BaseModel
     associatedtype DataType: BaseEntitiy
-    
-    static func toDomain(to data: DataType) -> DomainType
-    
-    static func toLocal(to doamin: DomainType) -> DataType
-    
 }

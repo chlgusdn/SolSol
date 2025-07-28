@@ -8,6 +8,7 @@
 import Foundation
 import GRDB
 
+/// 거래내역
 public struct TransactionEntity: BaseEntitiy {
     
     public var id: Int64?
@@ -15,6 +16,8 @@ public struct TransactionEntity: BaseEntitiy {
     public var categoryId: Int64
     public var amount: Double
     public var createdAt: TimeInterval
+    public var memo: String?
+    public var name: String
     
     public enum Columns: String, ColumnExpression {
         case id
@@ -22,6 +25,8 @@ public struct TransactionEntity: BaseEntitiy {
         case categoryId
         case amount
         case createdAt
+        case memo
+        case name
     }
     
     public init(
@@ -29,12 +34,21 @@ public struct TransactionEntity: BaseEntitiy {
         userId: String,
         categoryId: Int64,
         amount: Double,
-        createdAt: TimeInterval
+        createdAt: TimeInterval,
+        memo: String?,
+        name: String
     ) {
         self.id = id
         self.userId = userId
         self.categoryId = categoryId
         self.amount = amount
         self.createdAt = createdAt
+        self.memo = memo
+        self.name = name
     }
+}
+
+public extension TransactionEntity {
+    /// N: 1 관계
+    static let category = belongsTo(CategoryEntitiy.self, key: TransactionEntity.Columns.categoryId.rawValue)
 }

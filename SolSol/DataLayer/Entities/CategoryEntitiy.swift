@@ -30,3 +30,8 @@ public struct CategoryEntitiy: BaseEntitiy {
         self.categoryType = categoryType
     }
 }
+
+public extension CategoryEntitiy {
+    /// N: 1
+    static let transactions = hasMany(TransactionEntity.self, key: TransactionEntity.Columns.categoryId.rawValue)
+}

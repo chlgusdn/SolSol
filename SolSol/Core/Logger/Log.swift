@@ -66,27 +66,27 @@ public class Log {
         os_log("%{public}@", log: log, type: level.level, logMessage)
     }
     
-    static func d(_ message: String) {
+    public static func d(_ message: String) {
         let log = Log()
         log.message(message, level: .debug)
     }
     
-    static func i(_ message: String) {
+    public static func i(_ message: String) {
         let log = Log()
         log.message(message, level: .info)
     }
     
-    static func w(_ message: String) {
+    public static func w(_ message: String) {
         let log = Log()
         log.message(message, level: .warning)
     }
     
-    static func e(_ message: String) {
+    public static func e(_ message: String) {
         let log = Log()
         log.message(message, level: .error)
     }
     
-    static func custom(_ message: String, category: String) {
+    public static func custom(_ message: String, category: String) {
         let log = Log()
         log.message(message, level: .custom(category))
     }

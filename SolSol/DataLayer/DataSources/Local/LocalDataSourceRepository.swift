@@ -29,10 +29,21 @@ public protocol BudgetLocalDataSourceRepository: LocalDataSourceRepository {
 }
 
 //MARK: - Category
-public protocol CategoryLocalDataSourceRepository: LocalDataSourceRepository {}
+public protocol CategoryLocalDataSourceRepository: LocalDataSourceRepository {
+    func getAllCategories() async -> [CategoryModel]
+}
 
 //MARK: - Notification
-public protocol NotificationLocalDataSourceRepository: LocalDataSourceRepository {}
+public protocol NotificationLocalDataSourceRepository: LocalDataSourceRepository {
+    func getAllNotifications() async -> [NotificationModel]
+}
 
 //MARK: - Transaction
-public protocol TransactionLocalDataSourceRepository: LocalDataSourceRepository {}
+public protocol TransactionLocalDataSourceRepository: LocalDataSourceRepository {
+    func getTransactions() async -> [TransactionModel]
+    func getTransactions(contain name: String) async -> [TransactionModel]
+    func getTransactions(by category: CategoryModel) async -> [TransactionModel]
+    func getTransaction(by id: Int64) async -> TransactionModel?
+    func getTransaction(by memo: String) async -> TransactionModel?
+    func saveTransaction(_ transaction: TransactionModel) async -> Bool
+}

@@ -16,6 +16,6 @@ public struct UserMapper: Mappable {
     }
     
     public static func toDomain(to data: UserEntity) -> UserModel {
-        return UserModel(createdAt: Date(timeIntervalSince1970: data.createdAt/1000))
+        return UserModel(createdAt: Date(timeIntervalSince1970: data.createdAt))
     }
 }

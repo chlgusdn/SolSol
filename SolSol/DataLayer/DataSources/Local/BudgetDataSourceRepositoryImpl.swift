@@ -1,5 +1,5 @@
 //
-//  BudgetDataSourceRepository.swift
+//  BudgetDataSourceRepositoryImpl.swift
 //  SolSol
 //
 //  Created by NUNU:D on 6/25/25.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public final class BudgetDataSourceRepository: BudgetLocalDataSourceRepository {
+public final class BudgetDataSourceRepositoryImpl: BudgetLocalDataSourceRepository {
     
     let accessor: SQLAccessor
     

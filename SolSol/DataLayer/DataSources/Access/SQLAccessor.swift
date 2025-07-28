@@ -99,11 +99,43 @@ final actor SQLAccessor: SQLAccessable {
         }
     }
     
+    func fetchOne<T>(type: T.Type, query: QueryInterfaceRequest<T>) async -> T? where T : FetchableRecord, T : PersistableRecord {
+        guard let pool = databasePool else { return nil }
+        
+        do {
+            let result = try await pool.read { database in
+                try type.fetchOne(database, query)
+            }
+            
+            return result
+        }
+        catch {
+            Log.e("DB Select Failed \(error)")
+            return nil
+        }
+    }
+    
     func fetchAll<T>(type: T.Type, rawQuery: String) async -> [T]? where T : GRDB.FetchableRecord, T : GRDB.PersistableRecord {
         guard let pool = databasePool else { return nil }
         do {
             let result = try await pool.read { database in
                 try type.fetchAll(database, sql: rawQuery)
+            }
+            
+            return result
+        }
+        catch {
+            Log.e("DB Select Failed \(error)")
+            return nil
+        }
+    }
+    
+    func fetchAll<T>(type: T.Type, query: QueryInterfaceRequest<T>) async -> [T]? where T : FetchableRecord, T : PersistableRecord {
+        guard let pool = databasePool else { return [] }
+        
+        do {
+            let result = try await pool.read { database in
+                try type.fetchAll(database, query)
             }
             
             return result

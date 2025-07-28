@@ -52,6 +52,15 @@ public struct TableMigratorV1: TableVersionMigratoralbe {
             table.column(TransactionEntity.Columns.categoryId.rawValue, .integer).notNull()
             table.column(TransactionEntity.Columns.amount.rawValue, .double).notNull()
             table.column(TransactionEntity.Columns.createdAt.rawValue, .double).notNull()
+            table.column(TransactionEntity.Columns.name.rawValue, .text).notNull()
+            table.column(TransactionEntity.Columns.memo.rawValue)
+            
+            table.foreignKey(
+                [TransactionEntity.Columns.categoryId.rawValue],
+                references: CategoryEntitiy.databaseTableName,
+                columns: [CategoryEntitiy.Columns.id.rawValue],
+                onDelete: .restrict
+            )
         }
     }
     
@@ -73,6 +82,12 @@ public struct TableMigratorV1: TableVersionMigratoralbe {
             table.column(NotificationEntity.Columns.isActive.rawValue, .boolean).notNull()
             table.column(NotificationEntity.Columns.updatedAt.rawValue, .double).notNull()
             table.column(NotificationEntity.Columns.createdAt.rawValue, .double).notNull()
+            table.foreignKey(
+                [NotificationEntity.Columns.budgetId.rawValue],
+                references: BudgetEntity.databaseTableName,
+                columns: [BudgetEntity.Columns.id.rawValue],
+                onDelete: .restrict
+            )
         }
     }
 }

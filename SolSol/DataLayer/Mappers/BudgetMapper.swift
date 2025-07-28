@@ -13,6 +13,7 @@ public struct BudgetMapper: Mappable {
     
     public static func toDomain(to data: BudgetEntity) -> BudgetModel {
         return BudgetModel(
+            id: data.id ?? -1,
             userId: data.userId,
             budgetName: data.budgetName,
             startedAt: Date(timeIntervalSince1970: data.startedAt),

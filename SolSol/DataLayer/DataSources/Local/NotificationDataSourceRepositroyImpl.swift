@@ -23,7 +23,7 @@ public final class NotificationDataSourceRepositroyImpl: NotificationLocalDataSo
             .order(NotificationEntity.Columns.createdAt.desc)
             .asRequest(of: TransactionWithCategoryEntitiy.self)
         
-        return await self.accessor.fetchAll(type: TransactionWithCategoryEntitiy.self, query: query) ?? []
+        return await self.accessor.fetchAll(type: NotificationWithBudgetEntitiy.self, query: query) ?? []
     }
     
     public func saveNotification(_ notification: NotificationModel) async -> Bool {

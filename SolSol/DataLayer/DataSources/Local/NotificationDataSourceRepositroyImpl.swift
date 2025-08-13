@@ -21,7 +21,7 @@ public final class NotificationDataSourceRepositroyImpl: NotificationLocalDataSo
         let query = NotificationEntity
             .including(required: NotificationEntity.budget)
             .order(NotificationEntity.Columns.createdAt.desc)
-            .asRequest(of: TransactionWithCategoryEntitiy.self)
+            .asRequest(of: NotificationWithBudgetEntitiy.self)
         
         return await self.accessor.fetchAll(type: NotificationWithBudgetEntitiy.self, query: query) ?? []
     }

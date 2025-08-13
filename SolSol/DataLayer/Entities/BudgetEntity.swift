@@ -54,3 +54,8 @@ public struct BudgetEntity: BaseEntitiy {
         self.currentAmount = currentAmount
     }
 }
+
+public extension BudgetEntity {
+    /// N: 1 관계
+    static let notifications = hasMany(NotificationEntity.self, key: NotificationEntity.Columns.budgetId.rawValue)
+}

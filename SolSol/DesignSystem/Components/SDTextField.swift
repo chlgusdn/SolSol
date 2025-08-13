@@ -55,5 +55,8 @@ public final class SDTextField: UITextField {
         self.textColor = color
         return self
     }
-
+    
+    deinit {
+        bindings.removeAll()
+    }
 }

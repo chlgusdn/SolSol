@@ -50,3 +50,8 @@ public struct NotificationEntity: BaseEntitiy {
         self.updatedAt = updatedAt
     }
 }
+
+public extension NotificationEntity {
+    /// 1: N
+    static let budget = belongsTo(BudgetEntity.self, key: BudgetEntity.Columns.id.rawValue)
+}

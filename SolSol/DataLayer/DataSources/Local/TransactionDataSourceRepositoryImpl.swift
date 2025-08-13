@@ -16,66 +16,51 @@ public struct TransactionDataSourceRepositoryImpl: TransactionLocalDataSourceRep
         self.accessor = accessor
     }
     
-    public func getTransactions() async -> [TransactionModel] {
+    public func getTransactions() async -> [TransactionWithCategoryEntitiy] {
         let query = TransactionEntity
                .including(required: TransactionEntity.category)
                .order(TransactionEntity.Columns.createdAt.desc)
-               .asRequest(of: TransactionWithCategory.self)
+               .asRequest(of: TransactionWithCategoryEntitiy.self)
         
-        let transactions = await self.accessor.fetchAll(type: TransactionWithCategory.self, query: query) ?? []
-        
-        let domains = transactions.map { TransactionMapper.toDomain(to: $0.transaction, category: $0.category) }
-        
-        return domains
+        return await self.accessor.fetchAll(type: TransactionWithCategoryEntitiy.self, query: query) ?? []
     }
     
-    public func getTransactions(contain name: String) async -> [TransactionModel] {
+    public func getTransactions(contain name: String) async -> [TransactionWithCategoryEntitiy] {
         let query = TransactionEntity
             .including(required: TransactionEntity.category)
             .filter(TransactionEntity.Columns.name.like("%\(name)%"))
             .order(TransactionEntity.Columns.createdAt.desc)
-            .asRequest(of: TransactionWithCategory.self)
+            .asRequest(of: TransactionWithCategoryEntitiy.self)
         
-        guard let entities = await self.accessor.fetchAll(type: TransactionWithCategory.self, query: query) else { return [] }
-        
-        let domains = entities.map { TransactionMapper.toDomain(to: $0.transaction, category: $0.category) }
-        
-        return domains
+        return await self.accessor.fetchAll(type: TransactionWithCategoryEntitiy.self, query: query) ?? []
     }
     
-    public func getTransactions(by category: CategoryModel) async -> [TransactionModel] {
+    public func getTransactions(by category: CategoryModel) async -> [TransactionWithCategoryEntitiy] {
         let query = TransactionEntity
             .including(required: TransactionEntity.category)
             .filter(TransactionEntity.Columns.categoryId == category.id)
             .order(TransactionEntity.Columns.createdAt.desc)
-            .asRequest(of: TransactionWithCategory.self)
+            .asRequest(of: TransactionWithCategoryEntitiy.self)
         
-        let transactions = await self.accessor.fetchAll(type: TransactionWithCategory.self, query: query) ?? []
-        let domains = transactions.map { TransactionMapper.toDomain(to: $0.transaction, category: $0.category) }
-        
-        return domains
+        return await self.accessor.fetchAll(type: TransactionWithCategoryEntitiy.self, query: query) ?? []
     }
 
-    public func getTransaction(by id: Int64) async -> TransactionModel? {
+    public func getTransaction(by id: Int64) async -> TransactionWithCategoryEntitiy? {
         let query = TransactionEntity
             .including(required: TransactionEntity.category)
             .filter(TransactionEntity.Columns.id == id)
-            .asRequest(of: TransactionWithCategory.self)
+            .asRequest(of: TransactionWithCategoryEntitiy.self)
         
-        guard let entity = await self.accessor.fetchOne(type: TransactionWithCategory.self, query: query) else { return nil }
-        
-        return TransactionMapper.toDomain(to: entity.transaction, category: entity.category)
+        return await self.accessor.fetchOne(type: TransactionWithCategoryEntitiy.self, query: query)
     }
     
-    public func getTransaction(by memo: String) async -> TransactionModel? {
+    public func getTransaction(by memo: String) async -> TransactionWithCategoryEntitiy? {
         let query = TransactionEntity
             .including(required: TransactionEntity.category)
             .filter(TransactionEntity.Columns.memo == memo)
-            .asRequest(of: TransactionWithCategory.self)
+            .asRequest(of: TransactionWithCategoryEntitiy.self)
         
-        guard let entity = await self.accessor.fetchOne(type: TransactionWithCategory.self, query: query) else { return nil }
-        
-        return TransactionMapper.toDomain(to: entity.transaction, category: entity.category)
+        return await self.accessor.fetchOne(type: TransactionWithCategoryEntitiy.self, query: query)
     }
     
     public func saveTransaction(_ transaction: TransactionModel) async -> Bool {

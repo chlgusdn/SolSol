@@ -10,9 +10,9 @@ import Combine
 
 public final class BudgetRepositoryImpl: BudgetRepositoryProtocol {
     
-    let localDataSource: BudgetDataSourceRepository
+    let localDataSource: BudgetLocalDataSourceRepository
     
-    init(localDataSource: BudgetDataSourceRepository) {
+    init(localDataSource: BudgetLocalDataSourceRepository) {
         self.localDataSource = localDataSource
     }
     

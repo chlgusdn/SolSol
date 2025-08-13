@@ -86,7 +86,7 @@ public struct TableMigratorV1: TableVersionMigratoralbe {
                 [NotificationEntity.Columns.budgetId.rawValue],
                 references: BudgetEntity.databaseTableName,
                 columns: [BudgetEntity.Columns.id.rawValue],
-                onDelete: .restrict
+                onDelete: .cascade
             )
         }
     }

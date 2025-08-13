@@ -1,0 +1,33 @@
+//
+//  NotificationDataSourceRepositroyImpl.swift
+//  SolSol
+//
+//  Created by NUNU:D on 8/13/25.
+//
+
+import Foundation
+import GRDB
+
+public final class NotificationDataSourceRepositroyImpl: NotificationLocalDataSourceRepository {
+    
+    let accessor: SQLAccessor
+    
+    init(accessor: SQLAccessor) throws {
+        self.accessor = accessor
+    }
+    
+    public func getAllNotifications() async -> [NotificationWithBudgetEntitiy] {
+        
+        let query = NotificationEntity
+            .including(required: NotificationEntity.budget)
+            .order(NotificationEntity.Columns.createdAt.desc)
+            .asRequest(of: TransactionWithCategoryEntitiy.self)
+        
+        return await self.accessor.fetchAll(type: TransactionWithCategoryEntitiy.self, query: query) ?? []
+    }
+    
+    public func saveNotification(_ notification: NotificationModel) async -> Bool {
+        let entity = NotificationMapper.toLocal(to: notification)
+        return await self.accessor.save(to: entity)
+    }
+}

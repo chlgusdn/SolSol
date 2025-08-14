@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B125C10E2DEEC46300C9C755 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = B125C10D2DEEC46300C9C755 /* GRDB */; };
-		B125C1112DEEC49200C9C755 /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = B125C1102DEEC49200C9C755 /* Swinject */; };
+		B1ABE9D62E4E34C2000F8D7C /* Factory in Frameworks */ = {isa = PBXBuildFile; productRef = B1ABE9D52E4E34C2000F8D7C /* Factory */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,7 +71,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B125C10E2DEEC46300C9C755 /* GRDB in Frameworks */,
-				B125C1112DEEC49200C9C755 /* Swinject in Frameworks */,
+				B1ABE9D62E4E34C2000F8D7C /* Factory in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -133,7 +133,7 @@
 			name = SolSol;
 			packageProductDependencies = (
 				B125C10D2DEEC46300C9C755 /* GRDB */,
-				B125C1102DEEC49200C9C755 /* Swinject */,
+				B1ABE9D52E4E34C2000F8D7C /* Factory */,
 			);
 			productName = SolSol;
 			productReference = B125C0B62DEEC1E300C9C755 /* SolSol.app */;
@@ -219,7 +219,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				B125C10C2DEEC46300C9C755 /* XCRemoteSwiftPackageReference "GRDB" */,
-				B125C10F2DEEC49200C9C755 /* XCRemoteSwiftPackageReference "Swinject" */,
+				B1ABE9D42E4E34C2000F8D7C /* XCRemoteSwiftPackageReference "Factory" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B125C0B72DEEC1E300C9C755 /* Products */;
@@ -600,12 +600,12 @@
 				version = 7.5.0;
 			};
 		};
-		B125C10F2DEEC49200C9C755 /* XCRemoteSwiftPackageReference "Swinject" */ = {
+		B1ABE9D42E4E34C2000F8D7C /* XCRemoteSwiftPackageReference "Factory" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Swinject/Swinject.git";
+			repositoryURL = "https://github.com/hmlongco/Factory";
 			requirement = {
-				kind = exactVersion;
-				version = 2.8.0;
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.3;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -616,10 +616,10 @@
 			package = B125C10C2DEEC46300C9C755 /* XCRemoteSwiftPackageReference "GRDB" */;
 			productName = GRDB;
 		};
-		B125C1102DEEC49200C9C755 /* Swinject */ = {
+		B1ABE9D52E4E34C2000F8D7C /* Factory */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = B125C10F2DEEC49200C9C755 /* XCRemoteSwiftPackageReference "Swinject" */;
-			productName = Swinject;
+			package = B1ABE9D42E4E34C2000F8D7C /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = Factory;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

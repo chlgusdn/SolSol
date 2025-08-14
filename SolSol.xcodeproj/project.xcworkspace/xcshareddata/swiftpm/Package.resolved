@@ -1,6 +1,15 @@
 {
-  "originHash" : "2d959f39067cfb45164721c925d7eb56865ad09887ee4436ee99a1bfa89ba25d",
+  "originHash" : "b779e4db53231a34a8ee1a5d5859fc63e61c51ce66a84c23316ad9f22f85c558",
   "pins" : [
+    {
+      "identity" : "factory",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/hmlongco/Factory",
+      "state" : {
+        "revision" : "ccc898f21992ebc130bc04cc197460a5ae230bcf",
+        "version" : "2.5.3"
+      }
+    },
     {
       "identity" : "grdb.swift",
       "kind" : "remoteSourceControl",
@@ -8,15 +17,6 @@
       "state" : {
         "revision" : "a5a1be26b4513dc7ec360eb56bc08a345bac6649",
         "version" : "7.5.0"
-      }
-    },
-    {
-      "identity" : "swinject",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Swinject/Swinject.git",
-      "state" : {
-        "revision" : "b1d92a53159fe45e162c307183aec9be15e4e7ae",
-        "version" : "2.8.0"
       }
     }
   ],

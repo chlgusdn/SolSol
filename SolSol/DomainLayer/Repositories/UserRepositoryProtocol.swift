@@ -9,10 +9,10 @@ import Foundation
 import Combine
 
 public protocol UserRepositoryProtocol {
-    func getUser() -> AnyPublisher<UserModel, Error>
-    func getUsers() -> AnyPublisher<[UserModel], Error>
-    func saveUser(user: UserModel) -> AnyPublisher<Bool, Error>
-    func saveUsers(users: [UserModel]) -> AnyPublisher<Bool, Error>
-    func updateUser(user: UserModel) -> AnyPublisher<Bool, Error>
-    func deleteUser(user: UserModel) -> AnyPublisher<Bool, Error>
+    func getUser() async throws -> UserModel
+    func getUsers() async throws -> [UserModel]
+    func saveUser(user: UserModel) async -> Bool
+    func saveUsers(users: [UserModel]) async -> Bool
+    func updateUser(user: UserModel) async -> Bool
+    func deleteUser(user: UserModel) async -> Bool
 }

@@ -26,7 +26,7 @@ public final class BudgetDataSourceRepositoryImpl: BudgetLocalDataSourceReposito
         return await accessor.fetchOne(type: BudgetEntity.self, rawQuery: sql)
     }
     
-    public func getRemainingBudgetExpirationDate() async -> TimeInterval {
+    public func getRemainingBudgetExpirationDate() async -> TimeInterval? {
         let sql = """
         SELECT *
         FROM \(BudgetEntity.databaseTableName)
@@ -34,7 +34,7 @@ public final class BudgetDataSourceRepositoryImpl: BudgetLocalDataSourceReposito
         ORDER BY \(BudgetEntity.Columns.id)
         DESC LIMIT 1
         """
-        return await accessor.fetchOne(type: BudgetEntity.self, rawQuery: sql)?.finishedAt ?? 0
+        return await accessor.fetchOne(type: BudgetEntity.self, rawQuery: sql)?.finishedAt
     }
     
     public func saveBudget(_ budget: BudgetModel) async -> Bool {
@@ -51,6 +51,4 @@ public final class BudgetDataSourceRepositoryImpl: BudgetLocalDataSourceReposito
         let entity = BudgetMapper.toLocal(to: budget)
         return await accessor.deleteOne(to: entity)
     }
-    
-    
 }

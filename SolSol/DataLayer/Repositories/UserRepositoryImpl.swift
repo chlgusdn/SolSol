@@ -15,50 +15,43 @@ public final class UserRepositoryImpl: UserRepositoryProtocol {
     init(localDataSource: UserLocalDataSourceRepository) {
         self.localDataSource = localDataSource
     }
-    
-    public func getUser() -> AnyPublisher<UserModel, any Error> {
-        return Publishers.Async {
-            guard let result = await self.localDataSource.getUser() else {
-                throw NSError(domain: "", code: -1)
-            }
-            return UserMapper.toDomain(to: result)
+
+    public func getUser() async throws -> UserModel {
+        
+        guard let userEntity = await self.localDataSource.getUser() else {
+            throw UserError.notFound
         }
-        .eraseToAnyPublisher()
+        
+        return UserMapper.toDomain(to: userEntity)
     }
     
-    public func getUsers() -> AnyPublisher<[UserModel], any Error> {
-        return Publishers.Async {
-            let result = await self.localDataSource.getUsers()
-            return result.map { UserMapper.toDomain(to: $0) }
+    public func getUsers() async throws -> [UserModel] {
+        
+        let userEntities = await self.localDataSource.getUsers()
+        let users = userEntities.map { entity in
+            UserMapper.toDomain(to: entity)
         }
-        .eraseToAnyPublisher()
+        
+        guard users.isEmpty == false else {
+            throw UserError.notFound
+        }
+        
+        return users
     }
     
-    public func saveUser(user: UserModel) -> AnyPublisher<Bool, any Error> {
-        return Publishers.Async {
-            return await self.localDataSource.saveUser(user)
-        }
-        .eraseToAnyPublisher()
+    public func saveUser(user: UserModel) async -> Bool {
+        return await self.localDataSource.saveUser(user)
     }
     
-    public func saveUsers(users: [UserModel]) -> AnyPublisher<Bool, any Error> {
-        return Publishers.Async {
-            return await self.localDataSource.saveUsers(users: users)
-        }
-        .eraseToAnyPublisher()
+    public func saveUsers(users: [UserModel]) async -> Bool {
+        return await self.localDataSource.saveUsers(users: users)
     }
     
-    public func updateUser(user: UserModel) -> AnyPublisher<Bool, any Error> {
-        return Publishers.Async {
-            return await self.localDataSource.updateUser(user)
-        }
-        .eraseToAnyPublisher()
+    public func updateUser(user: UserModel) async -> Bool {
+        return await self.localDataSource.updateUser(user)
     }
     
-    public func deleteUser(user: UserModel) -> AnyPublisher<Bool, any Error> {
-        return Publishers.Async {
-            return await self.localDataSource.deleteUser(user)
-        }
-        .eraseToAnyPublisher()
+    public func deleteUser(user: UserModel) async -> Bool {
+        return await self.localDataSource.deleteUser(user)
     }
 }

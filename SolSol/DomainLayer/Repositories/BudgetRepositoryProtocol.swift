@@ -6,12 +6,11 @@
 //
 
 import Foundation
-import Combine
 
 public protocol BudgetRepositoryProtocol {
-    func getCurrentBudget() -> AnyPublisher<BudgetModel, Error>
-    func getRemainingBudgetExpirationDate() -> AnyPublisher<TimeInterval, Error>
-    func saveBudget(_ budget: BudgetModel) -> AnyPublisher<Bool, Error>
-    func updateBudget(_ budget: BudgetModel) -> AnyPublisher<Bool, Error>
-    func deleteBudget(_ budget: BudgetModel) -> AnyPublisher<Bool, Error>
+    func getCurrentBudget() async throws -> BudgetModel
+    func getRemainingBudgetExpirationDate() async throws -> TimeInterval
+    func saveBudget(_ budget: BudgetModel) async -> Bool
+    func updateBudget(_ budget: BudgetModel) async -> Bool
+    func deleteBudget(_ budget: BudgetModel) async -> Bool
 }

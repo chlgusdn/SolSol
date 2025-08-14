@@ -22,7 +22,7 @@ public protocol UserLocalDataSourceRepository: LocalDataSourceRepository {
 // MARK: - Budget
 public protocol BudgetLocalDataSourceRepository: LocalDataSourceRepository {
     func getCurrentBudget() async -> BudgetEntity?
-    func getRemainingBudgetExpirationDate() async -> TimeInterval
+    func getRemainingBudgetExpirationDate() async -> TimeInterval?
     func saveBudget(_ budget: BudgetModel) async -> Bool
     func updateBudget(_ budget: BudgetModel) async -> Bool
     func deleteBudget(_ budget: BudgetModel) async -> Bool

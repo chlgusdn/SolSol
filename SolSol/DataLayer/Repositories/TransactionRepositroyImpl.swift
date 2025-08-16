@@ -11,8 +11,8 @@ public final class TransactionRepositroyImpl: TransactionRepositroyProtocol {
     
     let localDataRepository: TransactionLocalDataSourceRepository
     
-    init(localDataRepository: TransactionLocalDataSourceRepository) {
-        self.localDataRepository = localDataRepository
+    init(localDataSource: TransactionLocalDataSourceRepository) {
+        self.localDataRepository = localDataSource
     }
     
     public func getTransactions() async -> [TransactionModel] {

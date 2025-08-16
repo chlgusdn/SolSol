@@ -8,7 +8,7 @@
 import Foundation
 import GRDB
 
-final actor SQLAccessor: SQLAccessable {
+public final actor SQLAccessor: SQLAccessable {
     
     private var databasePool: DatabasePool?
     
@@ -49,11 +49,11 @@ final actor SQLAccessor: SQLAccessable {
         }
     }
     
-    func getDatabase() async -> GRDB.DatabasePool? {
+    public func getDatabase() async -> GRDB.DatabasePool? {
         return databasePool
     }
     
-    func save<T>(to object: T) async -> Bool where T : GRDB.PersistableRecord {
+    public func save<T>(to object: T) async -> Bool where T : GRDB.PersistableRecord {
         guard let pool = databasePool else { return false }
         do {
             try await pool.write { database in
@@ -67,7 +67,7 @@ final actor SQLAccessor: SQLAccessable {
         }
     }
     
-    func saveAll<T>(to objects: [T]) async -> Bool where T : GRDB.PersistableRecord {
+    public func saveAll<T>(to objects: [T]) async -> Bool where T : GRDB.PersistableRecord {
         guard let pool = databasePool else { return false }
         do {
             try await pool.write { database in
@@ -84,7 +84,7 @@ final actor SQLAccessor: SQLAccessable {
         }
     }
     
-    func fetchOne<T>(type: T.Type, rawQuery: String) async -> T? where T : GRDB.FetchableRecord, T : GRDB.PersistableRecord {
+    public func fetchOne<T>(type: T.Type, rawQuery: String) async -> T? where T : GRDB.FetchableRecord, T : GRDB.PersistableRecord {
         guard let pool = databasePool else { return nil }
         do {
             let result = try await pool.read { database in
@@ -99,7 +99,7 @@ final actor SQLAccessor: SQLAccessable {
         }
     }
     
-    func fetchOne<T>(type: T.Type, query: QueryInterfaceRequest<T>) async -> T? where T : FetchableRecord, T : PersistableRecord {
+    public func fetchOne<T>(type: T.Type, query: QueryInterfaceRequest<T>) async -> T? where T : FetchableRecord, T : PersistableRecord {
         guard let pool = databasePool else { return nil }
         
         do {
@@ -115,7 +115,7 @@ final actor SQLAccessor: SQLAccessable {
         }
     }
     
-    func fetchAll<T>(type: T.Type, rawQuery: String) async -> [T]? where T : GRDB.FetchableRecord, T : GRDB.PersistableRecord {
+    public func fetchAll<T>(type: T.Type, rawQuery: String) async -> [T]? where T : GRDB.FetchableRecord, T : GRDB.PersistableRecord {
         guard let pool = databasePool else { return nil }
         do {
             let result = try await pool.read { database in
@@ -130,7 +130,7 @@ final actor SQLAccessor: SQLAccessable {
         }
     }
     
-    func fetchAll<T>(type: T.Type, query: QueryInterfaceRequest<T>) async -> [T]? where T : FetchableRecord, T : PersistableRecord {
+    public func fetchAll<T>(type: T.Type, query: QueryInterfaceRequest<T>) async -> [T]? where T : FetchableRecord, T : PersistableRecord {
         guard let pool = databasePool else { return [] }
         
         do {
@@ -146,7 +146,7 @@ final actor SQLAccessor: SQLAccessable {
         }
     }
     
-    func updateOne<T>(to object: T) async -> Bool where T : GRDB.PersistableRecord {
+    public func updateOne<T>(to object: T) async -> Bool where T : GRDB.PersistableRecord {
         guard let pool = databasePool else { return false }
         do {
             try await pool.write { database in
@@ -161,7 +161,7 @@ final actor SQLAccessor: SQLAccessable {
         }
     }
     
-    func updateAll<T>(type: T.Type, queryRequest: QueryInterfaceRequest<T>) async -> Bool where T : GRDB.PersistableRecord {
+    public func updateAll<T>(type: T.Type, queryRequest: QueryInterfaceRequest<T>) async -> Bool where T : GRDB.PersistableRecord {
         guard let pool = databasePool else { return false }
         
         do {
@@ -177,7 +177,7 @@ final actor SQLAccessor: SQLAccessable {
         }
     }
     
-    func deleteOne<T>(to object: T) async -> Bool where T : PersistableRecord {
+    public func deleteOne<T>(to object: T) async -> Bool where T : PersistableRecord {
         guard let pool = databasePool else { return false }
         do {
             let result = try await pool.write { database in
@@ -192,7 +192,7 @@ final actor SQLAccessor: SQLAccessable {
         }
     }
     
-    func deleteAll<T>(type: T.Type, filter: SQLExpression?) async -> Bool where T : PersistableRecord {
+    public func deleteAll<T>(type: T.Type, filter: SQLExpression?) async -> Bool where T : PersistableRecord {
         guard let pool = databasePool else { return false }
         do {
             let result = try await pool.write { database in
@@ -212,7 +212,7 @@ final actor SQLAccessor: SQLAccessable {
         }
     }
     
-    nonisolated func observeAll<T>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?)-> ValueObservation<ValueReducers.Fetch<[T]?>> where T : FetchableRecord, T : PersistableRecord, T : Sendable {
+    public nonisolated func observeAll<T>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?)-> ValueObservation<ValueReducers.Fetch<[T]?>> where T : FetchableRecord, T : PersistableRecord, T : Sendable {
         let queryRequest = query ?? type.all()
         
         guard let observeTable = observeTable else {
@@ -227,7 +227,7 @@ final actor SQLAccessor: SQLAccessable {
         
     }
     
-    nonisolated func observeOne<T>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?) -> ValueObservation<ValueReducers.Fetch<T?>> where T : FetchableRecord, T : PersistableRecord, T : Sendable {
+    public nonisolated func observeOne<T>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?) -> ValueObservation<ValueReducers.Fetch<T?>> where T : FetchableRecord, T : PersistableRecord, T : Sendable {
         let queryRequest = query ?? type.all()
         
         guard let observeTable = observeTable else {

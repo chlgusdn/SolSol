@@ -43,6 +43,7 @@ public final actor SQLAccessor: SQLAccessable {
             
             let migrator = try checkMigration()
             try migrator.migrate(databasePool!)
+            Log.d("Database Opened Successfully")
         }
         catch {
             Log.e("Database Open Failed \(error)")

@@ -19,6 +19,12 @@ public extension Container {
         }
         .singleton
     }
+    
+    /// SQL access 
+    static func initalizeSQLAccess() async {
+        let sqlAccessor = await SQLAccessor()
+        Container.shared.sqlAccessor.register { sqlAccessor }
+    }
 }
 
 // MARK: - DataSource

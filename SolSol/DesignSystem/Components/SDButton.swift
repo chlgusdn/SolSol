@@ -7,7 +7,7 @@
 
 import UIKit
 
-public final class SDButton: UIButton {
+public final class SDButton: UIButton, DampingAnimation {
     
     private var disabledColor: UIColor = .lightGray
     
@@ -20,8 +20,27 @@ public final class SDButton: UIButton {
         }
     }
     
+    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        self.performPressAnimation()
+    }
+    
+    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        self.performReleaseAnimation()
+        self.performHapticFeedback()
+    }
+    
+    public override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesCancelled(touches, with: event)
+        self.performReleaseAnimation()
+        self.performHapticFeedback()
+    }
+    
     public func setBackgroundColor(color: UIColor) -> Self {
-        self.backgroundColor = color
+        var config = configuration ?? UIButton.Configuration.filled()
+        config.baseBackgroundColor = color
+        configuration = config
         return self
     }
     
@@ -50,12 +69,33 @@ public final class SDButton: UIButton {
         return self
     }
     
-    public func registerButtonAction(action: @escaping () -> Void) {
+    public func onTapped(action: @escaping () -> Void) -> Self {
         self.buttonTapAction = action
         self.addTarget(self, action: #selector(buttonTappedAction), for: .touchUpInside)
+        return self
+    }
+    
+    public func setPadding(inset: NSDirectionalEdgeInsets) -> Self {
+        var config = configuration ?? UIButton.Configuration.filled()
+        config.contentInsets = inset
+        configuration = config
+        return self
     }
     
     @objc private func buttonTappedAction() {
-        buttonTapAction?()
+        self.buttonTapAction?()
     }
 }
+
+
+#Preview(traits: .defaultLayout, body: {
+    SDButton()
+        .setBackgroundColor(color: UIColor.primary100)
+        .setText(text: "확인", for: .normal)
+        .setTextColor(color: .white, for: .normal)
+        .setRadius(radius: 10)
+        .setPadding(inset: .init(top: 10, leading: 10, bottom: 10, trailing: 10))
+        .onTapped {
+            print("hello")
+        }
+})

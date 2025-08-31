@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		B125C10E2DEEC46300C9C755 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = B125C10D2DEEC46300C9C755 /* GRDB */; };
 		B1ABE9D62E4E34C2000F8D7C /* Factory in Frameworks */ = {isa = PBXBuildFile; productRef = B1ABE9D52E4E34C2000F8D7C /* Factory */; };
+		B1B84CCB2E64A3F3002F8CE8 /* FlexLayout in Frameworks */ = {isa = PBXBuildFile; productRef = B1B84CCA2E64A3F3002F8CE8 /* FlexLayout */; };
+		B1B84CCE2E64A418002F8CE8 /* PinLayout in Frameworks */ = {isa = PBXBuildFile; productRef = B1B84CCD2E64A418002F8CE8 /* PinLayout */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,7 +72,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B1B84CCB2E64A3F3002F8CE8 /* FlexLayout in Frameworks */,
 				B125C10E2DEEC46300C9C755 /* GRDB in Frameworks */,
+				B1B84CCE2E64A418002F8CE8 /* PinLayout in Frameworks */,
 				B1ABE9D62E4E34C2000F8D7C /* Factory in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -134,6 +138,8 @@
 			packageProductDependencies = (
 				B125C10D2DEEC46300C9C755 /* GRDB */,
 				B1ABE9D52E4E34C2000F8D7C /* Factory */,
+				B1B84CCA2E64A3F3002F8CE8 /* FlexLayout */,
+				B1B84CCD2E64A418002F8CE8 /* PinLayout */,
 			);
 			productName = SolSol;
 			productReference = B125C0B62DEEC1E300C9C755 /* SolSol.app */;
@@ -220,6 +226,8 @@
 			packageReferences = (
 				B125C10C2DEEC46300C9C755 /* XCRemoteSwiftPackageReference "GRDB" */,
 				B1ABE9D42E4E34C2000F8D7C /* XCRemoteSwiftPackageReference "Factory" */,
+				B1B84CC92E64A3F3002F8CE8 /* XCRemoteSwiftPackageReference "FlexLayout" */,
+				B1B84CCC2E64A418002F8CE8 /* XCRemoteSwiftPackageReference "PinLayout" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B125C0B72DEEC1E300C9C755 /* Products */;
@@ -608,6 +616,22 @@
 				minimumVersion = 2.5.3;
 			};
 		};
+		B1B84CC92E64A3F3002F8CE8 /* XCRemoteSwiftPackageReference "FlexLayout" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/layoutBox/FlexLayout";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.2.2;
+			};
+		};
+		B1B84CCC2E64A418002F8CE8 /* XCRemoteSwiftPackageReference "PinLayout" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/layoutBox/PinLayout";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.10.6;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -620,6 +644,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B1ABE9D42E4E34C2000F8D7C /* XCRemoteSwiftPackageReference "Factory" */;
 			productName = Factory;
+		};
+		B1B84CCA2E64A3F3002F8CE8 /* FlexLayout */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B1B84CC92E64A3F3002F8CE8 /* XCRemoteSwiftPackageReference "FlexLayout" */;
+			productName = FlexLayout;
+		};
+		B1B84CCD2E64A418002F8CE8 /* PinLayout */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B1B84CCC2E64A418002F8CE8 /* XCRemoteSwiftPackageReference "PinLayout" */;
+			productName = PinLayout;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

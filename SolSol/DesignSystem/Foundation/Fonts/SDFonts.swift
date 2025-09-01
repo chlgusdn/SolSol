@@ -17,13 +17,13 @@ public enum SDFont {
             
         case .pixel(let size):
             return UIFont(
-                name: "Mone-Pixel",
+                name: "MoneygraphyTTF-Pixel",
                 size: CGFloat(size)
             )!
             
         case .round(let size):
             return UIFont(
-                name: "Mone-Regular",
+                name: "MoneygraphyTTF-Rounded",
                 size: CGFloat(size)
             )!
         }

@@ -6,12 +6,27 @@
 //
 
 import UIKit
+import PinLayout
+import FlexLayout
 
 /// 홈화면
-final class HomeViewController: UIViewController {
+final class HomeViewController: BaseViewController {
+
+    private let testLabel = SDLabel()
+        .setFont(font: .pixel(size: 55))
+        .setText(text: "안녕하세요 반갑")
+        .setTextColor(color: .graph300)
+        .setNumberOfLines(limitLine: 0)
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        Log.d("\(self) Start")
+    }
+    
+    override func setupViews() {
+        super.setupViews()
+    }
+    
+    override func setupLayout() {
+        super.setupLayout()
     }
 }

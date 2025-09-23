@@ -8,7 +8,7 @@
 import Foundation
 import GRDB
 
-public struct TransactionWithCategoryEntitiy: Codable, PersistableRecord, FetchableRecord {
+public struct TransactionWithCategoryEntitiy: BaseEntitiy {
     public var transaction: TransactionEntity
     public var category: CategoryEntitiy
 }

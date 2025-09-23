@@ -8,7 +8,7 @@
 import Foundation
 import GRDB
 
-public struct NotificationWithBudgetEntitiy: Codable, PersistableRecord, FetchableRecord {
+public struct NotificationWithBudgetEntitiy: BaseEntitiy {
     public var notification: NotificationEntity
     public var budget: BudgetEntity
 }

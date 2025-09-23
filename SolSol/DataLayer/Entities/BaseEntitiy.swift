@@ -8,7 +8,4 @@
 import Foundation
 import GRDB
 
-public protocol BaseEntitiy: Codable, PersistableRecord, FetchableRecord {
-    /// 기본키가 될 id값
-    var id: Int64? { get set }
-}
+public protocol BaseEntitiy: Codable, PersistableRecord, FetchableRecord, Sendable { }

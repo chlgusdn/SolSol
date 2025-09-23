@@ -50,7 +50,16 @@ public final class SDButton: UIButton, DampingAnimation {
     }
     
     public func setFont(font: SDFont) -> Self {
-        self.titleLabel?.font = font.font
+        var config = configuration ?? UIButton.Configuration.plain()
+        let previousTransformer = config.titleTextAttributesTransformer
+        
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = previousTransformer?(incoming) ?? incoming
+            outgoing.font = font.font
+            return outgoing
+        }
+        
+        self.configuration = config
         return self
     }
     
@@ -59,13 +68,31 @@ public final class SDButton: UIButton, DampingAnimation {
         return self
     }
     
-    public func setTextColor(color: UIColor, for state: State = .normal) -> Self {
-        setTitleColor(color, for: state)
+    public func setTextColor(color: UIColor) -> Self {
+        var config = configuration ?? UIButton.Configuration.plain()
+        let previousTransformer = config.titleTextAttributesTransformer
+        
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = previousTransformer?(incoming) ?? incoming
+            outgoing.foregroundColor = color
+            return outgoing
+        }
+        
+        self.configuration = config
+        
         return self
     }
     
-    public func setText(text: String, for state: State = .normal) -> Self {
-        setTitle(text, for: state)
+    public func setText(text: LocalizedStringResource) -> Self {
+        var config = configuration ?? UIButton.Configuration.plain()
+        
+        config.title = NSLocalizedString(
+            text.key,
+            tableName: text.table,
+            comment: ""
+        )
+        
+        self.configuration = config
         return self
     }
     
@@ -91,8 +118,9 @@ public final class SDButton: UIButton, DampingAnimation {
 #Preview(traits: .defaultLayout, body: {
     SDButton()
         .setBackgroundColor(color: UIColor.primary100)
-        .setText(text: "확인", for: .normal)
-        .setTextColor(color: .white, for: .normal)
+        .setText(text: "안녕하세요. 반갑습니다.")
+        .setTextColor(color: .white200)
+        .setFont(font: .pixel(size: 50))
         .setRadius(radius: 10)
         .setPadding(inset: .init(top: 10, leading: 10, bottom: 10, trailing: 10))
         .onTapped {

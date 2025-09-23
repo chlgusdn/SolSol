@@ -7,7 +7,7 @@
 
 import UIKit
 
-public final class SDView: UIView {
+public class SDView: UIView {
 
     public func setBackgroundColor(color: UIColor) -> Self {
         self.backgroundColor = color

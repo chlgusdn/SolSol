@@ -13,7 +13,7 @@ class BaseViewController: UIViewController, Layoutable {
     override func viewDidLoad() {
         super.viewDidLoad()
         Log.d("\(self) Start")
-        self.view.backgroundColor = .white
+        self.view.backgroundColor = .white400
         self.setupProperties()
         self.setupViews()
         self.setupBindings()

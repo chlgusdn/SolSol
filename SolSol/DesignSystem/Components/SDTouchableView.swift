@@ -7,7 +7,7 @@
 
 import UIKit
 
-public final class SDTouchableView: UIControl, DampingAnimation {
+public class SDTouchableView: UIControl, DampingAnimation {
     
     private var viewTapAction: (() -> Void)?
     

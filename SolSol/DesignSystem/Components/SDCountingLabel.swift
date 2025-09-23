@@ -56,6 +56,7 @@ public final class SDCountingLabel: UILabel {
     private var timer: Timer?
     private var currentTime: Double = 0.0
     private let option: EasingOption
+    private var textForamtter: ((Double) -> String)?
     
     public init(to begin: Double, from end: Double, duration: TimeInterval = 1, option: EasingOption = .linear) {
         self.begin = begin
@@ -96,10 +97,16 @@ public final class SDCountingLabel: UILabel {
     
     private func updateLabel(to number: Double) {
         self.text = "\(Int(number).withComma()!)"
+//        if let formatter = self.textForamtter {
+//            self.text = formatter(Int(number))
+//        }
+//        else {
+//            self.text = "\(Int(number).withComma()!)"
+//        }
     }
     
     //MARK: Layout
-    public func setFont(font: SDFont, size: CGFloat) -> Self {
+    public func setFont(font: SDFont) -> Self {
         self.font = font.font
         return self
     }
@@ -113,7 +120,11 @@ public final class SDCountingLabel: UILabel {
         self.text = text
         return self
     }
-    
+        
+    public func registerTextFormat(textFormat: @escaping (Double) -> String) -> Self {
+        self.textForamtter = textFormat
+        return self
+    }
 }
 
 fileprivate extension Int {

@@ -36,8 +36,8 @@ public final class SDTextField: UITextField {
         return self
     }
     
-    public func setPlaceholder(placeholder: String) -> Self {
-        self.placeholder = placeholder
+    public func setPlaceholder(placeholder: LocalizedStringResource) -> Self {
+        self.placeholder = String(localized: placeholder)
         return self
     }
     

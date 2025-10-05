@@ -85,13 +85,7 @@ public final class SDButton: UIButton, DampingAnimation {
     
     public func setText(text: LocalizedStringResource) -> Self {
         var config = configuration ?? UIButton.Configuration.plain()
-        
-        config.title = NSLocalizedString(
-            text.key,
-            tableName: text.table,
-            comment: ""
-        )
-        
+        config.title = String(localized: text)
         self.configuration = config
         return self
     }

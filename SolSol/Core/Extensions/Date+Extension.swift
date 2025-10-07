@@ -25,4 +25,9 @@ public extension Date {
         return floor(self.timeIntervalSince1970 / (60 * 60))
     }
     
+    func toString(for format: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = format
+        return formatter.string(from: self)
+    }
 }

@@ -20,6 +20,7 @@ public final class HomeCoordinator: Coordinator {
         Log.d("\(self) Start")
         // main 화면 이동
         let homeViewController = HomeViewController()
+        self.navigationController.isNavigationBarHidden = true
         self.navigationController.pushViewController(homeViewController, animated: true)
     }
     

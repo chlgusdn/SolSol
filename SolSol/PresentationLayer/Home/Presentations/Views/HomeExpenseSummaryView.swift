@@ -16,10 +16,10 @@ final class HomeExpenseSummaryView: SDView, Layoutable {
     private let expenseSummaryButton = SDImageButton()
         .setBackgroundColor(color: .white100)
         .setRadius(radius: 8)
-        .setText(text: .mainSummaryExpenseTitle(1))
+        .setText(text: .mainSummaryExpenseTitle(0))
         .setTextColor(color: .black100)
         .setFont(font: .pixel(size: 14))
-        .setHighlightColor(color: .lightGray.withAlphaComponent(0.2))
+        .setHighlightColor(color: .gray80)
         .setPadding(
             inset: NSDirectionalEdgeInsets(
                 top: 8,
@@ -33,14 +33,18 @@ final class HomeExpenseSummaryView: SDView, Layoutable {
             padding: 0,
             position: .trailing
         )
+        .onTapped {
+            Log.d("Summary")
+        }
     
     private let summaryTitleLabel = SDCountingLabel()
         .setFont(font: .pixel(size: 20))
-        .setDuration(interval: 3)
+        .setDuration(3)
         .setRange(start: 0, end: 10_000_000)
+        .setTextColor(color: .black100)
         .setAnimationOption(option: .linear)
         .registerTextFormat { format in
-            return String(localized: LocalizedStringResource.mainSummaryAmount(format))
+            return LocalizedStringResource.mainSummaryAmount(format).localized
         }
     
     private lazy var chartView: UIView? = {
@@ -95,50 +99,59 @@ final class HomeExpenseSummaryView: SDView, Layoutable {
     
     func setupViews() {
         self.addSubview(containerView)
+        self.setupChartFlexLayout()
     }
     
     func setupLayout() {
         containerView.pin.all(pin.safeArea)
-        
-        containerView.flex.define { flex in
-            flex.direction(.column)
-                .alignItems(.start)
-                .paddingHorizontal(16)
-            
-            flex.addItem(expenseSummaryButton)
-                .marginTop(10)
-                .marginLeft(-8)
-            
-            flex.addItem(summaryTitleLabel)
-                .marginTop(11)
-            
-            if let chartView = chartView {
-                flex.addItem(chartView)
-                    .marginTop(11)
-            }
-            
-            flex.addItem()
-                .direction(.row)
-                .justifyContent(.spaceBetween)
-                .columnGap(18)
-                .define { flex in
-                    flex.addItem(incomeButton)
-                        .grow(1)
-                        .height(90)
-                    
-                    flex.addItem(expenseButton)
-                        .grow(1)
-                        .height(90)
-                    
-                }
-                .width(100%)
-        }
-        .layout(mode: .fitContainer)
+        containerView.flex.layout(mode: .fitContainer)
     }
     
     func setupProperties() {}
     
     func setupBindings() {}
+    
+    private func setupChartFlexLayout() {
+        self.containerView
+            .flex
+            .paddingBottom(16)
+            .paddingHorizontal(18)
+            .direction(.column)
+            .alignItems(.start)
+            .define { flex in
+                
+                flex.addItem(expenseSummaryButton)
+                    .marginTop(10)
+                    .marginLeft(-8)
+                
+                flex.addItem(summaryTitleLabel)
+                    .width(100%)
+                    .marginTop(11)
+                
+                if let chartView = chartView {
+                    flex.addItem(chartView)
+                        .marginTop(11)
+                        .height(50)
+                }
+                
+                flex.addItem()
+                    .direction(.row)
+                    .marginTop(10)
+                    .justifyContent(.spaceBetween)
+                    .columnGap(18)
+                    .define { flex in
+                        flex.addItem(incomeButton)
+                            .grow(1)
+                            .height(90)
+                        
+                        flex.addItem(expenseButton)
+                            .grow(1)
+                            .height(90)
+                        
+                    }
+                    .width(100%)
+            }
+    }
     
     @discardableResult
     public func setParentViewController(to viewController: UIViewController) -> Self {

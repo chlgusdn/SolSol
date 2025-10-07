@@ -39,7 +39,7 @@ public final class SDButton: UIButton, DampingAnimation {
     
     public func setBackgroundColor(color: UIColor) -> Self {
         var config = configuration ?? UIButton.Configuration.filled()
-        config.baseBackgroundColor = color
+        config.background.backgroundColor = color
         configuration = config
         return self
     }
@@ -64,7 +64,7 @@ public final class SDButton: UIButton, DampingAnimation {
     }
     
     public func setRadius(radius: CGFloat) -> Self {
-        var config = configuration ?? UIButton.Configuration.filled()
+        var config = configuration ?? UIButton.Configuration.plain()
         config.background.cornerRadius = radius
         configuration = config
         return self

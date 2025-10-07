@@ -83,6 +83,7 @@ public final class SDCountingLabel: UILabel {
         if elapsedTime > duration {
             updateLabel(to: end)
             timer?.invalidate()
+            timer = nil
             return
         }
         
@@ -107,15 +108,10 @@ public final class SDCountingLabel: UILabel {
     }
     
     @discardableResult
-    public func setDuration(interval: TimeInterval) -> Self {
-        self.interval = interval
-        return self
-    }
-    
-    @discardableResult
     public func setRange(start: Double = 0.0, end: Double = 0.0) -> Self {
         self.begin = start
         self.end = end
+        self.updateLabel(to: start)
         return self
     }
     
@@ -134,6 +130,18 @@ public final class SDCountingLabel: UILabel {
     @discardableResult
     public func registerTextFormat(textFormat: @escaping (String) -> String) -> Self {
         self.textForamtter = textFormat
+        return self
+    }
+    
+    @discardableResult
+    public func setDuration(_ duration: TimeInterval) -> Self {
+        self.duration = duration
+        return self
+    }
+
+    @discardableResult
+    public func setInterval(_ interval: TimeInterval) -> Self {
+        self.interval = interval
         return self
     }
 }

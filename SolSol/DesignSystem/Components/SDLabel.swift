@@ -19,8 +19,13 @@ public final class SDLabel: UILabel {
         return self
     }
     
-    public func setText(text: LocalizedStringResource) -> Self {
+    public func setText(localized text: LocalizedStringResource) -> Self {
         self.text = String(localized: text)
+        return self
+    }
+    
+    public func setText(text: String) -> Self {
+        self.text = text
         return self
     }
     

@@ -13,11 +13,15 @@ public final class SDImageButton: UIButton, DampingAnimation {
     
     private var highlightColor: UIColor = .white70
     
+    private var buttonBackgroundColor: UIColor = .white100
+    
     private var buttonTapAction: (() -> Void)?
     
     public override var isHighlighted: Bool {
         didSet {
-            backgroundColor = isHighlighted ? self.highlightColor : self.configuration?.baseBackgroundColor
+            self.configuration?.background.backgroundColor = isHighlighted ?
+            self.highlightColor :
+            self.buttonBackgroundColor
         }
     }
     
@@ -56,7 +60,9 @@ public final class SDImageButton: UIButton, DampingAnimation {
     
     public func setBackgroundColor(color: UIColor) -> Self {
         var config = configuration ?? UIButton.Configuration.plain()
-        config.baseBackgroundColor = color
+        config.background.backgroundColor = color
+        self.configuration = config
+        self.buttonBackgroundColor = color
         return self
     }
     
@@ -71,7 +77,7 @@ public final class SDImageButton: UIButton, DampingAnimation {
     }
     
     public func setRadius(radius: CGFloat) -> Self {
-        var config = configuration ?? UIButton.Configuration.filled()
+        var config = configuration ?? UIButton.Configuration.plain()
         config.background.cornerRadius = radius
         configuration = config
         return self
@@ -123,9 +129,50 @@ public final class SDImageButton: UIButton, DampingAnimation {
         return self
     }
     
-    public func registerButtonAction(action: @escaping () -> Void) {
+    @discardableResult
+    public func onTapped(action: @escaping () -> Void) -> Self {
         self.buttonTapAction = action
         self.addTarget(self, action: #selector(buttonTappedAction), for: .touchUpInside)
+        return self
+    }
+    
+    @discardableResult
+    public func setSubTitle(text: LocalizedStringResource) -> Self {
+        var config = configuration ?? UIButton.Configuration.plain()
+        config.subtitle = String(localized: text)
+        self.configuration = config
+        return self
+    }
+    
+    @discardableResult
+    public func setSubTitleFont(font: SDFont) -> Self {
+        var config = configuration ?? UIButton.Configuration.plain()
+        let previousTransformer = config.subtitleTextAttributesTransformer
+        
+        config.subtitleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = previousTransformer?(incoming) ?? incoming
+            outgoing.font = font.font
+            return outgoing
+        }
+        
+        self.configuration = config
+        return self
+    }
+    
+    @discardableResult
+    public func setSubTitleTextColor(color: UIColor) -> Self {
+        var config = configuration ?? UIButton.Configuration.plain()
+        let previousTransformer = config.subtitleTextAttributesTransformer
+        
+        config.subtitleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = previousTransformer?(incoming) ?? incoming
+            outgoing.foregroundColor = color
+            return outgoing
+        }
+        
+        self.configuration = config
+        
+        return self
     }
     
     @objc private func buttonTappedAction() {

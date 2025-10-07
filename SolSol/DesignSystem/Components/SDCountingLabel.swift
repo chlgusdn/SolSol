@@ -37,44 +37,38 @@ public final class SDCountingLabel: UILabel {
         }
     }
     
-    private var begin: Double {
+    private var begin: Double = 0.0 {
         didSet {
             amount = end - begin
         }
     }
     
-    private var end: Double {
+    private var end: Double = 0.0 {
         didSet {
             amount = end - begin
         }
     }
     
-    private let interval: TimeInterval = 1/60
-    private let duration: TimeInterval
+    private var interval: TimeInterval = 1/60
+    private var duration: TimeInterval = 1
     private var amount: Double = 0
     private var startDate: Date!
     private var timer: Timer?
     private var currentTime: Double = 0.0
-    private let option: EasingOption
-    private var textForamtter: ((Double) -> String)?
-    
-    public init(to begin: Double, from end: Double, duration: TimeInterval = 1, option: EasingOption = .linear) {
-        self.begin = begin
-        self.end = end
-        self.duration = duration
-        self.option = option
-        super.init(frame: .zero)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    private var option: EasingOption = .linear
+    private var textForamtter: ((String) -> String)?
     
     // MARK: public
     public func startAnimation() {
         startDate = Date()
         timer?.invalidate()
-        timer = Timer.scheduledTimer(timeInterval: interval, target: self, selector: #selector(updateValue), userInfo: nil, repeats: true)
+        timer = Timer.scheduledTimer(
+            timeInterval: interval,
+            target: self,
+            selector: #selector(updateValue),
+            userInfo: nil,
+            repeats: true
+        )
     }
     
     // MARK: Private
@@ -96,13 +90,14 @@ public final class SDCountingLabel: UILabel {
     }
     
     private func updateLabel(to number: Double) {
-        self.text = "\(Int(number).withComma()!)"
-//        if let formatter = self.textForamtter {
-//            self.text = formatter(Int(number))
-//        }
-//        else {
-//            self.text = "\(Int(number).withComma()!)"
-//        }
+        let intNumber = Int(number)
+        
+        if let formatter = self.textForamtter {
+            self.text = formatter(intNumber.withComma()!)
+        }
+        else {
+            self.text = "\(Int(number).withComma()!)"
+        }
     }
     
     //MARK: Layout
@@ -111,17 +106,33 @@ public final class SDCountingLabel: UILabel {
         return self
     }
     
+    @discardableResult
+    public func setDuration(interval: TimeInterval) -> Self {
+        self.interval = interval
+        return self
+    }
+    
+    @discardableResult
+    public func setRange(start: Double = 0.0, end: Double = 0.0) -> Self {
+        self.begin = start
+        self.end = end
+        return self
+    }
+    
+    @discardableResult
+    public func setAnimationOption(option: EasingOption) -> Self {
+        self.option = option
+        return self
+    }
+    
+    @discardableResult
     public func setTextColor(color: UIColor) -> Self {
         self.textColor = color
         return self
     }
     
-    public func setText(text: String) -> Self {
-        self.text = text
-        return self
-    }
-        
-    public func registerTextFormat(textFormat: @escaping (Double) -> String) -> Self {
+    @discardableResult
+    public func registerTextFormat(textFormat: @escaping (String) -> String) -> Self {
         self.textForamtter = textFormat
         return self
     }

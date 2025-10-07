@@ -34,14 +34,13 @@ final class HomeExpenseSummaryView: SDView, Layoutable {
             position: .trailing
         )
     
-    private let summaryTitleLabel = SDCountingLabel(
-        to: 0,
-        from: 10_000_000,
-        duration: 3
-    )
+    private let summaryTitleLabel = SDCountingLabel()
         .setFont(font: .pixel(size: 20))
-        .registerTextFormat { currency in
-            return String(format: "총 %.0f원", currency)
+        .setDuration(interval: 3)
+        .setRange(start: 0, end: 10_000_000)
+        .setAnimationOption(option: .linear)
+        .registerTextFormat { format in
+            return String(localized: LocalizedStringResource.mainSummaryAmount(format))
         }
     
     private lazy var chartView: UIView? = {

@@ -71,7 +71,9 @@ public final class SDImageButton: UIButton, DampingAnimation {
     }
     
     public func setRadius(radius: CGFloat) -> Self {
-        self.layer.cornerRadius = radius
+        var config = configuration ?? UIButton.Configuration.filled()
+        config.background.cornerRadius = radius
+        configuration = config
         return self
     }
     

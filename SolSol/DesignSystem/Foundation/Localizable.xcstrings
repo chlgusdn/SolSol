@@ -41,13 +41,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Total %1$lld 원"
+            "value" : "Total %@ won"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "총 %lld 원"
+            "value" : "총 %@ 원"
           }
         }
       }

@@ -8,6 +8,7 @@
 import UIKit
 import PinLayout
 import FlexLayout
+import FSCalendar
 
 /// 홈화면
 final class HomeViewController: BaseViewController {
@@ -73,7 +74,25 @@ final class HomeViewController: BaseViewController {
         .registerTextFormat {
             return "+\($0)%"
         }
-        
+    
+    private lazy var expenseCalendar: FSCalendar = {
+        let calendar = FSCalendar()
+        calendar.locale = .current
+        calendar.layer.cornerRadius = 8
+        calendar.scrollEnabled = true
+        calendar.scrollDirection = .horizontal
+        calendar.scope = .month
+        calendar.appearance.weekdayFont = SDFont.pixel(size: 14).font
+        calendar.appearance.titleFont = SDFont.pixel(size: 14).font
+        calendar.backgroundColor = .white100
+        calendar.appearance.headerTitleFont = SDFont.pixel(size: 16).font
+        calendar.allowsMultipleSelection = false
+        calendar.appearance.caseOptions = .headerUsesCapitalized
+        calendar.appearance.weekdayTextColor = .gray400
+        calendar.appearance.titlePlaceholderColor = .gray400
+        calendar.appearance.headerTitleColor = .gray800
+        return calendar
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -137,7 +156,13 @@ final class HomeViewController: BaseViewController {
                     .margin(0, 20, 4, 20)
                 
                 flex.addItem(todayIncomePercentContainerView)
-                    .margin(0, 20, 20, 20)
+                    .margin(0, 20, 0, 20)
+                
+                flex.addItem(expenseCalendar)
+                    .padding(10)
+                    .margin(4, 20, 20, 20)
+                    .height(300)
+                    .grow(1)
             }
     }
     

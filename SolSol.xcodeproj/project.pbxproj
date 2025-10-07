@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		B125C10E2DEEC46300C9C755 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = B125C10D2DEEC46300C9C755 /* GRDB */; };
 		B1ABE9D62E4E34C2000F8D7C /* Factory in Frameworks */ = {isa = PBXBuildFile; productRef = B1ABE9D52E4E34C2000F8D7C /* Factory */; };
+		B1B8333C2E954B270005F815 /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = B1B8333B2E954B270005F815 /* FSCalendar */; };
 		B1B84CCB2E64A3F3002F8CE8 /* FlexLayout in Frameworks */ = {isa = PBXBuildFile; productRef = B1B84CCA2E64A3F3002F8CE8 /* FlexLayout */; };
 		B1B84CCE2E64A418002F8CE8 /* PinLayout in Frameworks */ = {isa = PBXBuildFile; productRef = B1B84CCD2E64A418002F8CE8 /* PinLayout */; };
 /* End PBXBuildFile section */
@@ -75,6 +76,7 @@
 				B1B84CCB2E64A3F3002F8CE8 /* FlexLayout in Frameworks */,
 				B125C10E2DEEC46300C9C755 /* GRDB in Frameworks */,
 				B1B84CCE2E64A418002F8CE8 /* PinLayout in Frameworks */,
+				B1B8333C2E954B270005F815 /* FSCalendar in Frameworks */,
 				B1ABE9D62E4E34C2000F8D7C /* Factory in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -140,6 +142,7 @@
 				B1ABE9D52E4E34C2000F8D7C /* Factory */,
 				B1B84CCA2E64A3F3002F8CE8 /* FlexLayout */,
 				B1B84CCD2E64A418002F8CE8 /* PinLayout */,
+				B1B8333B2E954B270005F815 /* FSCalendar */,
 			);
 			productName = SolSol;
 			productReference = B125C0B62DEEC1E300C9C755 /* SolSol.app */;
@@ -229,6 +232,7 @@
 				B1ABE9D42E4E34C2000F8D7C /* XCRemoteSwiftPackageReference "Factory" */,
 				B1B84CC92E64A3F3002F8CE8 /* XCRemoteSwiftPackageReference "FlexLayout" */,
 				B1B84CCC2E64A418002F8CE8 /* XCRemoteSwiftPackageReference "PinLayout" */,
+				B1B8333A2E954B270005F815 /* XCRemoteSwiftPackageReference "FSCalendar" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B125C0B72DEEC1E300C9C755 /* Products */;
@@ -621,6 +625,14 @@
 				minimumVersion = 2.5.3;
 			};
 		};
+		B1B8333A2E954B270005F815 /* XCRemoteSwiftPackageReference "FSCalendar" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/WenchaoD/FSCalendar.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.8.4;
+			};
+		};
 		B1B84CC92E64A3F3002F8CE8 /* XCRemoteSwiftPackageReference "FlexLayout" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/layoutBox/FlexLayout";
@@ -649,6 +661,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B1ABE9D42E4E34C2000F8D7C /* XCRemoteSwiftPackageReference "Factory" */;
 			productName = Factory;
+		};
+		B1B8333B2E954B270005F815 /* FSCalendar */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B1B8333A2E954B270005F815 /* XCRemoteSwiftPackageReference "FSCalendar" */;
+			productName = FSCalendar;
 		};
 		B1B84CCA2E64A3F3002F8CE8 /* FlexLayout */ = {
 			isa = XCSwiftPackageProductDependency;

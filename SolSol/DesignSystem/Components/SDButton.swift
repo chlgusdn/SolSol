@@ -7,7 +7,7 @@
 
 import UIKit
 
-public final class SDButton: UIButton, DampingAnimation {
+public final class SDButton: UIButton, DampingAnimation, HapticFeedbackAnimation {
     
     private var disabledColor: UIColor = .lightGray
     

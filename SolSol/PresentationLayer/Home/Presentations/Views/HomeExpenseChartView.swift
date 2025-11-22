@@ -18,7 +18,10 @@ public struct HomeExpenseChartView: View {
         VStack(spacing: 10) {
             Chart(entries) { item in
                 BarMark(
-                    x: .value(item.label, item.x)
+                    x: .value(
+                        item.label,
+                        item.x
+                    )
                 )
                 .foregroundStyle(item.color)
             }

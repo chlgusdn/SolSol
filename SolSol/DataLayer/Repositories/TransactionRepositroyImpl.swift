@@ -58,6 +58,25 @@ public final class TransactionRepositroyImpl: TransactionRepositroyProtocol {
         return TransactionMapper.toDomain(to: entity.transaction, category: entity.category)
     }
     
+    public func getTransactions(startAt: TimeInterval, endAt: TimeInterval) async -> [TransactionModel] {
+        
+        let entities = await self.localDataRepository.getTransactions(startAt: startAt, endAt: endAt)
+        
+        let transactions = entities.map { entity in
+            TransactionMapper.toDomain(to: entity.transaction, category: entity.category)
+        }
+        
+        return transactions
+    }
+    
+    public func getTotalTransactionAmount(startAt: TimeInterval, endAt: TimeInterval) async throws -> Decimal? {
+        guard let amount = await self.localDataRepository.getTotalTransactionAmount(startAt: startAt, endAt: endAt) else {
+            throw TransactionError.notFound
+        }
+        
+        return amount
+    }
+    
     public func saveTransaction(_ transaction: TransactionModel) async -> Bool {
         return await self.localDataRepository.saveTransaction(transaction)
     }    

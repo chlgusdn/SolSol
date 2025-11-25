@@ -13,10 +13,10 @@ final class HomeExpenseSummaryView: SDView, Layoutable {
     
     public weak var parentViewController: UIViewController?
     
-    private let expenseSummaryButton = SDImageButton()
+    private lazy var expenseSummaryButton = SDImageButton()
         .setBackgroundColor(color: .white100)
         .setRadius(radius: 8)
-        .setText(text: .mainSummaryExpenseTitle(0))
+        .setText(text: .mainSummaryExpenseTitle(self.viewModel.summaryExpenseDays))
         .setTextColor(color: .black100)
         .setFont(font: .pixel(size: 14))
         .setHighlightColor(color: .gray80)
@@ -37,10 +37,13 @@ final class HomeExpenseSummaryView: SDView, Layoutable {
             Log.d("Summary")
         }
     
-    private let summaryTitleLabel = SDCountingLabel()
+    private lazy var summaryTitleLabel = SDCountingLabel()
         .setFont(font: .pixel(size: 20))
         .setDuration(3)
-        .setRange(start: 0, end: 10_000_000)
+        .setRange(
+            start: 0,
+            end: self.viewModel.totalExpense
+        )
         .setTextColor(color: .black100)
         .setAnimationOption(option: .linear)
         .registerTextFormat { format in
@@ -79,6 +82,8 @@ final class HomeExpenseSummaryView: SDView, Layoutable {
     
     private let containerView = SDView()
         .setBackgroundColor(color: .white100)
+    
+    private let viewModel = HomeExpenseSummaryViewModel()
     
     override init(frame: CGRect) {
         super.init(frame: frame)

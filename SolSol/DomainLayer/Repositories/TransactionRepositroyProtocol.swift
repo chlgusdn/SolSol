@@ -13,5 +13,7 @@ public protocol TransactionRepositroyProtocol {
     func getTransactions(by category: CategoryModel) async -> [TransactionModel]
     func getTransaction(by id: Int64) async throws -> TransactionModel
     func getTransaction(by memo: String) async throws -> TransactionModel
+    func getTransactions(startAt: TimeInterval, endAt: TimeInterval) async -> [TransactionModel]
+    func getTotalTransactionAmount(startAt: TimeInterval, endAt: TimeInterval) async throws -> Decimal?
     func saveTransaction(_ transaction: TransactionModel) async -> Bool
 }

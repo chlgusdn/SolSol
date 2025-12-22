@@ -30,4 +30,12 @@ public extension Date {
         formatter.dateFormat = format
         return formatter.string(from: self)
     }
+    
+    func daysAgo(_ days: Int) -> Date {
+        return Calendar.current.date(byAdding: .day, value: -days, to: self) ?? self
+    }
+    
+    func adding(days: Int) -> Date {
+        return Calendar.current.date(byAdding: .day, value: days, to: self) ?? self
+    }
 }

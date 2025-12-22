@@ -11,7 +11,7 @@ import SwiftUI
 import Factory
 
 public protocol HomeExpenseSummaryChartUsecaseProtocol {
-    func execute(startAt: TimeInterval, endAt: TimeInterval) async -> (max: Int, entries: [SDChartDataEntry])
+    func execute(startAt: TimeInterval, endAt: TimeInterval) async -> Result<HomeChartSummaryResponseModel, UsecaseError>
 }
 
 /// 홈 지출 차트 데이터 엔트리 생성 usecase
@@ -19,7 +19,7 @@ public struct HomeExpenseSummaryChartUsecase: HomeExpenseSummaryChartUsecaseProt
     
     @Injected(\.transactionRepository) var transactionRepository: TransactionRepositroyProtocol
     
-    public func execute(startAt: TimeInterval, endAt: TimeInterval) async -> (max: Int, entries: [SDChartDataEntry]) {
+    public func execute(startAt: TimeInterval, endAt: TimeInterval) async -> Result<HomeChartSummaryResponseModel, UsecaseError> {
         
         let transactions: [TransactionModel] = await self.transactionRepository.getTransactions(
             startAt: startAt,
@@ -66,7 +66,12 @@ public struct HomeExpenseSummaryChartUsecase: HomeExpenseSummaryChartUsecaseProt
             entries.append(entry)
         }
 
-        return (maxCount, entries)
+        return .success(
+            HomeChartSummaryResponseModel(
+                max: maxCount,
+                entries: entries
+            )
+        )
     }
     
 }

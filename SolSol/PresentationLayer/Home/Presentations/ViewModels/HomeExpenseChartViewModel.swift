@@ -18,13 +18,19 @@ final class HomeExpenseChartViewModel: ObservableObject {
     init() {
         
         Task { @MainActor in
-            let (maxCount, entries) = await self.chartSummaryUsecase.execute(
+            
+            let result = await self.chartSummaryUsecase.execute(
                 startAt: Date.now.millisecond,
                 endAt: Date.now.addingTimeInterval(60 * 60 * 24 * 14).millisecond
             )
             
-            self.entries = entries
-            self.maxCount = max(maxCount, 1)
+            // response 응답 값이 성공일 경우에만 반환 처리
+            guard case .success(let response) = result else {
+                return
+            }
+            
+            self.entries = response.entries
+            self.maxCount = max(response.max, 1)
         }
     }
     

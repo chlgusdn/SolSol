@@ -16,4 +16,11 @@ public extension Container {
             return HomeExpenseSummaryChartUsecase()
         }
     }
+    
+    /// 홈 화면 총 지출 값 usecase
+    var homeExpenseTotalAmountUsecase: Factory<HomeExpenseTotalAmountUsecaseProtocol> {
+        self {
+            return  HomeExpenseTotalAmountUsecase()
+        }
+    }
 }

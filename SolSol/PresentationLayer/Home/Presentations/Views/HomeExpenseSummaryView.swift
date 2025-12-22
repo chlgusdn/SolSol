@@ -42,7 +42,7 @@ final class HomeExpenseSummaryView: SDView, Layoutable {
         .setDuration(3)
         .setRange(
             start: 0,
-            end: self.viewModel.totalExpense
+            end: self.viewModel.totalExpense.doubleValue
         )
         .setTextColor(color: .black100)
         .setAnimationOption(option: .linear)

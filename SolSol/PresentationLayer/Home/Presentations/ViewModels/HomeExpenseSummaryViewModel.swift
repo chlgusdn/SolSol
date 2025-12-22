@@ -7,10 +7,13 @@
 
 import Foundation
 import Combine
+import Factory
 
 final class HomeExpenseSummaryViewModel: ObservableObject {
     
-    @Published private(set) var totalExpense: Double = 0.0
+    @Published private(set) var totalExpense: Decimal = 0
+    
+    @Injected(\.homeExpenseTotalAmountUsecase) var homeExpenseTotalAmountUsecase: HomeExpenseTotalAmountUsecaseProtocol
     
     private var isSummaryExpenseShowed: Bool = false {
         willSet {
@@ -25,4 +28,25 @@ final class HomeExpenseSummaryViewModel: ObservableObject {
     
     private(set) var summaryExpenseDays: Int = 0
     
+    init() {
+        
+        Task { @MainActor [weak self] in
+            
+            guard let `self` = self else {
+                return
+            }
+            
+            let result = await self.homeExpenseTotalAmountUsecase.execute(
+                startAt: Date.now.millisecond,
+                endAt: Date.now.adding(days: 14).millisecond
+            )
+            
+            // response 응답 값이 성공일 경우에만 반환 처리
+            guard case .success(let response) = result else {
+                return
+            }
+            
+            self.totalExpense = response
+        }
+    }
 }

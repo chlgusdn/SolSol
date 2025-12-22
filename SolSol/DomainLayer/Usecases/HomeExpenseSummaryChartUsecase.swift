@@ -21,21 +21,30 @@ public struct HomeExpenseSummaryChartUsecase: HomeExpenseSummaryChartUsecaseProt
     
     public func execute(startAt: TimeInterval, endAt: TimeInterval) async -> (max: Int, entries: [SDChartDataEntry]) {
         
-        let transactions: [TransactionModel] = await self.transactionRepository.getTransactions(startAt: startAt, endAt: endAt)
+        let transactions: [TransactionModel] = await self.transactionRepository.getTransactions(
+            startAt: startAt,
+            endAt: endAt
+        )
         
-        let grouped: [String: [TransactionModel]] = Dictionary(grouping: transactions, by: { (tx: TransactionModel) in
-            tx.category.categoryName
-        })
+        let grouped: [String: [TransactionModel]] = Dictionary(
+            grouping: transactions,
+            by: { (tx: TransactionModel) in
+                tx.category.categoryName
+            }
+        )
 
-        let sortedGroups: [[TransactionModel]] = grouped.values.sorted { (lhs: [TransactionModel], rhs: [TransactionModel]) in
-            lhs.count > rhs.count
-        }
+        let sortedGroups: [[TransactionModel]] = grouped
+            .values
+            .sorted { (lhs: [TransactionModel], rhs: [TransactionModel]) in
+                lhs.count > rhs.count
+            }
         
         let maxCount = sortedGroups
             .max { $0.count < $1.count }?
             .count ?? 10
         
         var entries: [SDChartDataEntry] = []
+        
         for (index, group) in sortedGroups.enumerated() {
             
             guard let first = group.first else {
@@ -50,7 +59,7 @@ public struct HomeExpenseSummaryChartUsecase: HomeExpenseSummaryChartUsecaseProt
             let entry = SDChartDataEntry(
                 label: label,
                 color: Color(color),
-                x: Double(count),
+                x: count.doubleValue,
                 y: 0.0
             )
             

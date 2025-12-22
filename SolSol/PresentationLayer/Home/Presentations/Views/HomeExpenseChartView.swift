@@ -7,10 +7,11 @@
 
 import SwiftUI
 import Charts
+import Factory
 
 public struct HomeExpenseChartView: View {
     
-    private let viewModel: HomeExpenseChartViewModel = HomeExpenseChartViewModel()
+    @Injected(\.homeExpenseChartViewModel) var viewModel: HomeExpenseChartViewModel
     
     public var body: some View {
         

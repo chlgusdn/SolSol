@@ -8,7 +8,7 @@
 import Foundation
 import Factory
 
-final class HomeExpenseChartViewModel: ObservableObject {
+public final class HomeExpenseChartViewModel: ObservableObject {
  
     @Published private(set) var entries: [SDChartDataEntry] = []
     @Published private(set) var maxCount: Int = 1

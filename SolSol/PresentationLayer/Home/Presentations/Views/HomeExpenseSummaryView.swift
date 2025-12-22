@@ -8,6 +8,7 @@
 import UIKit
 import FlexLayout
 import PinLayout
+import Factory
 
 final class HomeExpenseSummaryView: SDView, Layoutable {
     
@@ -83,7 +84,7 @@ final class HomeExpenseSummaryView: SDView, Layoutable {
     private let containerView = SDView()
         .setBackgroundColor(color: .white100)
     
-    private let viewModel = HomeExpenseSummaryViewModel()
+    @Injected(\.homeExpenseSummaryViewModel) private var viewModel: HomeExpenseSummaryViewModel
     
     override init(frame: CGRect) {
         super.init(frame: frame)

@@ -12,4 +12,8 @@ public extension Double {
     var decimalValue: Decimal {
         return Decimal(floatLiteral: self)
     }
+    
+    var intValue: Int {
+        return Int(self)
+    }
 }

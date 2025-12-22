@@ -6,3 +6,10 @@
 //
 
 import Foundation
+
+public extension Int {
+    
+    var decimalValue: Decimal {
+        return NSDecimalNumber(value: self).decimalValue
+    }
+}

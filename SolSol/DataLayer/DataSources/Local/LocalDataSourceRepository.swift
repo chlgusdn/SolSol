@@ -42,6 +42,6 @@ public protocol TransactionLocalDataSourceRepository: LocalDataSourceRepository 
     func getTransaction(by id: Int64) async -> TransactionWithCategoryEntitiy?
     func getTransaction(by memo: String) async -> TransactionWithCategoryEntitiy?
     func getTransactions(startAt: TimeInterval, endAt: TimeInterval) async -> [TransactionWithCategoryEntitiy]
-    func getTotalTransactionAmount(startAt: TimeInterval, endAt: TimeInterval) async -> Decimal?
+    func getTotalTransactionAmount(for type: TransactionModel.TransactionType, startAt: TimeInterval, endAt: TimeInterval) async -> Decimal?
     func saveTransaction(_ transaction: TransactionModel) async -> Bool
 }

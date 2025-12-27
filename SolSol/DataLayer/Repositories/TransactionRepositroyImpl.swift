@@ -69,8 +69,8 @@ public final class TransactionRepositroyImpl: TransactionRepositroyProtocol {
         return transactions
     }
     
-    public func getTotalTransactionAmount(startAt: TimeInterval, endAt: TimeInterval) async throws -> Decimal? {
-        guard let amount = await self.localDataRepository.getTotalTransactionAmount(startAt: startAt, endAt: endAt) else {
+    public func getTotalTransactionAmount(for type: TransactionModel.TransactionType, startAt: TimeInterval, endAt: TimeInterval) async throws -> Decimal? {
+        guard let amount = await self.localDataRepository.getTotalTransactionAmount(for: type, startAt: startAt, endAt: endAt) else {
             throw TransactionError.notFound
         }
         

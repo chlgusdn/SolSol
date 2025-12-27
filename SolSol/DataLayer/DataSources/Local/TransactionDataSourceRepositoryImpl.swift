@@ -74,8 +74,9 @@ public struct TransactionDataSourceRepositoryImpl: TransactionLocalDataSourceRep
         return await self.accessor.fetchAll(type: TransactionWithCategoryEntitiy.self, query: query) ?? []
     }
     
-    public func getTotalTransactionAmount(startAt: TimeInterval, endAt: TimeInterval) async -> Decimal? {
+    public func getTotalTransactionAmount(for type: TransactionModel.TransactionType, startAt: TimeInterval, endAt: TimeInterval) async -> Decimal? {
         let query = TransactionEntity
+            .filter(TransactionEntity.Columns.type == type.rawValue)
             .filter(TransactionEntity.Columns.createdAt >= startAt)
             .filter(TransactionEntity.Columns.createdAt <= endAt)
             .order(TransactionEntity.Columns.createdAt.desc)

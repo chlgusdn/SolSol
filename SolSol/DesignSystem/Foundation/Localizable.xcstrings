@@ -52,6 +52,40 @@
         }
       }
     },
+    "common_decreaes_percent" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "-%@ %%"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "-%@ %%"
+          }
+        }
+      }
+    },
+    "common_increaes_percent" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%@ %%"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%@ %%"
+          }
+        }
+      }
+    },
     "main_event_button_statstics_sub_title" : {
       "extractionState" : "manual",
       "localizations" : {

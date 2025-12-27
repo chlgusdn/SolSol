@@ -6,9 +6,12 @@
 //
 
 import UIKit
+import Combine
 
 /// 베이스로 사용될 뷰 컨트롤러
 class BaseViewController: UIViewController, Layoutable {
+    
+    var bindings = Set<AnyCancellable>()
     
     override func viewDidLoad() {
         super.viewDidLoad()

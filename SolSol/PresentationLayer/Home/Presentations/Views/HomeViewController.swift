@@ -9,6 +9,7 @@ import UIKit
 import PinLayout
 import FlexLayout
 import FSCalendar
+import Factory
 
 /// 홈화면
 final class HomeViewController: BaseViewController {
@@ -21,7 +22,7 @@ final class HomeViewController: BaseViewController {
     private lazy var summaryView = HomeExpenseSummaryView()
         .setParentViewController(to: self)
         .setBackgroundColor(color: .white100)
-        .setRadius(radius: 4)
+        .setRadius(radius: 20)
     
     private let eventContainerView = SDView()
         .setRadius(radius: 4)
@@ -68,12 +69,8 @@ final class HomeViewController: BaseViewController {
     
     private let percentLabel = SDCountingLabel()
         .setDuration(1)
-        .setRange(start: 0, end: 10)
         .setFont(font: .pixel(size: 16))
         .setTextColor(color: .graph300)
-        .registerTextFormat {
-            return "+\($0)%"
-        }
     
     private lazy var expenseCalendar: FSCalendar = {
         let calendar = FSCalendar()
@@ -94,13 +91,10 @@ final class HomeViewController: BaseViewController {
         return calendar
     }()
     
+    @Injected(\.homeViewModel) var viewModel: HomeViewModel
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        self.percentLabel.startAnimation()
     }
     
     override func setupViews() {
@@ -112,6 +106,37 @@ final class HomeViewController: BaseViewController {
         self.setupEventContainerView()
         self.setupDateContainerView()
         self.setupScrollContentContainerView()
+        
+        self.viewModel.$changeRate
+            .sink { changeRate in
+                switch changeRate {
+                case .increase(let rate):
+                    self.percentLabel
+                        .setRange(start: 0.0, end: rate)
+                        .setTextColor(color: .graph300)
+                        .registerTextFormat { text in
+                            return LocalizedStringResource.commonIncreaesPercent(text).localized
+                        }
+                        .isHidden = false
+                    
+                    self.percentLabel.startAnimation()
+                        
+                case .decrease(let rate):
+                    self.percentLabel
+                        .setRange(start: 0.0, end: rate)
+                        .setTextColor(color: .danger100)
+                        .registerTextFormat { text in
+                            return LocalizedStringResource.commonDecreaesPercent(text).localized
+                        }
+                        .isHidden = false
+                    
+                    self.percentLabel.startAnimation()
+                    
+                case .none:
+                    self.percentLabel.isHidden = true
+                }
+            }
+            .store(in: &self.bindings)
     }
     
     override func setupLayout() {

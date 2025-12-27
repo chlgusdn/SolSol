@@ -112,6 +112,7 @@ public final class SDImageButton: UIButton, DampingAnimation {
         return self
     }
     
+    @discardableResult
     public func setText(text: LocalizedStringResource) -> Self {
         var config = configuration ?? UIButton.Configuration.plain()
         

@@ -23,4 +23,11 @@ public extension Container {
             return  HomeExpenseTotalAmountUsecase()
         }
     }
+    
+    /// 지출 등락률 usecase
+    var expenseChangeRateUsecase: Factory<ExpenseChangeRateUsecase> {
+        self {
+            return ExpenseChangeRateUsecase()
+        }
+    }
 }

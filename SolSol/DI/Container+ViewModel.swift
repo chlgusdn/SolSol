@@ -21,4 +21,10 @@ public extension Container {
             return HomeExpenseSummaryViewModel()
         }
     }
+    
+    var homeViewModel: Factory<HomeViewModel> {
+        self {
+            return HomeViewModel()
+        }
+    }
 }

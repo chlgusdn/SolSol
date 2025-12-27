@@ -47,7 +47,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "yyyy.mm.dd (E)"
+            "value" : "yyyy.MM.dd (E)"
           }
         }
       }

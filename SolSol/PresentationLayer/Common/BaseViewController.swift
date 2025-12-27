@@ -16,14 +16,11 @@ class BaseViewController: UIViewController, Layoutable {
         self.view.backgroundColor = .white400
         self.setupProperties()
         self.setupViews()
-        self.setupBindings()
     }
     
     func setupViews() {}
     
     func setupProperties() {}
-    
-    func setupBindings() {}
     
     func setupLayout() {}
     

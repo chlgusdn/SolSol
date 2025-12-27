@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import Factory
 
+@Observable
 public final class HomeExpenseSummaryViewModel: ObservableObject {
     
     @Published private(set) var totalExpense: Decimal = 0

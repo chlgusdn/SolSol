@@ -90,13 +90,27 @@ final class HomeExpenseSummaryView: SDView, Layoutable {
         super.init(frame: frame)
         self.setupViews()
         self.setupProperties()
-        self.setupBindings()
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
         self.setupLayout()
-        self.summaryTitleLabel.startAnimation()
+        
+        //  지출 총 금액
+        self.expenseSummaryButton.setText(
+            text: .mainSummaryExpenseTitle(
+                self.viewModel.summaryExpenseDays
+            )
+        )
+        
+        // 지출 내역
+        self.summaryTitleLabel
+            .setRange(
+                start: 0.0,
+                end: self.viewModel.totalExpense.doubleValue
+            )
+            .startAnimation()
+        
     }
     
     required init?(coder: NSCoder) {
@@ -114,8 +128,6 @@ final class HomeExpenseSummaryView: SDView, Layoutable {
     }
     
     func setupProperties() {}
-    
-    func setupBindings() {}
     
     private func setupChartFlexLayout() {
         self.containerView

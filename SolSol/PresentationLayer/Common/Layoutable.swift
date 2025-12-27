@@ -18,7 +18,4 @@ public protocol Layoutable: UIResponder {
     
     /// 프로퍼티 설정
     func setupProperties()
-    
-    /// 바인딩 객체 관리
-    func setupBindings()
 }

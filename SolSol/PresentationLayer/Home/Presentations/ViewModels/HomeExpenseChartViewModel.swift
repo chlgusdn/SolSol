@@ -8,6 +8,7 @@
 import Foundation
 import Factory
 
+@Observable
 public final class HomeExpenseChartViewModel: ObservableObject {
  
     @Published private(set) var entries: [SDChartDataEntry] = []

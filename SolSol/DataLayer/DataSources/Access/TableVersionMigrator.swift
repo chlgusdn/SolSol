@@ -53,6 +53,7 @@ public struct TableMigratorV1: TableVersionMigratoralbe {
             table.column(TransactionEntity.Columns.amount.rawValue, .double).notNull()
             table.column(TransactionEntity.Columns.createdAt.rawValue, .double).notNull()
             table.column(TransactionEntity.Columns.name.rawValue, .text).notNull()
+            table.column(TransactionEntity.Columns.type.rawValue).notNull()
             table.column(TransactionEntity.Columns.memo.rawValue)
             
             table.foreignKey(

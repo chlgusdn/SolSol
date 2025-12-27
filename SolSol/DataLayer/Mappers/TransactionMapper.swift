@@ -24,7 +24,8 @@ public struct TransactionMapper: Mappable {
             amount: data.amount,
             createdAt: Date(timeIntervalSince1970: data.createdAt),
             memo: data.memo,
-            name: data.name
+            name: data.name,
+            type: TransactionModel.TransactionType(rawValue: data.type) ?? .expense
         )
     }
     
@@ -35,7 +36,8 @@ public struct TransactionMapper: Mappable {
             amount: doamin.amount,
             createdAt: doamin.createdAt.timeIntervalSince1970,
             memo: doamin.memo,
-            name: doamin.name
+            name: doamin.name,
+            type: doamin.type.rawValue
         )
     }
 }

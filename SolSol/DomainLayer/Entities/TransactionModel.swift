@@ -8,6 +8,12 @@
 import Foundation
 
 public struct TransactionModel: BaseModel {
+    
+    public enum TransactionType: Int {
+        case expense
+        case income
+    }
+    
     private(set)var id: Int64
     public var userId: String
     public var category: CategoryModel
@@ -15,6 +21,7 @@ public struct TransactionModel: BaseModel {
     public var createdAt: Date
     public var memo: String?
     public var name: String
+    public var type: TransactionType
     
     init(
         id: Int64,
@@ -23,7 +30,8 @@ public struct TransactionModel: BaseModel {
         amount: Double,
         createdAt: Date,
         memo: String? = nil,
-        name: String
+        name: String,
+        type: TransactionType
     ) {
         self.id = id
         self.userId = userId
@@ -32,5 +40,6 @@ public struct TransactionModel: BaseModel {
         self.createdAt = createdAt
         self.memo = memo
         self.name = name
+        self.type = type
     }
 }

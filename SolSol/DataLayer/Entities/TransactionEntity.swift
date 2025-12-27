@@ -18,6 +18,7 @@ public struct TransactionEntity: BaseEntitiy {
     public var createdAt: TimeInterval
     public var memo: String?
     public var name: String
+    public var type: Int
     
     public enum Columns: String, ColumnExpression {
         case id
@@ -27,6 +28,7 @@ public struct TransactionEntity: BaseEntitiy {
         case createdAt
         case memo
         case name
+        case type
     }
     
     public init(
@@ -36,7 +38,8 @@ public struct TransactionEntity: BaseEntitiy {
         amount: Double,
         createdAt: TimeInterval,
         memo: String?,
-        name: String
+        name: String,
+        type: Int
     ) {
         self.id = id
         self.userId = userId
@@ -45,6 +48,7 @@ public struct TransactionEntity: BaseEntitiy {
         self.createdAt = createdAt
         self.memo = memo
         self.name = name
+        self.type = type
     }
 }
 

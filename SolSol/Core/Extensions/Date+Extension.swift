@@ -31,6 +31,10 @@ public extension Date {
         return formatter.string(from: self)
     }
     
+    func subtracting(milliseconds: Int) -> Date {
+        return self.addingTimeInterval(-Double(milliseconds) / 1000.0)
+    }
+    
     func daysAgo(_ days: Int) -> Date {
         return Calendar.current.date(byAdding: .day, value: -days, to: self) ?? self
     }

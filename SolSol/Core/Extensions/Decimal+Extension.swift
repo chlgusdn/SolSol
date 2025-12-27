@@ -13,4 +13,8 @@ public extension Decimal {
         return NSDecimalNumber(decimal: self).doubleValue
     }
     
+    var intValue: Int {
+        return NSDecimalNumber(decimal: self).intValue
+    }
+    
 }

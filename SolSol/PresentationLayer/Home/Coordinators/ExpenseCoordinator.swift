@@ -1,14 +1,14 @@
 //
-//  HomeCoordinator.swift
+//  ExpenseCoordinator.swift
 //  SolSol
 //
-//  Created by NUNU:D on 9/1/25.
+//  Created by NUNU:D on 12/27/25.
 //
 
+import Foundation
 import UIKit
 
-/// 홈 화면 코디네이터
-public final class HomeCoordinator: Coordinator {
+final class ExpenseCoordinator: Coordinator {
     
     public var navigationController: UINavigationController
     
@@ -20,19 +20,11 @@ public final class HomeCoordinator: Coordinator {
         Log.d("\(self) Start")
         // main 화면 이동
         let homeViewController = HomeViewController()
-        homeViewController.coordinator = self
         self.navigationController.isNavigationBarHidden = true
         self.navigationController.pushViewController(homeViewController, animated: true)
     }
     
-    public func showExpenseScreen() {
-        let expenseCoordinator = ExpenseCoordinator(navigationController: self.navigationController)
-        expenseCoordinator.parentCoordinator = self
-        self.childCoordinators.append(expenseCoordinator)
-        expenseCoordinator.start()
-    }
-
-    public init(navigationController: UINavigationController) {
+    init(navigationController: UINavigationController) {
         self.navigationController = navigationController
     }
 }

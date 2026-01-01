@@ -27,7 +27,7 @@ final class HomeViewController: BaseViewController {
     private let eventContainerView = SDView()
         .setRadius(radius: 4)
     
-    private let statisticsScreenButton = SDImageButton()
+    private lazy var statisticsScreenButton = SDImageButton()
         .setBackgroundColor(color: .white100)
         .setImage(image: .icTrendingUp, padding: 10, position: .top)
         .setText(text: .mainEventButtonStatsticsTitle)
@@ -39,7 +39,7 @@ final class HomeViewController: BaseViewController {
         .setRadius(radius: 8)
         .setHighlightColor(color: .gray80)
         .onTapped {
-            Log.d("Statistics")
+            self.coordinator?.showExpenseScreen()
         }
     
     private let zeroExpenseDayScreenButton = SDImageButton()
@@ -92,6 +92,8 @@ final class HomeViewController: BaseViewController {
     }()
     
     @Injected(\.homeViewModel) var viewModel: HomeViewModel
+    
+    weak var coordinator: HomeCoordinator?
     
     override func viewDidLoad() {
         super.viewDidLoad()

@@ -11,19 +11,17 @@ import Data
 
 enum DataAssembly {
     static func initializeSQLAccess() async {
+        
         let sqlAccessor = await SQLAccessor()
-        Container.shared.sqlAccessor.register { sqlAccessor }
+        
+        Container.shared.sqlAccessor.register {
+            return sqlAccessor
+        }
+        .scope(.singleton)
     }
 
     static func register() {
-        _ = Container.shared.sqlAccessor.register {
-            fatalError("""
-                [ERROR] SQLAccessor is not initialized.
-                > 앱 시작 시 DataAssembly.initializeSQLAccess()가 먼저 호출되어야 합니다.
-                """)
-        }
-        .singleton
-
+        
         Container.shared.userDataSource.register {
             try! UserLocalDataSourceRepositoryImpl(accessor: Container.shared.sqlAccessor())
         }

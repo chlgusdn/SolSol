@@ -45,15 +45,6 @@
         "revision" : "72f5300042618340df21500f6c4ce71bb78b93e1",
         "version" : "1.10.6"
       }
-    },
-    {
-      "identity" : "yoga",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/facebook/yoga.git",
-      "state" : {
-        "revision" : "042f5013152eb81c1552dec945b88f7b95ca350f",
-        "version" : "3.2.1"
-      }
     }
   ],
   "version" : 3

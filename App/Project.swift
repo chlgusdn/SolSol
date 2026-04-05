@@ -3,7 +3,7 @@ import ProjectDescriptionHelpers
 
 let project = AppProject.make(
     name: "SolSol",
-    bundleId: "com.nunu.SolSol",
+    bundleId: "team.nunu.myApp.solsol",
     infoPlist: "Resources/Info.plist",
     sources: ["Sources/**"],
     resources: [

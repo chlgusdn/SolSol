@@ -15,7 +15,7 @@ public final class SDTextField: UITextField {
     
     private var bindings = Set<AnyCancellable>()
     
-    init() {
+    public init() {
         super.init(frame: .zero)
         
         NotificationCenter.default

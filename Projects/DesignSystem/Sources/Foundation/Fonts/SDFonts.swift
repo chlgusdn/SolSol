@@ -16,16 +16,10 @@ public enum SDFont {
         switch self {
             
         case .pixel(let size):
-            return UIFont(
-                name: "MoneygraphyTTF-Pixel",
-                size: CGFloat(size)
-            )!
+            return DesignSystemFontFamily.머니그라피Ttf.pixel.font(size: CGFloat(size))
             
         case .round(let size):
-            return UIFont(
-                name: "MoneygraphyTTF-Rounded",
-                size: CGFloat(size)
-            )!
+            return DesignSystemFontFamily.머니그라피Ttf.rounded.font(size: CGFloat(size))
         }
     }
 }

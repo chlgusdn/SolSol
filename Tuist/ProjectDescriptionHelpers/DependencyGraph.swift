@@ -12,7 +12,6 @@ public enum ModuleDependency {
     case flexLayout
     case pinLayout
     case fsCalendar
-    case yoga
 
     var targetDependency: TargetDependency {
         switch self {
@@ -33,13 +32,11 @@ public enum ModuleDependency {
         case .grdb:
             return .external(name: "GRDB")
         case .flexLayout:
-            return .external(name: "FlexLayout-Dynamic")
+            return .external(name: "FlexLayout")
         case .pinLayout:
             return .external(name: "PinLayout")
         case .fsCalendar:
             return .external(name: "FSCalendar")
-        case .yoga:
-            return .external(name: "yoga")
         }
     }
 }
@@ -50,7 +47,6 @@ public enum ExternalPackages {
         .remote(url: "https://github.com/groue/GRDB.swift.git", requirement: .upToNextMajor(from: "7.6.1")),
         .remote(url: "https://github.com/layoutBox/FlexLayout.git", requirement: .upToNextMajor(from: "2.1.0")),
         .remote(url: "https://github.com/layoutBox/PinLayout.git", requirement: .upToNextMajor(from: "1.10.5")),
-        .remote(url: "https://github.com/WenchaoD/FSCalendar.git", requirement: .upToNextMajor(from: "2.8.4")),
-        .remote(url: "https://github.com/facebook/yoga.git", requirement: .upToNextMajor(from: "3.2.1"))
+        .remote(url: "https://github.com/WenchaoD/FSCalendar.git", requirement: .upToNextMajor(from: "2.8.4"))
     ]
 }

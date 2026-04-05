@@ -9,7 +9,6 @@ let project = Module.featureProject(
         .domain,
         .factory,
         .flexLayout,
-        .yoga,
         .pinLayout,
         .fsCalendar
     ]

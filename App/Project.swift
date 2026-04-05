@@ -19,7 +19,6 @@ let project = AppProject.make(
         .data,
         .homePresentation,
         .transactionPresentation,
-        .factory,
-        .yoga
+        .factory
     ]
 )

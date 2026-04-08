@@ -53,15 +53,7 @@ final class HomeExpenseSummaryView: SDView {
             return "Total \(format) won"
         }
     
-    private lazy var chartView: UIView? = {
-        
-        guard let parentViewController = parentViewController else {
-            return nil
-        }
-        
-        return HomeExpenseChartView(viewModel: self.chartViewModel)
-            .toUIKitView(for: parentViewController)
-    }()
+    private lazy var chartView = HomeExpenseChartView(viewModel: self.chartViewModel)
     
     private let incomeButton = SDButton()
         .setBackgroundColor(color: SDColors.primary200 ?? .systemGreen)
@@ -148,11 +140,9 @@ final class HomeExpenseSummaryView: SDView {
                     .width(100%)
                     .marginTop(11)
                 
-                if let chartView = chartView {
-                    flex.addItem(chartView)
-                        .marginTop(11)
-                        .height(50)
-                }
+                flex.addItem(chartView)
+                    .marginTop(11)
+                    .width(100%)
                 
                 flex.addItem()
                     .direction(.row)

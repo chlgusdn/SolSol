@@ -20,8 +20,7 @@ public final class HomeExpenseSummaryViewModel: ObservableObject {
         willSet {
             if newValue == true  {
                 self.summaryExpenseDays = 14
-            }
-            else {
+            } else {
                 self.summaryExpenseDays = 0
             }
         }

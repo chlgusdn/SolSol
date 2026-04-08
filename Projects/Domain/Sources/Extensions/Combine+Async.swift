@@ -19,7 +19,7 @@ extension Publishers {
             self.asyncOperation = asyncOperation
         }
 
-        func receive<S>(subscriber: S) where S : Subscriber, Failure == S.Failure, Output == S.Input {
+        func receive<S>(subscriber: S) where S: Subscriber, Failure == S.Failure, Output == S.Input {
             let subscription = AsyncSubscription(
                 asyncOperation: asyncOperation,
                 subscriber: subscriber
@@ -41,8 +41,7 @@ extension Publishers {
                     do {
                         let result = try await asyncOperation()
                         promise(.success(result))
-                    }
-                    catch {
+                    } catch {
                         promise(.failure(error))
                     }
                 }
@@ -111,8 +110,7 @@ private class AsyncSubscription<Output, S: Subscriber>: Subscription where S.Inp
 
                 _ = subscriber?.receive(result)
                 subscriber?.receive(completion: .finished)
-            }
-            catch {
+            } catch {
                 subscriber?.receive(completion: .failure(error))
             }
         }

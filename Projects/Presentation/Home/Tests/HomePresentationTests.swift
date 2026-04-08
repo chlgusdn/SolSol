@@ -10,7 +10,7 @@ struct HomePresentationTests {
             entries: [
                 SDChartDataEntry(label: "Food", color: .systemRed, x: 2, y: 0),
                 SDChartDataEntry(label: "Transport", color: .systemBlue, x: 3, y: 0),
-                SDChartDataEntry(label: "Etc", color: .systemGreen, x: 5, y: 0)
+                SDChartDataEntry(label: "Etc", color: .systemGreen, x: 5, y: 0),
             ]
         )
 

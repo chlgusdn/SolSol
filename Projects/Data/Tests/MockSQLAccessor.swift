@@ -67,8 +67,7 @@ public final actor MockSQLAccessor: SQLAccessable {
         do {
             // 인메모리 데이터베이스 생성 (실제 테스트에서 스키마가 필요한 경우)
             mockDatabasePool = try DatabaseQueue()
-        }
-        catch {
+        } catch {
             Log.e("Mock Database Setup Failed \(error)")
         }
     }

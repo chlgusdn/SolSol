@@ -29,8 +29,7 @@ public final class SDCountingLabel: UILabel {
             case .easeInOut:
                 if x < 0.5 {
                     return 4 * pow(x, 3)
-                }
-                else {
+                } else {
                     return 1 - pow(-2 * x + 2, 3) / 2
                 }
             }
@@ -95,8 +94,7 @@ public final class SDCountingLabel: UILabel {
 
         if let formatter = self.textForamtter {
             self.text = formatter(intNumber.withComma()!)
-        }
-        else {
+        } else {
             self.text = "\(Int(number).withComma()!)"
         }
     }

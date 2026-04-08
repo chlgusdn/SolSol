@@ -60,8 +60,7 @@ extension WaveAnimation {
             path.addLine(to: CGPoint(x: width, y: bounds.height))
             path.addLine(to: CGPoint(x: 0, y: bounds.height))
             path.close()
-        }
-        else {
+        } else {
             path.move(to: CGPoint(x: 0, y: height))
             path.addLine(to: CGPoint(x: width, y: height))
             path.addLine(to: CGPoint(x: width, y: bounds.height))

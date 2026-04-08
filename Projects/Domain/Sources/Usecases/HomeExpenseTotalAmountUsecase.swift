@@ -34,8 +34,7 @@ public final class HomeExpenseTotalAmountUsecase: HomeExpenseTotalAmountUsecaseP
             }
 
             return .success(totalAmount)
-        }
-        catch {
+        } catch {
             return .failure(.unknown(error: error))
         }
     }

@@ -35,6 +35,7 @@ trailing_whitespace:
 
 file_name:
   severity: warning
+  suffix_pattern: "\\+(Extension|Template)$"
 
 force_cast:
   severity: warning

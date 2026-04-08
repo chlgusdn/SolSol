@@ -18,6 +18,7 @@ public enum AppProject {
             infoPlist: .file(path: .relativeToManifest(infoPlist)),
             sources: sources,
             resources: resources,
+            scripts: [Module.swiftLintScript],
             dependencies: dependencies.map(\.targetDependency),
             settings: .settings(configurations: [
                 .debug(name: "Debug", settings: [

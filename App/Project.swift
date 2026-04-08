@@ -10,7 +10,7 @@ let project = AppProject.make(
         .glob(
             pattern: "Resources/**",
             excluding: ["Resources/Info.plist"]
-        )
+        ),
     ],
     dependencies: [
         .core,
@@ -19,6 +19,6 @@ let project = AppProject.make(
         .data,
         .homePresentation,
         .transactionPresentation,
-        .factory
+        .factory,
     ]
 )

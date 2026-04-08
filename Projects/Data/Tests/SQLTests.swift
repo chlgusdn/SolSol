@@ -13,8 +13,8 @@ import Combine
 @Suite("SQLTest")
 struct SQLTests {
 
-    let accessor : SQLAccessor
-    let repository : UserRepositoryProtocol
+    let accessor: SQLAccessor
+    let repository: UserRepositoryProtocol
 
     init() async throws {
         self.accessor = await SQLAccessor()

@@ -58,11 +58,18 @@ public enum Module {
             dependencies: dependencies.map(\.targetDependency),
             settings: .settings(configurations: [
                 .debug(name: "Debug", settings: [
-                    "GCC_PREPROCESSOR_DEFINITIONS": ["DEBUG=1", "OTHER_MACRO=1", "FLEXLAYOUT_SWIFT_PACKAGE=1"],
+                    "GCC_PREPROCESSOR_DEFINITIONS": [
+                        "DEBUG=1",
+                        "OTHER_MACRO=1",
+                        "FLEXLAYOUT_SWIFT_PACKAGE=1",
+                    ],
                 ]),
                 .release(name: "Release", settings: [
-                    "GCC_PREPROCESSOR_DEFINITIONS": ["RELEASE=1", "FLEXLAYOUT_SWIFT_PACKAGE=1"],
-                ])
+                    "GCC_PREPROCESSOR_DEFINITIONS": [
+                        "RELEASE=1",
+                        "FLEXLAYOUT_SWIFT_PACKAGE=1",
+                    ],
+                ]),
             ])
         )
 
@@ -76,7 +83,7 @@ public enum Module {
             sources: ["Tests/**"],
             scripts: [swiftLintScript],
             dependencies: [
-                .target(name: name)
+                .target(name: name),
             ]
         )
 
@@ -86,7 +93,7 @@ public enum Module {
             packages: ExternalPackages.all,
             targets: [
                 target,
-                tests
+                tests,
             ]
         )
     }
@@ -108,11 +115,18 @@ public enum Module {
             dependencies: dependencies.map(\.targetDependency),
             settings: .settings(configurations: [
                 .debug(name: "Debug", settings: [
-                    "GCC_PREPROCESSOR_DEFINITIONS": ["DEBUG=1", "OTHER_MACRO=1", "FLEXLAYOUT_SWIFT_PACKAGE=1"],
+                    "GCC_PREPROCESSOR_DEFINITIONS": [
+                        "DEBUG=1",
+                        "OTHER_MACRO=1",
+                        "FLEXLAYOUT_SWIFT_PACKAGE=1",
+                    ],
                 ]),
                 .release(name: "Release", settings: [
-                    "GCC_PREPROCESSOR_DEFINITIONS": ["RELEASE=1", "FLEXLAYOUT_SWIFT_PACKAGE=1"],
-                ])
+                    "GCC_PREPROCESSOR_DEFINITIONS": [
+                        "RELEASE=1",
+                        "FLEXLAYOUT_SWIFT_PACKAGE=1",
+                    ],
+                ]),
             ])
         )
 
@@ -126,7 +140,7 @@ public enum Module {
             sources: ["Tests/**"],
             scripts: [swiftLintScript],
             dependencies: [
-                .target(name: name)
+                .target(name: name),
             ]
         )
 
@@ -136,7 +150,7 @@ public enum Module {
             packages: ExternalPackages.all,
             targets: [
                 target,
-                tests
+                tests,
             ]
         )
     }

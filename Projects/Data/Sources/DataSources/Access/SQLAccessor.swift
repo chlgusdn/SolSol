@@ -45,8 +45,7 @@ public final actor SQLAccessor: SQLAccessable {
             let migrator = try checkMigration()
             try migrator.migrate(databasePool!)
             Log.d("Database Opened Successfully")
-        }
-        catch {
+        } catch {
             Log.e("Database Open Failed \(error)")
         }
     }
@@ -55,21 +54,20 @@ public final actor SQLAccessor: SQLAccessable {
         return databasePool
     }
 
-    public func save<T>(to object: T) async -> Bool where T : BaseEntitiy {
+    public func save<T>(to object: T) async -> Bool where T: BaseEntitiy {
         guard let pool = databasePool else { return false }
         do {
             try await pool.write { database in
                 try object.insert(database)
             }
             return true
-        }
-        catch {
+        } catch {
             Log.e("DB Insert Failed \(error)")
             return false
         }
     }
 
-    public func saveAll<T>(to objects: [T]) async -> Bool where T : BaseEntitiy {
+    public func saveAll<T>(to objects: [T]) async -> Bool where T: BaseEntitiy {
         guard let pool = databasePool else { return false }
         do {
             try await pool.write { database in
@@ -79,14 +77,13 @@ public final actor SQLAccessor: SQLAccessable {
 
             }
             return true
-        }
-        catch {
+        } catch {
             Log.e("DB Insert Failed \(error)")
             return false
         }
     }
 
-    public func fetchOne<T>(type: T.Type, rawQuery: String) async -> T? where T : BaseEntitiy {
+    public func fetchOne<T>(type: T.Type, rawQuery: String) async -> T? where T: BaseEntitiy {
         guard let pool = databasePool else { return nil }
         do {
             let result = try await pool.read { database in
@@ -94,14 +91,13 @@ public final actor SQLAccessor: SQLAccessable {
             }
 
             return result
-        }
-        catch {
+        } catch {
             Log.e("DB Select Failed \(error)")
             return nil
         }
     }
 
-    public func fetchOne<T>(type: T.Type, query: QueryInterfaceRequest<T>) async -> T? where T : BaseEntitiy {
+    public func fetchOne<T>(type: T.Type, query: QueryInterfaceRequest<T>) async -> T? where T: BaseEntitiy {
         guard let pool = databasePool else { return nil }
 
         do {
@@ -110,14 +106,13 @@ public final actor SQLAccessor: SQLAccessable {
             }
 
             return result
-        }
-        catch {
+        } catch {
             Log.e("DB Select Failed \(error)")
             return nil
         }
     }
 
-    public func fetchAll<T>(type: T.Type, rawQuery: String) async -> [T]? where T : BaseEntitiy {
+    public func fetchAll<T>(type: T.Type, rawQuery: String) async -> [T]? where T: BaseEntitiy {
         guard let pool = databasePool else { return nil }
         do {
             let result = try await pool.read { database in
@@ -125,14 +120,13 @@ public final actor SQLAccessor: SQLAccessable {
             }
 
             return result
-        }
-        catch {
+        } catch {
             Log.e("DB Select Failed \(error)")
             return nil
         }
     }
 
-    public func fetchAll<T>(type: T.Type, query: QueryInterfaceRequest<T>) async -> [T]? where T : BaseEntitiy {
+    public func fetchAll<T>(type: T.Type, query: QueryInterfaceRequest<T>) async -> [T]? where T: BaseEntitiy {
         guard let pool = databasePool else { return [] }
 
         do {
@@ -141,14 +135,13 @@ public final actor SQLAccessor: SQLAccessable {
             }
 
             return result
-        }
-        catch {
+        } catch {
             Log.e("DB Select Failed \(error)")
             return nil
         }
     }
 
-    public func updateOne<T>(to object: T) async -> Bool where T : BaseEntitiy {
+    public func updateOne<T>(to object: T) async -> Bool where T: BaseEntitiy {
         guard let pool = databasePool else { return false }
         do {
             try await pool.write { database in
@@ -156,14 +149,13 @@ public final actor SQLAccessor: SQLAccessable {
             }
 
             return true
-        }
-        catch {
+        } catch {
             Log.e("DB Update Failed \(error)")
             return false
         }
     }
 
-    public func updateAll<T>(type: T.Type, queryRequest: QueryInterfaceRequest<T>) async -> Bool where T : BaseEntitiy {
+    public func updateAll<T>(type: T.Type, queryRequest: QueryInterfaceRequest<T>) async -> Bool where T: BaseEntitiy {
         guard let pool = databasePool else { return false }
 
         do {
@@ -172,14 +164,13 @@ public final actor SQLAccessor: SQLAccessable {
             }
 
             return (result != 0)
-        }
-        catch {
+        } catch {
             Log.e("DB Update Failed \(error)")
             return false
         }
     }
 
-    public func deleteOne<T>(to object: T) async -> Bool where T : BaseEntitiy {
+    public func deleteOne<T>(to object: T) async -> Bool where T: BaseEntitiy {
         guard let pool = databasePool else { return false }
         do {
             let result = try await pool.write { database in
@@ -187,34 +178,31 @@ public final actor SQLAccessor: SQLAccessable {
             }
 
             return result
-        }
-        catch {
+        } catch {
             Log.e("DB delete Failed \(error)")
             return false
         }
     }
 
-    public func deleteAll<T>(type: T.Type, filter: SQLExpression?) async -> Bool where T : BaseEntitiy {
+    public func deleteAll<T>(type: T.Type, filter: SQLExpression?) async -> Bool where T: BaseEntitiy {
         guard let pool = databasePool else { return false }
         do {
             let result = try await pool.write { database in
                 if let filter = filter {
                     try type.filter(filter).deleteAll(database)
-                }
-                else {
+                } else {
                     try type.deleteAll(database)
                 }
             }
 
             return (result != 0)
-        }
-        catch {
+        } catch {
             Log.e("DB delete Failed \(error)")
             return false
         }
     }
 
-    public nonisolated func observeAll<T>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?)-> ValueObservation<ValueReducers.Fetch<[T]?>> where T : BaseEntitiy {
+    public nonisolated func observeAll<T>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?)-> ValueObservation<ValueReducers.Fetch<[T]?>> where T: BaseEntitiy {
         let queryRequest = query ?? type.all()
 
         guard let observeTable = observeTable else {
@@ -229,7 +217,7 @@ public final actor SQLAccessor: SQLAccessable {
 
     }
 
-    public nonisolated func observeOne<T>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?) -> ValueObservation<ValueReducers.Fetch<T?>> where T : BaseEntitiy {
+    public nonisolated func observeOne<T>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?) -> ValueObservation<ValueReducers.Fetch<T?>> where T: BaseEntitiy {
         let queryRequest = query ?? type.all()
 
         guard let observeTable = observeTable else {

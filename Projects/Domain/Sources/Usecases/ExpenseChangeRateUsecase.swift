@@ -50,8 +50,7 @@ public final class ExpenseChangeRateUsecase: ExpenseChangeRateUsecaseProtocol {
             return .success(changeRate)
 
 
-        }
-        catch {
+        } catch {
             Log.e(error.localizedDescription)
             return .failure(.unknown(error: error))
         }

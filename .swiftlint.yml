@@ -15,10 +15,38 @@ disabled_rules:
 opt_in_rules:
   - empty_count
   - explicit_init
+  - file_name
+  - force_cast
+  - force_try
+  - force_unwrapping
+  - vertical_whitespace
 
-line_length:
-  warning: 140
-  error: 180
+control_statement:
+  severity: warning
+
+opening_brace:
+  severity: warning
+
+statement_position:
+  severity: warning
+
+trailing_whitespace:
+  severity: warning
+
+file_name:
+  severity: warning
+
+force_cast:
+  severity: warning
+
+force_try:
+  severity: warning
+
+force_unwrapping:
+  severity: warning
+
+vertical_whitespace:
+  severity: warning
 
 type_name:
   min_length: 3
@@ -31,5 +59,12 @@ identifier_name:
     - id
     - x
     - y
+
+custom_rules:
+  multiline_function_call_arguments:
+    name: "Multiline Function Call Arguments"
+    regex: '^(?!.*\b(?:func|init|subscript)\b).*?\b[A-Za-z_][A-Za-z0-9_\.]*\([^()\n]*,[^()\n]*\)'
+    message: "Function calls with two or more arguments should be split across multiple lines."
+    severity: warning
 
 reporter: xcode

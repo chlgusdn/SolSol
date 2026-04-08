@@ -11,7 +11,7 @@ public struct CategoryModel: BaseModel {
     public private(set) var id: Int64
     public var categoryName: String
     public var categoryType: Int
-    
+
     public init(
         id: Int64,
         categoryName: String,

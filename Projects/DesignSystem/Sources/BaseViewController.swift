@@ -11,9 +11,9 @@ import SolSolCore
 
 /// 베이스로 사용될 뷰 컨트롤러
 open class BaseViewController: UIViewController, Layoutable {
-    
+
     public var bindings = Set<AnyCancellable>()
-    
+
     open override func viewDidLoad() {
         super.viewDidLoad()
         Log.d("\(self) Start")
@@ -21,13 +21,13 @@ open class BaseViewController: UIViewController, Layoutable {
         self.setupProperties()
         self.setupViews()
     }
-    
+
     open func setupViews() {}
-    
+
     open func setupProperties() {}
-    
+
     open func setupLayout() {}
-    
+
     open override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         self.setupLayout()

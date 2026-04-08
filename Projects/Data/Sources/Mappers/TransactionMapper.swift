@@ -12,9 +12,9 @@ import SolSolCore
 public struct TransactionMapper: Mappable {
     public typealias DomainType = TransactionModel
     public typealias DataType = TransactionEntity
-    
+
     public static func toDomain(to data: TransactionEntity, category: CategoryEntitiy) -> TransactionModel {
-        
+
         return TransactionModel(
             id: data.id ?? -1,
             userId: data.userId,
@@ -30,7 +30,7 @@ public struct TransactionMapper: Mappable {
             type: TransactionModel.TransactionType(rawValue: data.type) ?? .expense
         )
     }
-    
+
     public static func toLocal(to doamin: TransactionModel) -> TransactionEntity {
         return TransactionEntity(
             userId: doamin.userId,

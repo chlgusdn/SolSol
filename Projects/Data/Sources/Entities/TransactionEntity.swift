@@ -10,7 +10,7 @@ import GRDB
 
 /// 거래내역
 public struct TransactionEntity: BaseEntitiy {
-    
+
     public var id: Int64?
     public var userId: String
     public var categoryId: Int64
@@ -19,7 +19,7 @@ public struct TransactionEntity: BaseEntitiy {
     public var memo: String?
     public var name: String
     public var type: Int
-    
+
     public enum Columns: String, ColumnExpression {
         case id
         case userId
@@ -30,7 +30,7 @@ public struct TransactionEntity: BaseEntitiy {
         case name
         case type
     }
-    
+
     public init(
         id: Int64? = nil,
         userId: String,

@@ -8,12 +8,12 @@
 import Foundation
 
 public struct NotificationModel: BaseModel {
-    
+
     public enum NotificationType: Int {
         case warnning
         case danger
     }
-    
+
     public var userId: String
     public var budget: BudgetModel?
     public var notificationType: NotificationType

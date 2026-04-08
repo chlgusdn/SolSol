@@ -9,14 +9,14 @@ import Foundation
 import OSLog
 
 public class Log {
-    
+
     public enum LogLevel {
         case debug
         case info
         case warning
         case error
         case custom(String)
-        
+
         var level: OSLogType {
             switch self {
             case .debug:            return .debug
@@ -26,7 +26,7 @@ public class Log {
             case .custom:           return .debug
             }
         }
-        
+
         var category: String {
             switch self {
             case .debug:                        return "DEBUG"
@@ -36,7 +36,7 @@ public class Log {
             case .custom(let category):         return category.uppercased()
             }
         }
-        
+
         var seperator: String {
             switch self {
             case .debug:                        return "✅"
@@ -46,13 +46,13 @@ public class Log {
             case .custom:                       return "☑️"
             }
         }
-        
+
     }
-    
+
     public var subsystem: String {
         return Bundle.main.bundleIdentifier ?? "SolSol"
     }
-    
+
     public func message(_ message: String, level: LogLevel) {
         let log = OSLog(subsystem: subsystem, category: level.category)
         let formatter = DateFormatter()
@@ -65,27 +65,27 @@ public class Log {
         """
         os_log("%{public}@", log: log, type: level.level, logMessage)
     }
-    
+
     public static func d(_ message: String) {
         let log = Log()
         log.message(message, level: .debug)
     }
-    
+
     public static func i(_ message: String) {
         let log = Log()
         log.message(message, level: .info)
     }
-    
+
     public static func w(_ message: String) {
         let log = Log()
         log.message(message, level: .warning)
     }
-    
+
     public static func e(_ message: String) {
         let log = Log()
         log.message(message, level: .error)
     }
-    
+
     public static func custom(_ message: String, category: String) {
         let log = Log()
         log.message(message, level: .custom(category))

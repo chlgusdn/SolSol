@@ -37,13 +37,13 @@ public extension Container {
             fatalError("Home chart usecase is not registered")
         }
     }
-    
+
     var homeExpenseTotalAmountUsecase: Factory<HomeExpenseTotalAmountUsecaseProtocol> {
         self {
             fatalError("Home total amount usecase is not registered")
         }
     }
-    
+
     var expenseChangeRateUsecase: Factory<ExpenseChangeRateUsecaseProtocol> {
         self {
             fatalError("Expense change rate usecase is not registered")

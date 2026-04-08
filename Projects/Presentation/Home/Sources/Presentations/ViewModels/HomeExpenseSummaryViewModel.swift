@@ -11,11 +11,11 @@ import Domain
 import SolSolCore
 
 public final class HomeExpenseSummaryViewModel: ObservableObject {
-    
+
     @Published private(set) var totalExpense: Decimal = 0
-    
+
     private let homeExpenseTotalAmountUsecase: HomeExpenseTotalAmountUsecaseProtocol
-    
+
     private var isSummaryExpenseShowed: Bool = false {
         willSet {
             if newValue == true  {
@@ -26,28 +26,28 @@ public final class HomeExpenseSummaryViewModel: ObservableObject {
             }
         }
     }
-    
+
     private(set) var summaryExpenseDays: Int = 0
-    
+
     public init(homeExpenseTotalAmountUsecase: HomeExpenseTotalAmountUsecaseProtocol) {
         self.homeExpenseTotalAmountUsecase = homeExpenseTotalAmountUsecase
-        
+
         Task { @MainActor [weak self] in
-            
+
             guard let `self` = self else {
                 return
             }
-            
+
             let result = await self.homeExpenseTotalAmountUsecase.execute(
                 startAt: Date.now.millisecond,
                 endAt: Date.now.adding(days: 14).millisecond
             )
-            
+
             // response 응답 값이 성공일 경우에만 반환 처리
             guard case .success(let response) = result else {
                 return
             }
-            
+
             self.totalExpense = response
         }
     }

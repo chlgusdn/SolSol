@@ -10,15 +10,15 @@ import SolSolCore
 
 /// 홈 화면 코디네이터
 public final class HomeCoordinator: Coordinator {
-    
+
     public var navigationController: UINavigationController
-    
+
     public var childCoordinators: [any Coordinator] = []
-    
+
     public weak var parentCoordinator: (any Coordinator)?
 
     private let dependencies: HomeDependencyProviding
-    
+
     public func start() {
         Log.d("\(self) Start")
         // main 화면 이동
@@ -31,7 +31,7 @@ public final class HomeCoordinator: Coordinator {
         self.navigationController.isNavigationBarHidden = true
         self.navigationController.pushViewController(homeViewController, animated: true)
     }
-    
+
     public func showExpenseScreen() {
         let expenseCoordinator = ExpenseCoordinator(
             navigationController: self.navigationController,

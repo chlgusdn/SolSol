@@ -9,7 +9,7 @@ import Foundation
 import GRDB
 
 public struct NotificationEntity: BaseEntitiy {
-    
+
     public var id: Int64?
     public var userId: String
     public var budgetId: Int64?
@@ -18,7 +18,7 @@ public struct NotificationEntity: BaseEntitiy {
     public var isActive: Bool
     public var createdAt: TimeInterval
     public var updatedAt: TimeInterval
-    
+
     public enum Columns: String, ColumnExpression {
         case id
         case userId
@@ -29,7 +29,7 @@ public struct NotificationEntity: BaseEntitiy {
         case createdAt
         case updatedAt
     }
-    
+
     public init(
         id: Int64? = nil,
         userId: String,

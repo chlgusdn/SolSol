@@ -8,12 +8,12 @@
 import Foundation
 
 public struct TransactionModel: BaseModel {
-    
+
     public enum TransactionType: Int {
         case expense
         case income
     }
-    
+
     public private(set) var id: Int64
     public var userId: String
     public var category: CategoryModel
@@ -22,7 +22,7 @@ public struct TransactionModel: BaseModel {
     public var memo: String?
     public var name: String
     public var type: TransactionType
-    
+
     public init(
         id: Int64,
         userId: String,

@@ -10,7 +10,7 @@ import DesignSystem
 
 /// 홈 화면 지출 요약 내용 snap shot
 struct HomeExpenseChartSnapshot {
-    
+
     struct Item {
         let id: UUID
         let label: String
@@ -30,7 +30,7 @@ struct HomeExpenseChartSnapshot {
                 value: max(entry.x, 0)
             )
         }
-        
+
         self.totalValue = self.items.reduce(0) { partialResult, item in
             partialResult + item.value
         }

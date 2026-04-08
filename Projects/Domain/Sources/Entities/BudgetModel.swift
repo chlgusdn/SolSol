@@ -17,7 +17,7 @@ public struct BudgetModel: BaseModel {
     public var updatedAt: Date
     public var initalizeAmount: Double
     public var currentAmount: Double
-    
+
     public init(
         id: Int64,
         userId: String,

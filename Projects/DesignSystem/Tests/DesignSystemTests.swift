@@ -3,7 +3,7 @@ import UIKit
 @testable import DesignSystem
 
 struct DesignSystemTests {
-    
+
     @Test
     @MainActor
     func 슬롯_금액_뷰는_플레이스홀더와_포맷된_금액에_맞춰_접근성_라벨을_갱신한다() async throws {

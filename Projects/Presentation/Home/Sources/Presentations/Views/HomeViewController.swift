@@ -19,10 +19,10 @@ final class HomeViewController: BaseViewController {
     private let chartViewModel: HomeExpenseChartViewModel
 
     private let scrollView = UIScrollView()
-    
+
     private let scrollContentView = SDView()
         .setBackgroundColor(color: SDColors.white300 ?? .systemGray5)
-    
+
     private lazy var summaryView = HomeExpenseSummaryView(
         viewModel: self.summaryViewModel,
         chartViewModel: self.chartViewModel
@@ -30,10 +30,10 @@ final class HomeViewController: BaseViewController {
         .setParentViewController(to: self)
         .setBackgroundColor(color: SDColors.white100 ?? .white)
         .setRadius(radius: 20)
-    
+
     private let eventContainerView = SDView()
         .setRadius(radius: 4)
-    
+
     private lazy var statisticsScreenButton = SDImageButton()
         .setBackgroundColor(color: SDColors.white100 ?? .white)
         .setImage(image: SDImages.icTrendingUp, padding: 10, position: .top)
@@ -48,7 +48,7 @@ final class HomeViewController: BaseViewController {
         .onTapped {
             self.coordinator?.showExpenseScreen()
         }
-    
+
     private let zeroExpenseDayScreenButton = SDImageButton()
         .setBackgroundColor(color: SDColors.white100 ?? .white)
         .setImage(image: SDImages.icDollarSign, padding: 10, position: .top)
@@ -63,22 +63,22 @@ final class HomeViewController: BaseViewController {
         .onTapped {
             Log.d("zeroExpenseDay")
         }
-    
+
     private let todayIncomePercentContainerView = SDView()
         .setBackgroundColor(color: SDColors.white100 ?? .white)
         .setRadius(radius: 4)
-    
+
     private let todayDateLabel = SDLabel()
         .setFont(font: .pixel(size: 16))
         .setTextColor(color: SDColors.black100 ?? .black)
         .setNumberOfLines(limitLine: 1)
         .setText(text: Date().toString(for: "yyyy.MM.dd (E)"))
-    
+
     private let percentLabel = SDCountingLabel()
         .setDuration(1)
         .setFont(font: .pixel(size: 16))
         .setTextColor(color: SDColors.graph300 ?? .systemGreen)
-    
+
     private lazy var expenseCalendar: FSCalendar = {
         let calendar = FSCalendar()
         calendar.locale = .current
@@ -97,7 +97,7 @@ final class HomeViewController: BaseViewController {
         calendar.appearance.headerTitleColor = SDColors.gray800 ?? .darkGray
         return calendar
     }()
-    
+
     weak var coordinator: HomeCoordinator?
 
     init(
@@ -114,21 +114,21 @@ final class HomeViewController: BaseViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
     }
-    
+
     override func setupViews() {
         super.setupViews()
-        
+
         self.scrollView.addSubview(self.scrollContentView)
         self.view.addSubview(self.scrollView)
-        
+
         self.setupEventContainerView()
         self.setupDateContainerView()
         self.setupScrollContentContainerView()
-        
+
         self.viewModel.$changeRate
             .sink { changeRate in
                 switch changeRate {
@@ -140,9 +140,9 @@ final class HomeViewController: BaseViewController {
                             return "+\(text) %"
                         }
                         .isHidden = false
-                    
+
                     self.percentLabel.startAnimation()
-                        
+
                 case .decrease(let rate):
                     self.percentLabel
                         .setRange(start: 0.0, end: rate)
@@ -151,42 +151,42 @@ final class HomeViewController: BaseViewController {
                             return "-\(text) %"
                         }
                         .isHidden = false
-                    
+
                     self.percentLabel.startAnimation()
-                    
+
                 case .none:
                     self.percentLabel.isHidden = true
                 }
             }
             .store(in: &self.bindings)
     }
-    
+
     override func setupLayout() {
         super.setupLayout()
-        
+
         self.scrollView
             .pin
             .all(self.view.pin.safeArea)
-        
+
         self.scrollContentView
             .pin
             .top()
             .left()
             .width(scrollView.frame.width)
-        
+
         self.scrollContentView
             .flex
             .layout(mode: .adjustHeight)
-        
+
         self.scrollView.contentSize = scrollContentView.frame.size
     }
-    
+
     override func setupProperties() {
         super.setupProperties()
         self.scrollView.backgroundColor = SDColors.white200 ?? .systemGray6
         self.view.backgroundColor = SDColors.white200 ?? .systemGray6
     }
-    
+
     private func setupScrollContentContainerView() {
         self.scrollContentView
             .flex
@@ -195,16 +195,16 @@ final class HomeViewController: BaseViewController {
             .justifyContent(.spaceBetween)
             .backgroundColor(SDColors.white200 ?? .systemGray6)
             .define { flex in
-                
+
                 flex.addItem(summaryView)
                     .margin(10, 20, 10, 20)
-                
+
                 flex.addItem(eventContainerView)
                     .margin(0, 20, 4, 20)
-                
+
                 flex.addItem(todayIncomePercentContainerView)
                     .margin(0, 20, 0, 20)
-                
+
                 flex.addItem(expenseCalendar)
                     .padding(10)
                     .margin(4, 20, 20, 20)
@@ -212,7 +212,7 @@ final class HomeViewController: BaseViewController {
                     .grow(1)
             }
     }
-    
+
     private func setupEventContainerView() {
         self.eventContainerView
             .flex
@@ -221,15 +221,15 @@ final class HomeViewController: BaseViewController {
             .backgroundColor(SDColors.white200 ?? .systemGray6)
             .alignContent(.center)
             .define { flex in
-                
+
                 flex.addItem(self.zeroExpenseDayScreenButton)
                     .width(50%)
-                
+
                 flex.addItem(self.statisticsScreenButton)
                     .width(50%)
             }
     }
-    
+
     private func setupDateContainerView() {
         self.todayIncomePercentContainerView
             .flex

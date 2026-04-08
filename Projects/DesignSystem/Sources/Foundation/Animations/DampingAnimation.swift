@@ -11,26 +11,26 @@ public protocol DampingAnimation: UIView {
     var animationDuration: TimeInterval { get }
     var damping: CGFloat { get }
     var velocity: CGFloat { get }
-    
+
     func performPressAnimation()
     func performReleaseAnimation()
     func performHapticFeedback()
 }
 
 extension DampingAnimation {
-    
+
     public var animationDuration: TimeInterval {
         return 0.2
     }
-    
+
     public var damping: CGFloat {
         return 0.7
     }
-    
+
     public var velocity: CGFloat {
         return 0.5
     }
-    
+
     public func performPressAnimation() {
         UIView.animate(
             withDuration: 0.1,
@@ -44,7 +44,7 @@ extension DampingAnimation {
             }
         )
     }
-    
+
     public func performReleaseAnimation() {
         UIView.animate(
             withDuration: self.animationDuration,
@@ -57,7 +57,7 @@ extension DampingAnimation {
             }
         )
     }
-    
+
     public func performHapticFeedback() {
         let impact = UIImpactFeedbackGenerator(style: .light)
         impact.impactOccurred()

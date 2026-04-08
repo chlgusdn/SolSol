@@ -19,7 +19,7 @@ public struct BudgetEntity: BaseEntitiy {
     public var updatedAt: TimeInterval
     public var initalizeAmount: Double
     public var currentAmount: Double
-    
+
     public enum Columns: String, ColumnExpression {
         case id
         case userId
@@ -31,7 +31,7 @@ public struct BudgetEntity: BaseEntitiy {
         case initalizeAmount
         case currentAmount
     }
-    
+
     public init(
         id: Int64? = nil,
         userId: String,

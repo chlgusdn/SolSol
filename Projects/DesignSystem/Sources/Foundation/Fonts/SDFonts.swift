@@ -14,10 +14,10 @@ public enum SDFont {
 
     public var font: UIFont {
         switch self {
-            
+
         case .pixel(let size):
             return DesignSystemFontFamily.머니그라피Ttf.pixel.font(size: CGFloat(size))
-            
+
         case .round(let size):
             return DesignSystemFontFamily.머니그라피Ttf.rounded.font(size: CGFloat(size))
         }

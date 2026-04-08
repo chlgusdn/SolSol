@@ -12,7 +12,7 @@ import PinLayout
 
 /// 홈 화면 지출 요약 차트
 public final class HomeExpenseChartView: UIView {
-    
+
     private enum LayoutMetrics {
         static let barHeight: CGFloat = 50
         static let legendTopSpacing: CGFloat = 10
@@ -38,18 +38,18 @@ public final class HomeExpenseChartView: UIView {
 
     public override func layoutSubviews() {
         super.layoutSubviews()
-        
+
         self.contentView
             .pin
             .all()
-        
+
         self.contentView
             .flex
             .layout(mode: .adjustHeight)
     }
 
     public override func sizeThatFits(_ size: CGSize) -> CGSize {
-        
+
         // 현재 계산된 사이즈가 0이상인 경우는 계산된 사이즈로 표시
         let width = if size.width > 0 {
             size.width
@@ -66,7 +66,7 @@ public final class HomeExpenseChartView: UIView {
             .top()
             .left()
             .width(width)
-        
+
         self.contentView
             .flex
             .layout(mode: .adjustHeight)
@@ -78,7 +78,7 @@ public final class HomeExpenseChartView: UIView {
     }
 
     public override var intrinsicContentSize: CGSize {
-        
+
         let fittedSize = self.sizeThatFits(
             CGSize(
                 width: self.bounds.width,

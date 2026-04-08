@@ -19,15 +19,15 @@ extension HapticFeedbackAnimation {
         let generator = UIImpactFeedbackGenerator(style: .light)
         generator.impactOccurred()
     }
-    
+
     public func performHapticInMedium() {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.impactOccurred()
     }
-    
+
     public func performHapticInDanger() {
         let generator = UIImpactFeedbackGenerator(style: .heavy)
         generator.impactOccurred()
     }
-    
+
 }

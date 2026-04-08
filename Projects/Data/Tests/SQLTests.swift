@@ -12,10 +12,10 @@ import Combine
 
 @Suite("SQLTest")
 struct SQLTests {
-    
+
     let accessor : SQLAccessor
     let repository : UserRepositoryProtocol
-    
+
     init() async throws {
         self.accessor = await SQLAccessor()
         self.repository = UserRepositoryImpl(
@@ -24,13 +24,13 @@ struct SQLTests {
             )
         )
     }
-    
+
     @Test("Insert 단건 테스트")
     func insertUser() async throws {
         let user = UserModel(createdAt: Date())
         var cancellable: AnyCancellable?
         let isSuccess = await withCheckedContinuation { countinuation in
-            
+
             cancellable = repository.saveUser(user: user)
                 .replaceError(with: false)
                 .sink { isSuccess in
@@ -39,10 +39,10 @@ struct SQLTests {
                 }
             _ = cancellable
         }
-        
+
         #expect(isSuccess, "insert에 성공해야합니다")
     }
-    
+
     @Test("100개 insert 스트레스 테스트", .timeLimit(.minutes(1)))
     func test_insert_stress_for_100() async throws {
         var userList: [UserModel] = []
@@ -53,7 +53,7 @@ struct SQLTests {
         }
         var cancellable: AnyCancellable?
         let isSuccess = await withCheckedContinuation { countinuation in
-            
+
             cancellable = repository.saveUsers(users: userList)
                 .replaceError(with: false)
                 .sink { isSuccess in
@@ -62,10 +62,10 @@ struct SQLTests {
                 }
             _ = cancellable
         }
-        
+
         #expect(isSuccess, "insert에 성공해야합니다")
     }
-    
+
     @Test("Fetch User 단건 테스트")
     func test_user_fetch_one() async throws {
         let currentDate = Date()
@@ -81,7 +81,7 @@ struct SQLTests {
                 }
             _ = cancellable
         }
-        
+
         #expect(fetchModel.createdAt.millisecond == user.createdAt.millisecond, "fetchModel의 데이터와 같아야합니다")
     }
 

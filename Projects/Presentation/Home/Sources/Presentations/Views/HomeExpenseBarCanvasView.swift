@@ -10,7 +10,7 @@ import DesignSystem
 
 /// 홈 화면 지출 요약 바 화면 (카테고리 바)
 final class HomeExpenseBarCanvasView: UIView {
-    
+
     private enum LayoutMetrics {
         static let cornerRadius: CGFloat = 8
     }
@@ -55,7 +55,7 @@ final class HomeExpenseBarCanvasView: UIView {
         let frames = self.snapshot.segmentFrames(in: self.bounds)
 
         for (index, layer) in self.segmentLayers.enumerated() {
-            
+
             guard index < self.snapshot.items.count, index < frames.count else {
                 layer.frame = .zero
                 layer.isHidden = true
@@ -71,7 +71,7 @@ final class HomeExpenseBarCanvasView: UIView {
     }
 
     private func syncSegmentLayers(count: Int) {
-        
+
         while self.segmentLayers.count < count {
             let layer = CALayer()
             self.layer.addSublayer(layer)

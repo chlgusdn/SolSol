@@ -8,24 +8,24 @@
 import UIKit
 
 public final class SDCountingLabel: UILabel {
-    
+
     public enum EasingOption {
         case linear
         case easeIn
         case easeOut
         case easeInOut
-        
+
         func function(_ x: Double) -> Double {
             switch self {
             case .linear:
                 return x
-                
+
             case .easeIn:
                 return pow(x, 3)
-                
+
             case .easeOut:
                 return 1 - pow(1 - x, 3)
-                
+
             case .easeInOut:
                 if x < 0.5 {
                     return 4 * pow(x, 3)
@@ -36,19 +36,19 @@ public final class SDCountingLabel: UILabel {
             }
         }
     }
-    
+
     private var begin: Double = 0.0 {
         didSet {
             amount = end - begin
         }
     }
-    
+
     private var end: Double = 0.0 {
         didSet {
             amount = end - begin
         }
     }
-    
+
     private var interval: TimeInterval = 1/60
     private var duration: TimeInterval = 1
     private var amount: Double = 0
@@ -57,7 +57,7 @@ public final class SDCountingLabel: UILabel {
     private var currentTime: Double = 0.0
     private var option: EasingOption = .linear
     private var textForamtter: ((String) -> String)?
-    
+
     // MARK: public
     public func startAnimation() {
         startDate = Date()
@@ -70,7 +70,7 @@ public final class SDCountingLabel: UILabel {
             repeats: true
         )
     }
-    
+
     // MARK: Private
     @objc
     private func updateValue() {
@@ -79,20 +79,20 @@ public final class SDCountingLabel: UILabel {
         let elapsedRate = elapsedTime / duration
         let amount = end - begin
         let currentNumber = option.function(elapsedRate) * amount + begin
-        
+
         if elapsedTime > duration {
             updateLabel(to: end)
             timer?.invalidate()
             timer = nil
             return
         }
-        
+
         updateLabel(to: currentNumber)
     }
-    
+
     private func updateLabel(to number: Double) {
         let intNumber = Int(number)
-        
+
         if let formatter = self.textForamtter {
             self.text = formatter(intNumber.withComma()!)
         }
@@ -100,13 +100,13 @@ public final class SDCountingLabel: UILabel {
             self.text = "\(Int(number).withComma()!)"
         }
     }
-    
+
     //MARK: Layout
     public func setFont(font: SDFont) -> Self {
         self.font = font.font
         return self
     }
-    
+
     @discardableResult
     public func setRange(start: Double = 0.0, end: Double = 0.0) -> Self {
         self.begin = start
@@ -114,25 +114,25 @@ public final class SDCountingLabel: UILabel {
         self.updateLabel(to: start)
         return self
     }
-    
+
     @discardableResult
     public func setAnimationOption(option: EasingOption) -> Self {
         self.option = option
         return self
     }
-    
+
     @discardableResult
     public func setTextColor(color: UIColor) -> Self {
         self.textColor = color
         return self
     }
-    
+
     @discardableResult
     public func registerTextFormat(textFormat: @escaping (String) -> String) -> Self {
         self.textForamtter = textFormat
         return self
     }
-    
+
     @discardableResult
     public func setDuration(_ duration: TimeInterval) -> Self {
         self.duration = duration

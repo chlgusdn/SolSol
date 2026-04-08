@@ -11,7 +11,7 @@ import Domain
 public struct BudgetMapper: Mappable {
     public typealias DomainType = BudgetModel
     public typealias DataType = BudgetEntity
-    
+
     public static func toDomain(to data: BudgetEntity) -> BudgetModel {
         return BudgetModel(
             id: data.id ?? -1,
@@ -25,7 +25,7 @@ public struct BudgetMapper: Mappable {
             currentAmount: data.currentAmount
         )
     }
-    
+
     public static func toLocal(to doamin: BudgetModel) -> BudgetEntity {
         return BudgetEntity(
             userId: doamin.userId,

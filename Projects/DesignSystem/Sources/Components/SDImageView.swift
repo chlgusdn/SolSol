@@ -14,11 +14,11 @@ public final class SDImageView: UIImageView {
         self.image = image
         self.contentMode = contentMode
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     public func setopacity(opacity: Float) -> Self {
         self.layer.opacity = opacity
         return self
@@ -29,5 +29,5 @@ public final class SDImageView: UIImageView {
         self.clipsToBounds = true
         return self
     }
-    
+
 }

@@ -9,7 +9,7 @@ import Foundation
 
 public struct UserModel: BaseModel {
     public var createdAt: Date
-    
+
     public init(createdAt: Date) {
         self.createdAt = createdAt
     }

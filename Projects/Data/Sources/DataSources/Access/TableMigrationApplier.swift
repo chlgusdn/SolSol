@@ -9,14 +9,14 @@ import Foundation
 import GRDB
 
 public struct TableMigrationApplier {
-    
+
     public enum Step: String, CaseIterable {
         case createUser
         case createBudget
         case createTransaction
         case createCategory
         case createNotification
-        
+
         func apply(to database: Database, migrator: TableVersionMigratoralbe) throws {
             switch self {
             case .createUser:               return try migrator.createUserTable(in: database)
@@ -27,16 +27,16 @@ public struct TableMigrationApplier {
             }
         }
     }
-    
+
     static func applyAll(to migrator: inout DatabaseMigrator, from tableMigrationVersion: TableVersionMigratoralbe) {
         migrator.registerMigration(tableMigrationVersion.migraionVersion) { database in
-            
+
             for step in Step.allCases {
                 try step.apply(to: database, migrator: tableMigrationVersion)
             }
-            
+
         }
-        
+
     }
-    
+
 }

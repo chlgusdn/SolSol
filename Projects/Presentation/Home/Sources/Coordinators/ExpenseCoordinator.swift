@@ -10,15 +10,15 @@ import UIKit
 import SolSolCore
 
 final class ExpenseCoordinator: Coordinator {
-    
+
     public var navigationController: UINavigationController
-    
+
     public var childCoordinators: [any Coordinator] = []
-    
+
     public weak var parentCoordinator: (any Coordinator)?
 
     private let dependencies: HomeDependencyProviding
-    
+
     public func start() {
         Log.d("\(self) Start")
         // main 화면 이동
@@ -30,7 +30,7 @@ final class ExpenseCoordinator: Coordinator {
         self.navigationController.isNavigationBarHidden = true
         self.navigationController.pushViewController(homeViewController, animated: true)
     }
-    
+
     init(navigationController: UINavigationController, dependencies: HomeDependencyProviding) {
         self.navigationController = navigationController
         self.dependencies = dependencies

@@ -13,9 +13,9 @@ import DesignSystem
 
 final class HomeExpenseSummaryView: SDView {
     private let viewModel: HomeExpenseSummaryViewModel
-    
+
     public weak var parentViewController: UIViewController?
-    
+
     private lazy var expenseSummaryButton = SDImageButton()
         .setBackgroundColor(color: SDColors.white100 ?? .white)
         .setRadius(radius: 8)
@@ -39,7 +39,7 @@ final class HomeExpenseSummaryView: SDView {
         .onTapped {
             Log.d("Summary")
         }
-    
+
     private lazy var summaryTitleLabel = SDCountingLabel()
         .setFont(font: .pixel(size: 20))
         .setDuration(3)
@@ -52,9 +52,9 @@ final class HomeExpenseSummaryView: SDView {
         .registerTextFormat { format in
             return "Total \(format) won"
         }
-    
+
     private lazy var chartView = HomeExpenseChartView(viewModel: self.chartViewModel)
-    
+
     private let incomeButton = SDButton()
         .setBackgroundColor(color: SDColors.primary200 ?? .systemGreen)
         .setText(text: "Add Income")
@@ -64,7 +64,7 @@ final class HomeExpenseSummaryView: SDView {
         .onTapped {
             Log.d("InCome")
         }
-    
+
     private let expenseButton = SDButton()
         .setBackgroundColor(color: SDColors.danger70 ?? .systemRed)
         .setText(text: "Add Expense")
@@ -74,12 +74,12 @@ final class HomeExpenseSummaryView: SDView {
         .onTapped {
             Log.d("Expense")
         }
-    
+
     private let containerView = SDView()
         .setBackgroundColor(color: SDColors.white100 ?? .white)
-    
+
     private let chartViewModel: HomeExpenseChartViewModel
-    
+
     init(viewModel: HomeExpenseSummaryViewModel, chartViewModel: HomeExpenseChartViewModel, frame: CGRect = .zero) {
         self.viewModel = viewModel
         self.chartViewModel = chartViewModel
@@ -87,16 +87,16 @@ final class HomeExpenseSummaryView: SDView {
         self.setupViews()
         self.setupProperties()
     }
-    
+
     override func layoutSubviews() {
         super.layoutSubviews()
         self.setupLayout()
-        
+
         //  지출 총 금액
         self.expenseSummaryButton.setText(
             text: Self.summaryExpenseTitle(self.viewModel.summaryExpenseDays)
         )
-        
+
         // 지출 내역
         self.summaryTitleLabel
             .setRange(
@@ -104,25 +104,25 @@ final class HomeExpenseSummaryView: SDView {
                 end: self.viewModel.totalExpense.doubleValue
             )
             .startAnimation()
-        
+
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     func setupViews() {
         self.addSubview(containerView)
         self.setupChartFlexLayout()
     }
-    
+
     func setupLayout() {
         containerView.pin.all(pin.safeArea)
         containerView.flex.layout(mode: .fitContainer)
     }
-    
+
     func setupProperties() {}
-    
+
     private func setupChartFlexLayout() {
         self.containerView
             .flex
@@ -131,19 +131,19 @@ final class HomeExpenseSummaryView: SDView {
             .direction(.column)
             .alignItems(.start)
             .define { flex in
-                
+
                 flex.addItem(expenseSummaryButton)
                     .marginTop(10)
                     .marginLeft(-8)
-                
+
                 flex.addItem(summaryTitleLabel)
                     .width(100%)
                     .marginTop(11)
-                
+
                 flex.addItem(chartView)
                     .marginTop(11)
                     .width(100%)
-                
+
                 flex.addItem()
                     .direction(.row)
                     .marginTop(10)
@@ -153,16 +153,16 @@ final class HomeExpenseSummaryView: SDView {
                         flex.addItem(incomeButton)
                             .grow(1)
                             .height(90)
-                        
+
                         flex.addItem(expenseButton)
                             .grow(1)
                             .height(90)
-                        
+
                     }
                     .width(100%)
             }
     }
-    
+
     @discardableResult
     public func setParentViewController(to viewController: UIViewController) -> Self {
         self.parentViewController = viewController

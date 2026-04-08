@@ -10,7 +10,7 @@ import FlexLayout
 import PinLayout
 import DesignSystem
 
-/// 홈 화면 지출 요약 범례 화면 
+/// 홈 화면 지출 요약 범례 화면
 final class HomeExpenseChartLegendView: UIView {
     private enum LayoutMetrics {
         static let itemSpacing: CGFloat = 12
@@ -36,11 +36,11 @@ final class HomeExpenseChartLegendView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        
+
         self.contentView
             .pin
             .all()
-        
+
         self.contentView
             .flex
             .layout(mode: .adjustHeight)
@@ -64,7 +64,7 @@ final class HomeExpenseChartLegendView: UIView {
             .top()
             .left()
             .width(width)
-        
+
         self.contentView
             .flex
             .layout(mode: .adjustHeight)
@@ -120,11 +120,11 @@ final class HomeExpenseChartLegendView: UIView {
                         .alignItems(.center)
                         .columnGap(LayoutMetrics.dotLabelSpacing)
                         .define { flex in
-                            
+
                             flex.addItem(dotView)
                                 .width(LayoutMetrics.dotSize)
                                 .height(LayoutMetrics.dotSize)
-                            
+
                             flex.addItem(label)
                         }
                 }

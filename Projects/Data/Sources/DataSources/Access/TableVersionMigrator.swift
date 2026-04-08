@@ -10,7 +10,7 @@ import GRDB
 
 public protocol TableVersionMigratoralbe {
     var migraionVersion: String { get }
-    
+
     func createUserTable(in database: Database) throws
     func createBudgetTable(in database: Database) throws
     func createTransactionTable(in database: Database) throws
@@ -19,18 +19,18 @@ public protocol TableVersionMigratoralbe {
 }
 
 public struct TableMigratorV1: TableVersionMigratoralbe {
-    
+
     public var migraionVersion: String {
         return "V1"
     }
-    
+
     public func createUserTable(in database: GRDB.Database) throws {
         try database.create(table: UserEntity.databaseTableName, ifNotExists: true) { table in
             table.autoIncrementedPrimaryKey(UserEntity.Columns.id.rawValue)
             table.column(UserEntity.Columns.createdAt.rawValue, .double).notNull()
         }
     }
-    
+
     public func createBudgetTable(in database: GRDB.Database) throws {
         try database.create(table: BudgetEntity.databaseTableName, ifNotExists: true) { table in
             table.autoIncrementedPrimaryKey(BudgetEntity.Columns.id.rawValue)
@@ -44,7 +44,7 @@ public struct TableMigratorV1: TableVersionMigratoralbe {
             table.column(BudgetEntity.Columns.currentAmount.rawValue, .double).notNull()
         }
     }
-    
+
     public func createTransactionTable(in database: GRDB.Database) throws {
         try database.create(table: TransactionEntity.databaseTableName, ifNotExists: true) { table in
             table.autoIncrementedPrimaryKey(TransactionEntity.Columns.id.rawValue)
@@ -55,7 +55,7 @@ public struct TableMigratorV1: TableVersionMigratoralbe {
             table.column(TransactionEntity.Columns.name.rawValue, .text).notNull()
             table.column(TransactionEntity.Columns.type.rawValue).notNull()
             table.column(TransactionEntity.Columns.memo.rawValue)
-            
+
             table.foreignKey(
                 [TransactionEntity.Columns.categoryId.rawValue],
                 references: CategoryEntitiy.databaseTableName,
@@ -64,7 +64,7 @@ public struct TableMigratorV1: TableVersionMigratoralbe {
             )
         }
     }
-    
+
     public func createCategoryTable(in database: GRDB.Database) throws {
         try database.create(table: CategoryEntitiy.databaseTableName, ifNotExists: true) { table in
             table.autoIncrementedPrimaryKey(CategoryEntitiy.Columns.id.rawValue)
@@ -72,7 +72,7 @@ public struct TableMigratorV1: TableVersionMigratoralbe {
             table.column(CategoryEntitiy.Columns.categoryType.rawValue, .integer).notNull()
         }
     }
-    
+
     public func createNotificationTable(in database: GRDB.Database) throws {
         try database.create(table: NotificationEntity.databaseTableName, ifNotExists: true) { table in
             table.autoIncrementedPrimaryKey(NotificationEntity.Columns.id.rawValue)

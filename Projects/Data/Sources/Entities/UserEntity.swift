@@ -11,12 +11,12 @@ import GRDB
 public struct UserEntity: BaseEntitiy {
     public var id: Int64?
     public var createdAt: TimeInterval
-    
+
     public enum Columns: String, ColumnExpression {
         case id
         case createdAt
     }
-    
+
     public init(
         id: Int64? = nil,
         createdAt: TimeInterval

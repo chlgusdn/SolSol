@@ -8,7 +8,7 @@
 import Foundation
 
 public extension LocalizedStringResource {
-    
+
     var localized: String {
         return String(localized: self)
     }

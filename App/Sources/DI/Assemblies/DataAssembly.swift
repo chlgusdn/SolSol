@@ -11,9 +11,9 @@ import Data
 
 enum DataAssembly {
     static func initializeSQLAccess() async {
-        
+
         let sqlAccessor = await SQLAccessor()
-        
+
         Container.shared.sqlAccessor.register {
             return sqlAccessor
         }
@@ -21,7 +21,7 @@ enum DataAssembly {
     }
 
     static func register() {
-        
+
         Container.shared.userDataSource.register {
             try! UserLocalDataSourceRepositoryImpl(accessor: Container.shared.sqlAccessor())
         }

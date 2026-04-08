@@ -575,7 +575,7 @@ private final class SDSlotCharacterView: SDView, Layoutable {
 
 // MARK: - Solt Structure
 private extension SDSlotAmountView {
-    
+
     // 현재 슬롯 검증 상태
     enum SDSlotAmountValidationState: Equatable {
         case normal
@@ -587,7 +587,7 @@ private extension SDSlotAmountView {
         case digit(String)
         case separator(String)
     }
-    
+
     struct AmountText {
         let digits: String
 
@@ -600,7 +600,7 @@ private extension SDSlotAmountView {
                 .compactMap(\.wholeNumberValue)
                 .map(String.init)
                 .joined()
-            
+
             guard digits.isEmpty == false else {
                 return nil
             }
@@ -610,7 +610,7 @@ private extension SDSlotAmountView {
         }
 
         var formattedText: String {
-            
+
             var grouped: [Character] = []
             grouped.reserveCapacity(digits.count + digits.count / 3)
 

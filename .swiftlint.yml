@@ -1,0 +1,35 @@
+included:
+  - App
+  - Projects
+  - Tuist
+
+excluded:
+  - .build
+  - Tuist/.build
+  - "**/Derived/**"
+  - "**/*.generated.swift"
+
+disabled_rules:
+  - todo
+
+opt_in_rules:
+  - empty_count
+  - explicit_init
+
+line_length:
+  warning: 140
+  error: 180
+
+type_name:
+  min_length: 3
+  max_length:
+    warning: 50
+    error: 60
+
+identifier_name:
+  excluded:
+    - id
+    - x
+    - y
+
+reporter: xcode

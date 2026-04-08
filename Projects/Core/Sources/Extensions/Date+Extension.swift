@@ -42,4 +42,8 @@ public extension Date {
     func adding(days: Int) -> Date {
         return Calendar.current.date(byAdding: .day, value: days, to: self) ?? self
     }
+    
+    func adding(compo: Calendar.Component, value: Int) -> Date {
+        return Calendar.current.date(byAdding: compo, value: value, to: self) ?? self
+    }
 }

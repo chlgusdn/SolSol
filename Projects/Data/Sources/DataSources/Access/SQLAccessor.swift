@@ -29,7 +29,7 @@ public final actor SQLAccessor: SQLAccessable {
             .path
     }
 
-    fileprivate func checkMigration() throws -> DatabaseMigrator{
+    fileprivate func checkMigration() throws -> DatabaseMigrator {
         var migrator = DatabaseMigrator()
         let versionMigrator = TableMigratorV1()
         TableMigrationApplier.applyAll(to: &migrator, from: versionMigrator)
@@ -40,10 +40,11 @@ public final actor SQLAccessor: SQLAccessable {
     fileprivate func openDatabase() async {
         do {
             let dbPath = try getDBpath()
-            databasePool = try DatabasePool(path: dbPath)
+            let pool = try DatabasePool(path: dbPath)
+            databasePool = pool
 
             let migrator = try checkMigration()
-            try migrator.migrate(databasePool!)
+            try migrator.migrate(pool)
             Log.d("Database Opened Successfully")
         } catch {
             Log.e("Database Open Failed \(error)")
@@ -202,7 +203,11 @@ public final actor SQLAccessor: SQLAccessable {
         }
     }
 
-    public nonisolated func observeAll<T>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?)-> ValueObservation<ValueReducers.Fetch<[T]?>> where T: BaseEntitiy {
+    public nonisolated func observeAll<T>(
+        type: T.Type,
+        query: QueryInterfaceRequest<T>?,
+        observeTable: [Table<any PersistableRecord>]?
+    ) -> ValueObservation<ValueReducers.Fetch<[T]?>> where T: BaseEntitiy {
         let queryRequest = query ?? type.all()
 
         guard let observeTable = observeTable else {
@@ -217,7 +222,11 @@ public final actor SQLAccessor: SQLAccessable {
 
     }
 
-    public nonisolated func observeOne<T>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?) -> ValueObservation<ValueReducers.Fetch<T?>> where T: BaseEntitiy {
+    public nonisolated func observeOne<T>(
+        type: T.Type,
+        query: QueryInterfaceRequest<T>?,
+        observeTable: [Table<any PersistableRecord>]?
+    ) -> ValueObservation<ValueReducers.Fetch<T?>> where T: BaseEntitiy {
         let queryRequest = query ?? type.all()
 
         guard let observeTable = observeTable else {

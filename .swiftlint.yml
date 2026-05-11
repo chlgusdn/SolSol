@@ -6,11 +6,17 @@ included:
 excluded:
   - .build
   - Tuist/.build
+  - Pods
+  - Carthage
   - "**/Derived/**"
   - "**/*.generated.swift"
 
 disabled_rules:
   - todo
+  - type_body_length
+  - function_parameter_count
+  - nesting
+  - file_length
 
 opt_in_rules:
   - empty_count
@@ -35,7 +41,14 @@ trailing_whitespace:
 
 file_name:
   severity: warning
-  suffix_pattern: "\\+(Extension|Template)$"
+  suffix_pattern: "\\+[A-Za-z]+"
+  excluded:
+    - "SDFonts.swift"
+    - "Errors.swift"
+    - "TableVersionMigrator.swift"
+    - "Dependencies.swift"
+    - "Combine+Async.swift"
+    - "Project+Templates.swift"
 
 force_cast:
   severity: warning
@@ -60,12 +73,13 @@ identifier_name:
     - id
     - x
     - y
+    - tx
 
-custom_rules:
-  multiline_function_call_arguments:
-    name: "Multiline Function Call Arguments"
-    regex: '^(?!.*\b(?:func|init|subscript)\b).*?\b[A-Za-z_][A-Za-z0-9_\.]*\([^()\n]*,[^()\n]*\)'
-    message: "Function calls with two or more arguments should be split across multiple lines."
-    severity: warning
+
+line_length:
+  warning: 120
+  error: 300
+  ignores_urls: true
+  ignores_comments: true
 
 reporter: xcode

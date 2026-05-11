@@ -75,7 +75,7 @@ struct SQLTests {
             cancellable =  repository.saveUser(user: user)
                 .replaceError(with: false)
                 .flatMap { _ in self.repository.getUser() }
-                .sink { completion in} receiveValue: { model in
+                .sink { _ in} receiveValue: { model in
                     countinuation.resume(returning: model)
                     cancellable = nil
                 }

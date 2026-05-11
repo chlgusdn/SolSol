@@ -23,19 +23,35 @@ enum DataAssembly {
     static func register() {
 
         Container.shared.userDataSource.register {
-            try! UserLocalDataSourceRepositoryImpl(accessor: Container.shared.sqlAccessor())
+            do {
+                return try UserLocalDataSourceRepositoryImpl(accessor: Container.shared.sqlAccessor())
+            } catch {
+                fatalError("UserLocalDataSourceRepositoryImpl 초기화 실패: \(error)")
+            }
         }
 
         Container.shared.budgetDataSource.register {
-            try! BudgetDataSourceRepositoryImpl(accessor: Container.shared.sqlAccessor())
+            do {
+                return try BudgetDataSourceRepositoryImpl(accessor: Container.shared.sqlAccessor())
+            } catch {
+                fatalError("BudgetDataSourceRepositoryImpl 초기화 실패: \(error)")
+            }
         }
 
         Container.shared.transactionDataSource.register {
-            try! TransactionDataSourceRepositoryImpl(accessor: Container.shared.sqlAccessor())
+            do {
+                return try TransactionDataSourceRepositoryImpl(accessor: Container.shared.sqlAccessor())
+            } catch {
+                fatalError("TransactionDataSourceRepositoryImpl 초기화 실패: \(error)")
+            }
         }
 
         Container.shared.notificationDataSource.register {
-            try! NotificationDataSourceRepositroyImpl(accessor: Container.shared.sqlAccessor())
+            do {
+                return try NotificationDataSourceRepositroyImpl(accessor: Container.shared.sqlAccessor())
+            } catch {
+                fatalError("NotificationDataSourceRepositroyImpl 초기화 실패: \(error)")
+            }
         }
     }
 }

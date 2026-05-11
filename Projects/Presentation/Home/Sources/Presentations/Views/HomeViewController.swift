@@ -115,10 +115,6 @@ final class HomeViewController: BaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
-
     override func setupViews() {
         super.setupViews()
 

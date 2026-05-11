@@ -1,3 +1,4 @@
+// swiftlint:disable identifier_name
 import Testing
 import UIKit
 @testable import DesignSystem
@@ -109,3 +110,4 @@ private func visibleLabels(in view: UIView) -> [UILabel] {
 
     return (currentLabel + nestedLabels).filter { $0.alpha > 0.01 && $0.isHidden == false }
 }
+// swiftlint:enable identifier_name

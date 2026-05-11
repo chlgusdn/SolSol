@@ -34,19 +34,19 @@ public enum SDColors {
     /// #D9D9D9
     public static let graph500 = UIColor(named: "graph500")
 
-    ///#3CC3DF
+    /// #3CC3DF
     public static let graph600 = UIColor(named: "graph600")
 
-    ///#8979FF
+    /// #8979FF
     public static let graph700 = UIColor(named: "graph700")
 
-    ///#FF928A
+    /// #FF928A
     public static let graph800 = UIColor(named: "graph800")
 
-    ///#FFAE4C
+    /// #FFAE4C
     public static let graph900 = UIColor(named: "graph900")
 
-    ///#14AE5C alpha 0.5
+    /// #14AE5C alpha 0.5
     public static let primary50 = UIColor(named: "primary50")
 
     /// #14AE5C alpha 0.7
@@ -64,7 +64,7 @@ public enum SDColors {
     /// #C2EFCF alpha 0.9
     public static let selection90 = UIColor(named: "selection90")
 
-    ///#EBA326
+    /// #EBA326
     public static let warnning100 = UIColor(named: "warnning100")
 
     public static let gray80 = UIColor(named: "gray80")

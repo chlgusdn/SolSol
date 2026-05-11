@@ -19,17 +19,17 @@ public enum AppProject {
                     "GCC_PREPROCESSOR_DEFINITIONS": [
                         "DEBUG=1",
                         "OTHER_MACRO=1",
-                        "FLEXLAYOUT_SWIFT_PACKAGE=1",
+                        "FLEXLAYOUT_SWIFT_PACKAGE=1"
                     ],
-                    "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"],
+                    "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"]
                 ]),
                 .release(name: "Release", settings: [
                     "GCC_PREPROCESSOR_DEFINITIONS": [
                         "RELEASE=1",
-                        "FLEXLAYOUT_SWIFT_PACKAGE=1",
+                        "FLEXLAYOUT_SWIFT_PACKAGE=1"
                     ],
-                    "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"],
-                ]),
+                    "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"]
+                ])
             ])
         )
 

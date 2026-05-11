@@ -63,4 +63,3 @@ extension DampingAnimation {
         impact.impactOccurred()
     }
 }
-

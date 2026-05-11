@@ -27,6 +27,6 @@ let package = Package(
         .package(
             url: "https://github.com/facebook/yoga.git",
             from: "3.2.1"
-        ),
+        )
     ]
 )

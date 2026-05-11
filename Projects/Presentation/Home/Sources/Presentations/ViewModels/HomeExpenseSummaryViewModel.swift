@@ -18,7 +18,7 @@ public final class HomeExpenseSummaryViewModel: ObservableObject {
 
     private var isSummaryExpenseShowed: Bool = false {
         willSet {
-            if newValue == true  {
+            if newValue == true {
                 self.summaryExpenseDays = 14
             } else {
                 self.summaryExpenseDays = 0

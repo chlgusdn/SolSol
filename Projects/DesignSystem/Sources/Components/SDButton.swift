@@ -117,7 +117,6 @@ public final class SDButton: UIButton, DampingAnimation, HapticFeedbackAnimation
     }
 }
 
-
 #Preview(traits: .defaultLayout, body: {
     SDButton()
         .setBackgroundColor(color: SDColors.primary100 ?? .systemGreen)

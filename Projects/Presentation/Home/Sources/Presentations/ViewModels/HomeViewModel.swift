@@ -37,7 +37,6 @@ public final class HomeViewModel: ObservableObject {
             endAt: endAt
         )
 
-
         switch changeRate {
         case .success(let success):
 

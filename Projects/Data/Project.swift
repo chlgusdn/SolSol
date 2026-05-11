@@ -6,6 +6,6 @@ let project = Module.layerProject(
     dependencies: [
         .core,
         .domain,
-        .grdb,
+        .grdb
     ]
 )

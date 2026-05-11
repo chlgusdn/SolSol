@@ -93,13 +93,13 @@ public final class SDCountingLabel: UILabel {
         let intNumber = Int(number)
 
         if let formatter = self.textForamtter {
-            self.text = formatter(intNumber.withComma()!)
+            self.text = formatter(intNumber.withComma() ?? "")
         } else {
-            self.text = "\(Int(number).withComma()!)"
+            self.text = Int(number).withComma() ?? ""
         }
     }
 
-    //MARK: Layout
+    // MARK: Layout
     public func setFont(font: SDFont) -> Self {
         self.font = font.font
         return self
@@ -149,6 +149,6 @@ fileprivate extension Int {
         let numberFormatter = NumberFormatter()
         numberFormatter.groupingSeparator = ","
         numberFormatter.numberStyle = .decimal
-        return numberFormatter.string(from: NSNumber(value:self))
+        return numberFormatter.string(from: NSNumber(value: self))
     }
 }

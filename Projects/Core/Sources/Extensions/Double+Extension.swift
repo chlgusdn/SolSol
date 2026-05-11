@@ -10,7 +10,7 @@ import Foundation
 public extension Double {
 
     var decimalValue: Decimal {
-        return Decimal(floatLiteral: self)
+        return Decimal(string: "\(self)") ?? 0
     }
 
     var intValue: Int {

@@ -10,6 +10,6 @@ let project = Module.featureProject(
         .factory,
         .flexLayout,
         .pinLayout,
-        .fsCalendar,
+        .fsCalendar
     ]
 )

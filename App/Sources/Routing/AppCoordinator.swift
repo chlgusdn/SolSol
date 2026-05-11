@@ -16,7 +16,7 @@ public final class AppCoordinator: Coordinator {
 
     public var childCoordinators: [any Coordinator] = []
 
-    public var parentCoordinator: (any Coordinator)? = nil
+    public var parentCoordinator: (any Coordinator)?
 
     public func start() {
         Log.d("\(self) Start")

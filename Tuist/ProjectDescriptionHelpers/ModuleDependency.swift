@@ -91,6 +91,6 @@ public enum ExternalPackages {
         .remote(
             url: "https://github.com/WenchaoD/FSCalendar.git",
             requirement: .upToNextMajor(from: "2.8.4")
-        ),
+        )
     ]
 }

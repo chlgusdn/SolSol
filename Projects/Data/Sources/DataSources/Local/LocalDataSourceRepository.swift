@@ -29,13 +29,13 @@ public protocol BudgetLocalDataSourceRepository: LocalDataSourceRepository {
     func deleteBudget(_ budget: BudgetModel) async -> Bool
 }
 
-//MARK: - Notification
+// MARK: - Notification
 public protocol NotificationLocalDataSourceRepository: LocalDataSourceRepository {
     func getAllNotifications() async -> [NotificationWithBudgetEntitiy]
     func saveNotification(_ notification: NotificationModel) async -> Bool
 }
 
-//MARK: - Transaction
+// MARK: - Transaction
 public protocol TransactionLocalDataSourceRepository: LocalDataSourceRepository {
     func getTransactions() async -> [TransactionWithCategoryEntitiy]
     func getTransactions(contain name: String) async -> [TransactionWithCategoryEntitiy]

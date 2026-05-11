@@ -9,7 +9,7 @@ import Foundation
 
 public protocol TransactionRepositroyProtocol {
     func getTransactions() async -> [TransactionModel]
-    func getTransactions(contain name: String) async-> [TransactionModel]
+    func getTransactions(contain name: String) async -> [TransactionModel]
     func getTransactions(by category: CategoryModel) async -> [TransactionModel]
     func getTransaction(by id: Int64) async throws -> TransactionModel
     func getTransaction(by memo: String) async throws -> TransactionModel

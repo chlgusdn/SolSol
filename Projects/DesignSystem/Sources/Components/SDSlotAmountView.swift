@@ -381,14 +381,13 @@ public final class SDSlotAmountView: SDView, Layoutable {
         }
 
         if tokens.count < count {
-            let prefix = Array<Token?>(repeating: nil, count: count - tokens.count)
+            let prefix = [Token?](repeating: nil, count: count - tokens.count)
             return prefix + tokens.map(Optional.some)
         }
 
         return Array(tokens.suffix(count)).map(Optional.some)
     }
 }
-
 
 // MARK: - SDSoltDigitView
 

@@ -9,7 +9,10 @@ import Foundation
 import SolSolCore
 
 public protocol HomeExpenseSummaryChartUsecaseProtocol {
-    func execute(startAt: TimeInterval, endAt: TimeInterval) async -> Result<HomeChartSummaryResponseModel, UsecaseError>
+    func execute(
+        startAt: TimeInterval,
+        endAt: TimeInterval
+    ) async -> Result<HomeChartSummaryResponseModel, UsecaseError>
 }
 
 /// 홈 지출 차트 데이터 엔트리 생성 usecase
@@ -20,7 +23,10 @@ public struct HomeExpenseSummaryChartUsecase: HomeExpenseSummaryChartUsecaseProt
         self.transactionRepository = transactionRepository
     }
 
-    public func execute(startAt: TimeInterval, endAt: TimeInterval) async -> Result<HomeChartSummaryResponseModel, UsecaseError> {
+    public func execute(
+        startAt: TimeInterval,
+        endAt: TimeInterval
+    ) async -> Result<HomeChartSummaryResponseModel, UsecaseError> {
 
         let transactions: [TransactionModel] = await self.transactionRepository.getTransactions(
             startAt: startAt,

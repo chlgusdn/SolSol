@@ -35,7 +35,10 @@ public final class SDStackView: UIStackView {
         return self
     }
 
-    public func setRadius(radius: CGFloat, corners: CACornerMask = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner]) -> Self {
+    public func setRadius(
+        radius: CGFloat,
+        corners: CACornerMask = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner]
+    ) -> Self {
         self.layer.cornerRadius = radius
         self.layer.maskedCorners = corners
         return self

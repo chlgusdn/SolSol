@@ -2,7 +2,14 @@ import ProjectDescription
 
 public enum AppProject {
 
-    public static func make(name: String, bundleId: String, infoPlist: String, sources: SourceFilesList, resources: ResourceFileElements, dependencies: [ModuleDependency]) -> Project {
+    public static func make(
+        name: String,
+        bundleId: String,
+        infoPlist: String,
+        sources: SourceFilesList,
+        resources: ResourceFileElements,
+        dependencies: [ModuleDependency]
+    ) -> Project {
         let appTarget = Target.target(
             name: name,
             destinations: .iOS,

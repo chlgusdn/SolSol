@@ -322,9 +322,17 @@ public final class SDSlotAmountView: SDView, Layoutable {
     private func makeView(for token: Token) -> UIView {
         switch token {
         case .digit(let value):
-            return SDSlotDigitView(font: textFont, textColor: activeTextColor(for: renderState.validationState), digit: value)
+            return SDSlotDigitView(
+                font: textFont,
+                textColor: activeTextColor(for: renderState.validationState),
+                digit: value
+            )
         case .separator(let value):
-            return SDSlotCharacterView(font: textFont, textColor: activeTextColor(for: renderState.validationState), character: value)
+            return SDSlotCharacterView(
+                font: textFont,
+                textColor: activeTextColor(for: renderState.validationState),
+                character: value
+            )
         }
     }
 

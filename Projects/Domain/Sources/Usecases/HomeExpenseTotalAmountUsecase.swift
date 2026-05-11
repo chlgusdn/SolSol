@@ -24,7 +24,11 @@ public final class HomeExpenseTotalAmountUsecase: HomeExpenseTotalAmountUsecaseP
         do {
 
             // DB에서 계산한 값을 가져옴
-            guard let totalAmount = try await self.transactionRepository.getTotalTransactionAmount(for: .expense, startAt: startAt, endAt: endAt) else {
+            guard let totalAmount = try await self.transactionRepository.getTotalTransactionAmount(
+                for: .expense,
+                startAt: startAt,
+                endAt: endAt
+            ) else {
                 return .failure(.notFound)
             }
 

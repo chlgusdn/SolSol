@@ -51,7 +51,10 @@ extension Publishers {
     }
 
     /// async 함수를 Publisher로 변환 (우선순위 지정 가능)
-    static func async<T>(priority: TaskPriority? = nil, _ asyncOperation: @escaping () async throws -> T) -> AnyPublisher<T, Error> {
+    static func async<T>(
+        priority: TaskPriority? = nil,
+        _ asyncOperation: @escaping () async throws -> T
+    ) -> AnyPublisher<T, Error> {
         return Deferred {
             Future { promise in
                 Task(priority: priority) {

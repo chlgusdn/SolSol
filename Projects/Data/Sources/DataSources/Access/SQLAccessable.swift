@@ -22,6 +22,14 @@ public protocol SQLAccessable: SQLAccessAdapterable {
     func updateAll<T: BaseEntitiy>(type: T.Type, queryRequest: QueryInterfaceRequest<T>) async -> Bool
     func deleteOne<T: BaseEntitiy>(to object: T) async -> Bool
     func deleteAll<T: BaseEntitiy>(type: T.Type, filter: SQLExpression?) async -> Bool
-    nonisolated func observeAll<T: BaseEntitiy>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?) -> ValueObservation<ValueReducers.Fetch<[T]?>>
-    nonisolated func observeOne<T: BaseEntitiy>(type: T.Type, query: QueryInterfaceRequest<T>?, observeTable: [Table<any PersistableRecord>]?) -> ValueObservation<ValueReducers.Fetch<T?>>
+    nonisolated func observeAll<T: BaseEntitiy>(
+        type: T.Type,
+        query: QueryInterfaceRequest<T>?,
+        observeTable: [Table<any PersistableRecord>]?
+    ) -> ValueObservation<ValueReducers.Fetch<[T]?>>
+    nonisolated func observeOne<T: BaseEntitiy>(
+        type: T.Type,
+        query: QueryInterfaceRequest<T>?,
+        observeTable: [Table<any PersistableRecord>]?
+    ) -> ValueObservation<ValueReducers.Fetch<T?>>
 }

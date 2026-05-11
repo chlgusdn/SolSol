@@ -22,7 +22,9 @@ public enum Module {
             exit 0
           fi
 
-          if [ -n "${TARGET_NAME:-}" ] && [ "${TARGET_NAME%Tests}" != "${TARGET_NAME}" ] && [ -d "${SRCROOT}/Tests" ]; then
+          if [ -n "${TARGET_NAME:-}" ] && \
+             [ "${TARGET_NAME%Tests}" != "${TARGET_NAME}" ] && \
+             [ -d "${SRCROOT}/Tests" ]; then
             LINT_PATH="${SRCROOT}/Tests"
           elif [ -d "${SRCROOT}/Sources" ]; then
             LINT_PATH="${SRCROOT}/Sources"

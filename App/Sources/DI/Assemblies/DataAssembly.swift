@@ -57,16 +57,22 @@ enum DataAssembly {
 }
 
 public extension Container {
-    var sqlAccessor: Factory<SQLAccessor> { self { fatalError("SQLAccessor is not initialized") }.singleton }
+    var sqlAccessor: Factory<SQLAccessor> {
+        self { fatalError("SQLAccessor is not initialized") }.singleton
+    }
+
     var userDataSource: Factory<UserLocalDataSourceRepository> {
         self { fatalError("User data source is not registered") }
     }
+
     var budgetDataSource: Factory<BudgetLocalDataSourceRepository> {
         self { fatalError("Budget data source is not registered") }
     }
+
     var transactionDataSource: Factory<TransactionLocalDataSourceRepository> {
         self { fatalError("Transaction data source is not registered") }
     }
+
     var notificationDataSource: Factory<NotificationLocalDataSourceRepository> {
         self { fatalError("Notification data source is not registered") }
     }

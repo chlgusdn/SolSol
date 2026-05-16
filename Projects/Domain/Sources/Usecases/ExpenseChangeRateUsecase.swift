@@ -22,7 +22,7 @@ public final class ExpenseChangeRateUsecase: ExpenseChangeRateUsecaseProtocol {
     public func execute(startAt: TimeInterval, endAt: TimeInterval) async -> Result<Decimal, UsecaseError> {
 
         do {
-            let currentDate = Date.now
+            let currentDate = Date.ntpNow
             let todayOfStartDay = Calendar.current.startOfDay(for: currentDate).millisecond
 
             let todayTotalExpense = try await self.transactionRepository.getTotalTransactionAmount(

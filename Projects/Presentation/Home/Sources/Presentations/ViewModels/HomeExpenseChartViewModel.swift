@@ -23,8 +23,8 @@ public final class HomeExpenseChartViewModel: ObservableObject {
         Task { @MainActor in
 
             let result = await self.chartSummaryUsecase.execute(
-                startAt: Date.now.millisecond,
-                endAt: Date.now.adding(days: 14).millisecond
+                startAt: Date.ntpNow.millisecond,
+                endAt: Date.ntpNow.adding(days: 14).millisecond
             )
 
             guard case .success(let response) = result else {

@@ -2,5 +2,8 @@ import ProjectDescriptionHelpers
 
 let project = Module.layerProject(
     name: "SolSolCore",
-    bundleId: "com.nunu.SolSol.Core"
+    bundleId: "com.nunu.SolSol.Core",
+    dependencies: [
+        .kronos
+    ]
 )

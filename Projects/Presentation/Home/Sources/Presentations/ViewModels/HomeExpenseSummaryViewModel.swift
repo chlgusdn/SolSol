@@ -38,8 +38,8 @@ public final class HomeExpenseSummaryViewModel: ObservableObject {
             }
 
             let result = await self.homeExpenseTotalAmountUsecase.execute(
-                startAt: Date.now.millisecond,
-                endAt: Date.now.adding(days: 14).millisecond
+                startAt: Date.ntpNow.millisecond,
+                endAt: Date.ntpNow.adding(days: 14).millisecond
             )
 
             // response 응답 값이 성공일 경우에만 반환 처리

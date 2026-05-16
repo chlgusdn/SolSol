@@ -20,7 +20,7 @@ public final class BudgetDataSourceRepositoryImpl: BudgetLocalDataSourceReposito
         let sql = """
         SELECT *
         FROM \(BudgetEntity.databaseTableName)
-        WHERE \(BudgetEntity.Columns.finishedAt) < \(Date().second)
+        WHERE \(BudgetEntity.Columns.finishedAt) < \(Date.ntpNow.second)
         ORDER BY \(BudgetEntity.Columns.id)
         DESC LIMIT 1
         """
@@ -31,7 +31,7 @@ public final class BudgetDataSourceRepositoryImpl: BudgetLocalDataSourceReposito
         let sql = """
         SELECT *
         FROM \(BudgetEntity.databaseTableName)
-        WHERE \(BudgetEntity.Columns.finishedAt) < \(Date().second)
+        WHERE \(BudgetEntity.Columns.finishedAt) < \(Date.ntpNow.second)
         ORDER BY \(BudgetEntity.Columns.id)
         DESC LIMIT 1
         """

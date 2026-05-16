@@ -12,6 +12,7 @@ public enum ModuleDependency {
     case flexLayout
     case pinLayout
     case fsCalendar
+    case kronos
 
     var targetDependency: TargetDependency {
         switch self {
@@ -65,6 +66,9 @@ public enum ModuleDependency {
 
         case .fsCalendar:
             return .external(name: "FSCalendar")
+
+        case .kronos:
+            return .external(name: "Kronos")
         }
     }
 }
@@ -91,6 +95,10 @@ public enum ExternalPackages {
         .remote(
             url: "https://github.com/WenchaoD/FSCalendar.git",
             requirement: .upToNextMajor(from: "2.8.4")
+        ),
+        .remote(
+            url: "https://github.com/MobileNativeFoundation/Kronos.git",
+            requirement: .upToNextMajor(from: "4.3.1")
         )
     ]
 }

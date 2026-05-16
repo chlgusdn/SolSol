@@ -6,8 +6,14 @@
 //
 
 import Foundation
+import Kronos
 
 public extension Date {
+
+    /// NTP 동기화된 현재 시각. 동기화 전이면 시스템 시각으로 fallback.
+    static var ntpNow: Date {
+        Clock.now ?? Date()
+    }
 
     var millisecond: TimeInterval {
         return floor(self.timeIntervalSince1970 * 1000)

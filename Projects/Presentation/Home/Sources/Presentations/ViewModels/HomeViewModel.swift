@@ -27,7 +27,7 @@ public final class HomeViewModel: ObservableObject {
     }
 
     private func calculateChangeRate() async -> ChangeRate {
-        let currentDate = Date.now
+        let currentDate = Date.ntpNow
         let startOfDay = Calendar.current.startOfDay(for: currentDate)
         let startedAt = startOfDay.daysAgo(1).millisecond
         let endAt = currentDate.subtracting(milliseconds: 1).millisecond

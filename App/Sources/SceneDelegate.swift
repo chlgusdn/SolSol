@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import SolSolCore
+import Kronos
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -25,6 +27,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.appCoordinator = AppCoordinator(window: window)
 
         Task {
+            await Clock.synchronize()
+
             await DependencyBootstrapper.bootstrap()
 
             await MainActor.run { [weak self] in

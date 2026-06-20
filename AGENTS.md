@@ -1,4 +1,4 @@
-<!-- Generated: 2026-04-06 | Updated: 2026-04-06 -->
+<!-- Generated: 2026-04-06 | Updated: 2026-06-20 -->
 
 # SolSol
 
@@ -60,6 +60,19 @@ Domain은 Data, Presentation, App을 절대 import하면 안 됨.
 - `ObservableObject` + `@Published` ViewModel을 ViewController에서 Combine으로 바인딩
 - Factory DI 컨테이너 — `App/Sources/DI/Assemblies/`에서 등록, `Container.shared`로 사용
 - 모든 ViewController는 DesignSystem의 `BaseViewController` 상속
+
+### Coordinator 라우팅 책임
+- 같은 feature 내부 화면 이동은 해당 feature의 Coordinator가 직접 처리한다.
+  - 예: `HomePresentation` 내부 화면 이동은 `HomeCoordinator`에서 처리
+- 다른 feature로 넘어가는 화면 이동은 feature Coordinator가 직접 import/push하지 않고 App 레벨로 요청을 올린다.
+  - 예: `HomePresentation`에서 `TransactionPresentation` 화면이 필요하면 delegate 또는 route event로 `AppCoordinator`에 요청
+- `AppCoordinator`는 앱 root flow 조립, feature 간 이동 연결, DI boundary 연결, 로그인/메인/온보딩 같은 전역 flow 전환만 담당한다.
+- `AppCoordinator`에 Home 내부 화면 상세 이동, Transaction 내부 화면 상세 이동, UI 상태 판단, 저장/검증 같은 feature 로직을 넣지 않는다.
+- feature 간 이동이 많아져 `AppCoordinator`가 커지면 route handler 또는 flow coordinator로 분리한다.
+  - 예: `HomeRouteHandler`, `TransactionRouteHandler`, `AuthRouteHandler`
+- Presentation feature 모듈끼리는 직접 의존하지 않는다.
+  - 지양: `HomePresentation -> TransactionPresentation`
+  - 권장: `HomePresentation -> AppCoordinator <- TransactionPresentation`
 
 ### 화면 구성도 
 화면은 아래 예시 처럼 구성한다. 

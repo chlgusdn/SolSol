@@ -32,7 +32,7 @@ public enum Module {
             LINT_PATH="${SRCROOT}"
           fi
 
-          swiftlint lint --config "$SWIFTLINT_CONFIG" --path "$LINT_PATH" --quiet
+          swiftlint lint --config "$SWIFTLINT_CONFIG" "$LINT_PATH" --quiet
         else
           echo "warning: SwiftLint is not installed. Install it to enable local linting."
         fi

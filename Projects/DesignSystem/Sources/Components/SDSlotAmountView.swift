@@ -13,7 +13,6 @@ public final class SDSlotAmountView: SDView, Layoutable {
     private let placeholderLabel = SDLabel()
 
     private var tokenViews: [UIView] = []
-    private weak var boundTextField: UITextField?
 
     private var textFont: UIFont = SDFont.pixel(size: 20).font
     private var slotTextColor: UIColor = SDColors.black100 ?? .black
@@ -67,7 +66,7 @@ public final class SDSlotAmountView: SDView, Layoutable {
         stackView.spacing = digitSpacing
 
         _ = placeholderLabel
-            .setFont(font: .pixel(size: 40))
+            .setFont(font: .pixel(size: 20))
             .setTextColor(color: slotPlaceholderColor)
 
         placeholderLabel.textAlignment = .left
@@ -127,8 +126,8 @@ public final class SDSlotAmountView: SDView, Layoutable {
 
         let previousState = renderState
         let nextState = makeRenderState(from: renderState.formattedText)
-        render(nextState, previousState: previousState)
         renderState = nextState
+        render(nextState, previousState: previousState)
 
         return self
     }
@@ -151,28 +150,14 @@ public final class SDSlotAmountView: SDView, Layoutable {
     public func update(rawText: String?) -> Self {
         let previousState = renderState
         let nextState = makeRenderState(from: rawText)
-        render(nextState, previousState: previousState)
         renderState = nextState
-        return self
-    }
-
-    @discardableResult
-    public func bind(to textField: UITextField) -> Self {
-        boundTextField?.removeTarget(self, action: #selector(handleBoundTextFieldChange(_:)), for: .editingChanged)
-        boundTextField = textField
-        textField.addTarget(self, action: #selector(handleBoundTextFieldChange(_:)), for: .editingChanged)
-        update(rawText: textField.text)
+        render(nextState, previousState: previousState)
         return self
     }
 
     public override var intrinsicContentSize: CGSize {
         let height = ceil(textFont.lineHeight)
         return CGSize(width: UIView.noIntrinsicMetric, height: height)
-    }
-
-    @objc
-    private func handleBoundTextFieldChange(_ textField: UITextField) {
-        update(rawText: textField.text)
     }
 
     private func makeRenderState(from rawText: String?) -> RenderState {
@@ -397,7 +382,7 @@ public final class SDSlotAmountView: SDView, Layoutable {
     }
 }
 
-// MARK: - SDSoltDigitView
+// MARK: - SDSlotDigitView
 
 private final class SDSlotDigitView: SDView, Layoutable {
     private let currentLabel = UILabel()
@@ -580,7 +565,7 @@ private final class SDSlotCharacterView: SDView, Layoutable {
     }
 }
 
-// MARK: - Solt Structure
+// MARK: - Slot Structure
 private extension SDSlotAmountView {
 
     // 현재 슬롯 검증 상태

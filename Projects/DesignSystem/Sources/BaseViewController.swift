@@ -22,7 +22,7 @@ open class BaseViewController: UIViewController, Layoutable {
         self.setupViews()
         self.bind()
     }
-    
+
     open func bind() {}
 
     open func setupViews() {}

@@ -8,6 +8,15 @@
 import UIKit
 import SolSolCore
 
+public enum HomeTransactionInputType {
+    case income
+    case expense
+}
+
+public protocol HomeCoordinatorDelegate: AnyObject {
+    func homeCoordinator(_ coordinator: HomeCoordinator, didRequestTransactionInput type: HomeTransactionInputType)
+}
+
 /// 홈 화면 코디네이터
 public final class HomeCoordinator: Coordinator {
 
@@ -16,6 +25,7 @@ public final class HomeCoordinator: Coordinator {
     public var childCoordinators: [any Coordinator] = []
 
     public weak var parentCoordinator: (any Coordinator)?
+    public weak var delegate: HomeCoordinatorDelegate?
 
     private let dependencies: HomeDependencyProviding
 
@@ -32,14 +42,12 @@ public final class HomeCoordinator: Coordinator {
         self.navigationController.pushViewController(homeViewController, animated: true)
     }
 
-    public func showExpenseScreen() {
-        let expenseCoordinator = ExpenseCoordinator(
-            navigationController: self.navigationController,
-            dependencies: self.dependencies
-        )
-        expenseCoordinator.parentCoordinator = self
-        self.childCoordinators.append(expenseCoordinator)
-        expenseCoordinator.start()
+    public func showIncomeInputScreen() {
+        delegate?.homeCoordinator(self, didRequestTransactionInput: .income)
+    }
+
+    public func showExpenseInputScreen() {
+        delegate?.homeCoordinator(self, didRequestTransactionInput: .expense)
     }
 
     public init(navigationController: UINavigationController, dependencies: HomeDependencyProviding) {

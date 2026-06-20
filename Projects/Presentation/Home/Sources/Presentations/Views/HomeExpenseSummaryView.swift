@@ -13,6 +13,8 @@ import DesignSystem
 
 final class HomeExpenseSummaryView: SDView {
     private let viewModel: HomeExpenseSummaryViewModel
+    private var incomeButtonTapAction: (() -> Void)?
+    private var expenseButtonTapAction: (() -> Void)?
 
     public weak var parentViewController: UIViewController?
 
@@ -55,24 +57,24 @@ final class HomeExpenseSummaryView: SDView {
 
     private lazy var chartView = HomeExpenseChartView(viewModel: self.chartViewModel)
 
-    private let incomeButton = SDButton()
+    private lazy var incomeButton = SDButton()
         .setBackgroundColor(color: SDColors.primary200 ?? .systemGreen)
         .setText(text: "Add Income")
         .setFont(font: .pixel(size: 18))
         .setTextColor(color: SDColors.white100 ?? .white)
         .setRadius(radius: 8)
-        .onTapped {
-            Log.d("InCome")
+        .onTapped { [weak self] in
+            self?.incomeButtonTapAction?()
         }
 
-    private let expenseButton = SDButton()
+    private lazy var expenseButton = SDButton()
         .setBackgroundColor(color: SDColors.danger70 ?? .systemRed)
         .setText(text: "Add Expense")
         .setFont(font: .pixel(size: 18))
         .setTextColor(color: SDColors.white100 ?? .white)
         .setRadius(radius: 8)
-        .onTapped {
-            Log.d("Expense")
+        .onTapped { [weak self] in
+            self?.expenseButtonTapAction?()
         }
 
     private let containerView = SDView()
@@ -167,6 +169,18 @@ final class HomeExpenseSummaryView: SDView {
     public func setParentViewController(to viewController: UIViewController) -> Self {
         self.parentViewController = viewController
         self.containerView.flex.markDirty()
+        return self
+    }
+
+    @discardableResult
+    func onIncomeTapped(_ action: @escaping () -> Void) -> Self {
+        incomeButtonTapAction = action
+        return self
+    }
+
+    @discardableResult
+    func onExpenseTapped(_ action: @escaping () -> Void) -> Self {
+        expenseButtonTapAction = action
         return self
     }
 

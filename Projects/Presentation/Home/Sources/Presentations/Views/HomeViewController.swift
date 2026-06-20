@@ -28,6 +28,12 @@ final class HomeViewController: BaseViewController {
         chartViewModel: self.chartViewModel
     )
         .setParentViewController(to: self)
+        .onIncomeTapped { [weak self] in
+            self?.coordinator?.showIncomeInputScreen()
+        }
+        .onExpenseTapped { [weak self] in
+            self?.coordinator?.showExpenseInputScreen()
+        }
         .setBackgroundColor(color: SDColors.white100 ?? .white)
         .setRadius(radius: 20)
 
@@ -45,9 +51,7 @@ final class HomeViewController: BaseViewController {
         .setSubTitleTextColor(color: SDColors.black100 ?? .black)
         .setRadius(radius: 8)
         .setHighlightColor(color: SDColors.gray80 ?? .systemGray4)
-        .onTapped {
-            self.coordinator?.showExpenseScreen()
-        }
+        .onTapped { }
 
     private let zeroExpenseDayScreenButton = SDImageButton()
         .setBackgroundColor(color: SDColors.white100 ?? .white)

@@ -20,7 +20,10 @@ open class BaseViewController: UIViewController, Layoutable {
         self.view.backgroundColor = SDColors.white400 ?? .systemGray6
         self.setupProperties()
         self.setupViews()
+        self.bind()
     }
+    
+    open func bind() {}
 
     open func setupViews() {}
 

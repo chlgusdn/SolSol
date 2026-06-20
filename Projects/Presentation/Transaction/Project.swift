@@ -6,6 +6,8 @@ let project = Module.featureProject(
     dependencies: [
         .core,
         .designSystem,
-        .domain
+        .domain,
+        .flexLayout,
+        .pinLayout
     ]
 )

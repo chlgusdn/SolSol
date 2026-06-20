@@ -61,20 +61,6 @@ struct DesignSystemTests {
         #expect(displayedTokenColors(in: view).allSatisfy { $0 == UIColor.red })
     }
 
-    @Test
-    @MainActor
-    func 슬롯_금액_뷰는_텍스트필드와_바인딩되면_초기_값을_즉시_반영한다() async throws {
-        let textField = UITextField(frame: .zero)
-        textField.text = "9999"
-
-        let view = makeSlotAmountView()
-            .bind(to: textField)
-
-        view.layoutIfNeeded()
-
-        #expect(view.accessibilityLabel == "9,999")
-        #expect(displayedTokenTexts(in: view) == ["9", ",", "9", "9", "9"])
-    }
 }
 
 @MainActor

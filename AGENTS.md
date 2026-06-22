@@ -55,11 +55,37 @@ Domain은 Data, Presentation, App을 절대 import하면 안 됨.
 - 각 모듈에 `Tests/` 타깃 존재 — `tuist test`로 실행
 - Data 레이어 테스트는 실제 DB를 피하기 위해 `MockSQLAccessor` 사용
 
+| 모듈 | 스킴 |
+|------|------|
+| Domain | `DomainTests` |
+| Data | `DataTests` |
+| Core | `CoreTests` |
+| DesignSystem | `DesignSystemTests` |
+
 ### 공통 패턴
 - 모든 화면 전환에 Coordinator 패턴 사용 (`Core`의 `Coordinator` 프로토콜)
 - `ObservableObject` + `@Published` ViewModel을 ViewController에서 Combine으로 바인딩
 - Factory DI 컨테이너 — `App/Sources/DI/Assemblies/`에서 등록, `Container.shared`로 사용
 - 모든 ViewController는 DesignSystem의 `BaseViewController` 상속
+
+### 데이터 레이어 주의사항
+- `SQLAccessor`는 Swift `actor` — 모든 DB 작업은 반드시 `async`로 호출
+- DB 스키마 변경 시 `TableVersionMigrator`에 **새 버전을 추가**만 허용, 기존 버전 수정 절대 금지
+- 엔티티는 반드시 `BaseEntitiy`를 준수해야 함
+
+### DesignSystem 에셋 추가 규칙
+- 에셋/색상/이미지는 `Derived/Sources/`의 `SDColors`, `SDFont`, `SDImages`로만 접근 (직접 수정 금지)
+- 커스텀 폰트 추가 시: `Resources/Foundation/`에 파일 추가 후 `DesignSystem/Project.swift`에 등록
+- 문자열 리소스: `Resources/Foundation/Localizable.xcstrings` 사용
+
+### 커밋 컨벤션
+```
+[feat]: 새 기능 추가
+[fix]: 버그 수정
+[chore]: 설정, 의존성, 리팩터링, 기타
+[test]: 테스트 추가/수정
+[docs]: 문서 작성/수정
+```
 
 ### Coordinator 라우팅 책임
 - 같은 feature 내부 화면 이동은 해당 feature의 Coordinator가 직접 처리한다.

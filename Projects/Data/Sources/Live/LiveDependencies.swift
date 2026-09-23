@@ -12,6 +12,10 @@ extension DependencyValues {
         defaultDatabase = database
         date = .trusted  // Kronos 기반 신뢰 시간
         transactionClient = .live(database: database)
+        categoryClient = .live(database: database)
+        fixedExpenseClient = .live(database: database)
+        budgetClient = .live(database: database)
+        settingsClient = .live(database: database)
         timeSyncClient = .liveValue
     }
 }

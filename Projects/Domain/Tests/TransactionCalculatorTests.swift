@@ -12,9 +12,9 @@ struct TransactionCalculatorTests {
     @Test func summary_sumsIncomeAndExpenseSeparately() {
         let date = Date(timeIntervalSince1970: 0)
         let transactions = [
-            Transaction(id: UUID(0), type: .income, amount: 3_000_000, category: .salary, date: date),
-            Transaction(id: UUID(1), type: .expense, amount: 12_000, category: .food, date: date),
-            Transaction(id: UUID(2), type: .expense, amount: 8_000, category: .transport, date: date)
+            Transaction(id: UUID(0), type: .income, amount: 3_000_000, category: .Default.income, title: "월급", date: date),
+            Transaction(id: UUID(1), type: .expense, amount: 12_000, category: .Default.food, title: "점심", date: date),
+            Transaction(id: UUID(2), type: .expense, amount: 8_000, category: .Default.transport, title: "지하철", date: date)
         ]
 
         let summary = TransactionCalculator.summary(of: transactions)
@@ -24,7 +24,7 @@ struct TransactionCalculatorTests {
     }
 
     @Test func signedAmount_isNegativeForExpense() {
-        let expense = Transaction(id: UUID(0), type: .expense, amount: 500, category: .etc, date: .distantPast)
+        let expense = Transaction(id: UUID(0), type: .expense, amount: 500, category: .Default.food, title: "간식", date: .distantPast)
         #expect(expense.signedAmount == -500)
     }
 
@@ -42,8 +42,8 @@ struct TransactionCalculatorTests {
         let day1 = calendar.date(from: DateComponents(year: 2026, month: 2, day: 1, hour: 9))!
         let day2 = calendar.date(from: DateComponents(year: 2026, month: 2, day: 2, hour: 9))!
         let transactions = [
-            Transaction(id: UUID(0), type: .expense, amount: 1, category: .etc, date: day1),
-            Transaction(id: UUID(1), type: .expense, amount: 2, category: .etc, date: day2)
+            Transaction(id: UUID(0), type: .expense, amount: 1, category: .Default.food, title: "a", date: day1),
+            Transaction(id: UUID(1), type: .expense, amount: 2, category: .Default.food, title: "b", date: day2)
         ]
 
         let groups = TransactionCalculator.groupedByDay(transactions, calendar: calendar)

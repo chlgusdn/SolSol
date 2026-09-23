@@ -7,7 +7,8 @@ import Foundation
 @DependencyClient
 public struct TransactionClient: Sendable {
     public var fetchMonth: @Sendable (_ month: DateInterval) async throws -> [Transaction]
-    public var fetchSummary: @Sendable (_ month: DateInterval) async throws -> TransactionSummary
+    /// 구간의 수입·지출 합계 (DB 집계)
+    public var fetchSummary: @Sendable (_ interval: DateInterval) async throws -> TransactionSummary
     /// 같은 id가 있으면 수정, 없으면 추가
     public var save: @Sendable (_ transaction: Transaction) async throws -> Void
     public var delete: @Sendable (_ id: Transaction.ID) async throws -> Void
@@ -21,78 +22,29 @@ extension DependencyValues {
     }
 }
 
-// MARK: - Preview
-
 extension TransactionClient: TestDependencyKey {
     /// 매크로가 생성한 unimplemented 구현
     public static let testValue = Self()
 
     public static var previewValue: Self {
-        let storage = InMemoryTransactionStorage(Transaction.previewSamples)
+        let store = PreviewStore<[Transaction]>(Transaction.previewSamples)
+        @Sendable func inInterval(_ items: [Transaction], _ interval: DateInterval) -> [Transaction] {
+            items
+                .filter { interval.start <= $0.date && $0.date < interval.end }
+                .sorted { $0.date > $1.date }
+        }
         return Self(
-            fetchMonth: { month in await storage.transactions(in: month) },
-            fetchSummary: { month in
-                TransactionCalculator.summary(of: await storage.transactions(in: month))
+            fetchMonth: { month in inInterval(await store.get(), month) },
+            fetchSummary: { interval in TransactionCalculator.summary(of: inInterval(await store.get(), interval)) },
+            save: { transaction in
+                await store.update { items in
+                    items.removeAll { $0.id == transaction.id }
+                    items.append(transaction)
+                }
             },
-            save: { transaction in await storage.save(transaction) },
-            delete: { id in await storage.delete(id) },
-            observeMonth: { month in storage.observe(month) }
+            delete: { id in await store.update { $0.removeAll { $0.id == id } } },
+            observeMonth: { month in store.stream { inInterval($0, month) } }
         )
-    }
-}
-
-/// previewValue 전용 인메모리 저장소
-private actor InMemoryTransactionStorage {
-    private var items: [Transaction.ID: Transaction]
-    private var continuations: [UUID: (DateInterval, AsyncThrowingStream<[Transaction], any Error>.Continuation)] = [:]
-
-    init(_ transactions: [Transaction]) {
-        items = Dictionary(uniqueKeysWithValues: transactions.map { ($0.id, $0) })
-    }
-
-    func transactions(in month: DateInterval) -> [Transaction] {
-        items.values
-            .filter { month.start <= $0.date && $0.date < month.end }
-            .sorted { $0.date > $1.date }
-    }
-
-    func save(_ transaction: Transaction) {
-        items[transaction.id] = transaction
-        notify()
-    }
-
-    func delete(_ id: Transaction.ID) {
-        items[id] = nil
-        notify()
-    }
-
-    nonisolated func observe(_ month: DateInterval) -> AsyncThrowingStream<[Transaction], any Error> {
-        AsyncThrowingStream { continuation in
-            let key = UUID()
-            Task { await self.register(key, month, continuation) }
-            continuation.onTermination = { _ in
-                Task { await self.unregister(key) }
-            }
-        }
-    }
-
-    private func register(
-        _ key: UUID,
-        _ month: DateInterval,
-        _ continuation: AsyncThrowingStream<[Transaction], any Error>.Continuation
-    ) {
-        continuations[key] = (month, continuation)
-        continuation.yield(transactions(in: month))
-    }
-
-    private func unregister(_ key: UUID) {
-        continuations[key] = nil
-    }
-
-    private func notify() {
-        for (month, continuation) in continuations.values {
-            continuation.yield(transactions(in: month))
-        }
     }
 }
 
@@ -103,10 +55,11 @@ extension Transaction {
         let calendar = Calendar.current
         func daysAgo(_ days: Int) -> Date { calendar.date(byAdding: .day, value: -days, to: now) ?? now }
         return [
-            Transaction(id: UUID(), type: .income, amount: 3_200_000, category: .salary, memo: "월급", date: daysAgo(0)),
-            Transaction(id: UUID(), type: .expense, amount: 12_000, category: .food, memo: "점심", date: daysAgo(0)),
-            Transaction(id: UUID(), type: .expense, amount: 1_450, category: .transport, memo: "지하철", date: daysAgo(1)),
-            Transaction(id: UUID(), type: .expense, amount: 54_900, category: .shopping, memo: "생필품", date: daysAgo(2))
+            Transaction(id: UUID(), type: .income, amount: 3_200_000, category: .Default.income, title: "월급", date: daysAgo(0)),
+            Transaction(id: UUID(), type: .expense, amount: 12_000, category: .Default.food, title: "점심", memo: "김치찌개", date: daysAgo(0)),
+            Transaction(id: UUID(), type: .expense, amount: 4_500, category: .Default.cafe, title: "아메리카노", date: daysAgo(1)),
+            Transaction(id: UUID(), type: .expense, amount: 1_450, category: .Default.transport, title: "지하철", date: daysAgo(1)),
+            Transaction(id: UUID(), type: .expense, amount: 13_500, category: .Default.subscription, title: "넷플릭스", date: daysAgo(3), isFixed: true)
         ]
     }
 }

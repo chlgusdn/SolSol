@@ -80,7 +80,7 @@ public struct HomeFeature {
                 let month = state.month
                 // 합계는 DB(SQL)에서 집계한다
                 return .run { [transactionClient] send in
-                    await send(.summaryLoaded(try await transactionClient.fetchSummary(month: month)))
+                    await send(.summaryLoaded(try await transactionClient.fetchSummary(interval: month)))
                 } catch: { error, send in
                     await send(.loadFailed(error.localizedDescription))
                 }

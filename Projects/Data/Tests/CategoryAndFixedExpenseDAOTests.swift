@@ -17,6 +17,14 @@ struct CategoryDAOTests {
         #expect(expenses.last?.isDefault == false)
     }
 
+    @Test func add_nameAcceptedByDomainValidation_isAcceptedByDatabase() async throws {
+        let dao = CategoryDAO(database: try TestDatabase.make())
+        for raw in ["🇰🇷🇰🇷🇰🇷🇰🇷", "12345678", "배달".decomposedStringWithCanonicalMapping] {
+            let name = try #require(TransactionCategory.validatedName(raw))
+            try await dao.add(TransactionCategory(id: UUID(), type: .expense, name: name, colorKey: "red", sortOrder: 0))
+        }
+    }
+
     @Test func add_nameLongerThanLimit_isRejectedByDatabase() async throws {
         let dao = CategoryDAO(database: try TestDatabase.make())
         let tooLong = TransactionCategory(id: UUID(), type: .expense, name: "123456789", colorKey: "red", sortOrder: 0)

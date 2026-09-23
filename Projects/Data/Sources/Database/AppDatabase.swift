@@ -14,11 +14,16 @@ public func appDatabase() throws -> any DatabaseWriter {
 
 /// 스키마 마이그레이션. 스키마 변경은 새 마이그레이션을 추가한다 (기존 마이그레이션 수정 금지).
 func migrate(_ database: any DatabaseWriter) throws {
+    try makeMigrator().migrate(database)
+}
+
+/// 등록된 전체 마이그레이션. 테스트에서 `migrate(_:upTo:)`로 중간 버전까지만 적용할 때도 쓴다
+func makeMigrator() -> DatabaseMigrator {
     var migrator = DatabaseMigrator()
     #if DEBUG
     migrator.eraseDatabaseOnSchemaChange = true
     #endif
-    migrator.registerMigration("v1_create_tables") { db in
+    migrator.registerMigration(MigrationID.v1) { db in
         try db.execute(sql: """
             CREATE TABLE "transactionRecords" (
                 "id" TEXT PRIMARY KEY NOT NULL,
@@ -33,5 +38,11 @@ func migrate(_ database: any DatabaseWriter) throws {
             CREATE INDEX "idx_transactionRecords_date" ON "transactionRecords"("date")
             """)
     }
-    try migrator.migrate(database)
+    migrator.registerMigration(MigrationID.v2, migrate: migrateV2)
+    return migrator
+}
+
+enum MigrationID {
+    static let v1 = "v1_create_tables"
+    static let v2 = "v2_categories_budget_fixed_expense"
 }

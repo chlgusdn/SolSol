@@ -5,14 +5,17 @@ import SQLiteData
 @Table("transactionRecords")
 struct TransactionRecord: Identifiable, Hashable, Sendable {
     let id: UUID
-    var type: Kind
+    var type: TransactionTypeColumn
     var amount: Int
-    var category: String
+    var categoryID: UUID
+    var title: String
     var memo: String
     var date: Date
+    var isFixed: Bool
+}
 
-    enum Kind: String, QueryBindable, Sendable {
-        case income
-        case expense
-    }
+/// 거래 유형 컬럼 값
+enum TransactionTypeColumn: String, QueryBindable, Sendable {
+    case income
+    case expense
 }

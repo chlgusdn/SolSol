@@ -16,9 +16,13 @@ public struct TransactionEditorFeature {
         public var mode: Mode
         public var type: TransactionType
         public var amountText: String
-        public var category: TransactionCategory
+        public var title: String
+        public var categoryID: TransactionCategory.ID
+        /// 선택 가능한 지출 카테고리 (onAppear에 DB에서 불러온다)
+        public var expenseCategories: [TransactionCategory] = TransactionCategory.Default.expenses
         public var memo: String
         public var date: Date
+        public var isFixed: Bool
         public var isSaving = false
         @Presents public var alert: AlertState<Action.Alert>?
 
@@ -27,9 +31,11 @@ public struct TransactionEditorFeature {
             self.mode = .create
             self.type = .expense
             self.amountText = ""
-            self.category = .food
+            self.title = ""
+            self.categoryID = TransactionCategory.Default.food.id
             self.memo = ""
             self.date = date
+            self.isFixed = false
         }
 
         /// 기존 거래 수정
@@ -37,22 +43,47 @@ public struct TransactionEditorFeature {
             self.mode = .edit(transaction.id)
             self.type = transaction.type
             self.amountText = String(transaction.amount)
-            self.category = transaction.category
+            self.title = transaction.title
+            self.categoryID = transaction.category.id
             self.memo = transaction.memo
             self.date = transaction.date
+            self.isFixed = transaction.isFixed
+            if transaction.type == .expense, !expenseCategories.contains(transaction.category) {
+                expenseCategories.append(transaction.category)
+            }
         }
 
+        /// 1 … `Transaction.maxAmount` 범위의 금액
         public var amount: Int? {
-            Int(amountText.filter(\.isNumber)).flatMap { $0 > 0 ? $0 : nil }
+            Int(amountText.filter(\.isNumber)).flatMap { (1...Transaction.maxAmount).contains($0) ? $0 : nil }
+        }
+
+        public var isAmountOverLimit: Bool {
+            (Int(amountText.filter(\.isNumber)) ?? 0) > Transaction.maxAmount
         }
 
         public var canSave: Bool { amount != nil && !isSaving }
-        public var availableCategories: [TransactionCategory] { TransactionCategory.available(for: type) }
+
+        public var availableCategories: [TransactionCategory] {
+            switch type {
+            case .income: [TransactionCategory.Default.income]
+            case .expense: expenseCategories
+            }
+        }
+
+        public var selectedCategory: TransactionCategory {
+            availableCategories.first { $0.id == categoryID }
+                ?? availableCategories.first
+                ?? TransactionCategory.Default.food
+        }
         public var isEditing: Bool { mode != .create }
     }
 
     public enum Action: BindableAction, Equatable {
         case binding(BindingAction<State>)
+        case onAppear
+        case categoriesLoaded([TransactionCategory])
+        case categoriesLoadFailed(String)
         case typeChanged(TransactionType)
         case saveButtonTapped
         case deleteButtonTapped
@@ -74,6 +105,7 @@ public struct TransactionEditorFeature {
     }
 
     @Dependency(\.transactionClient) var transactionClient
+    @Dependency(\.categoryClient) var categoryClient
     @Dependency(\.uuid) var uuid
 
     public init() {}
@@ -82,13 +114,45 @@ public struct TransactionEditorFeature {
         BindingReducer()
         Reduce { state, action in
             switch action {
+            case .binding(\.memo):
+                if state.memo.count > Transaction.memoLimit {
+                    state.memo = String(state.memo.prefix(Transaction.memoLimit))
+                }
+                return .none
+
             case .binding:
+                return .none
+
+            case .onAppear:
+                return .run { [categoryClient] send in
+                    await send(.categoriesLoaded(try await categoryClient.fetchAll()))
+                } catch: { error, send in
+                    await send(.categoriesLoadFailed(error.localizedDescription))
+                }
+
+            case let .categoriesLoaded(categories):
+                var expenses = categories.filter { $0.type == .expense }
+                // 수정 중인 거래의 카테고리는 목록에 없더라도 유지한다
+                if state.type == .expense, !expenses.contains(where: { $0.id == state.categoryID }),
+                   let current = state.expenseCategories.first(where: { $0.id == state.categoryID }) {
+                    expenses.append(current)
+                }
+                state.expenseCategories = expenses
+                return .none
+
+            case let .categoriesLoadFailed(message):
+                state.alert = AlertState {
+                    TextState("카테고리를 불러오지 못했어요")
+                } message: {
+                    TextState(message)
+                }
                 return .none
 
             case let .typeChanged(type):
                 state.type = type
-                if !state.availableCategories.contains(state.category) {
-                    state.category = state.availableCategories.first ?? .etc
+                if type == .income { state.isFixed = false }
+                if !state.availableCategories.contains(where: { $0.id == state.categoryID }) {
+                    state.categoryID = state.availableCategories.first?.id ?? TransactionCategory.Default.food.id
                 }
                 return .none
 
@@ -99,13 +163,16 @@ public struct TransactionEditorFeature {
                 case .create: uuid()
                 case let .edit(id): id
                 }
+                let title = state.title.trimmingCharacters(in: .whitespacesAndNewlines)
                 let transaction = Transaction(
                     id: id,
                     type: state.type,
                     amount: amount,
-                    category: state.category,
-                    memo: state.memo.trimmingCharacters(in: .whitespacesAndNewlines),
-                    date: state.date
+                    category: state.selectedCategory,
+                    title: title.isEmpty ? Transaction.defaultTitle(for: state.type) : title,
+                    memo: String(state.memo.trimmingCharacters(in: .whitespacesAndNewlines).prefix(Transaction.memoLimit)),
+                    date: state.date,
+                    isFixed: state.type == .expense && state.isFixed
                 )
                 return .run { [transactionClient] send in
                     try await transactionClient.save(transaction: transaction)

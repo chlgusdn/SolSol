@@ -9,7 +9,7 @@ import Testing
 struct HomeFeatureTests {
     private let month = DateInterval.month(containing: Date(timeIntervalSince1970: 1_800_000_000))
     private var sample: Domain.Transaction {
-        Domain.Transaction(id: UUID(0), type: .expense, amount: 12_000, category: .food, date: month.start)
+        Domain.Transaction(id: UUID(0), type: .expense, amount: 12_000, category: .Default.food, title: "점심", date: month.start)
     }
 
     @Test func onAppear_observesTransactionsAndLoadsSummary() async {

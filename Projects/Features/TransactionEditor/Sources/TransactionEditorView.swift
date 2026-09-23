@@ -33,13 +33,17 @@ public struct TransactionEditorView: View {
             }
 
             Section("분류") {
-                Picker("카테고리", selection: $store.category) {
-                    ForEach(store.availableCategories, id: \.self) { category in
-                        Text(category.displayName).tag(category)
+                Picker("카테고리", selection: $store.categoryID) {
+                    ForEach(store.availableCategories) { category in
+                        Text(category.name).tag(category.id)
                     }
                 }
                 DatePicker("날짜", selection: $store.date)
-                TextField("메모", text: $store.memo)
+                TextField("제목을 입력해요", text: $store.title)
+                TextField("메모를 남겨보아요 (선택)", text: $store.memo)
+                if store.type == .expense {
+                    Toggle("고정 지출로 등록", isOn: $store.isFixed)
+                }
             }
 
             if store.isEditing {
@@ -66,7 +70,10 @@ public struct TransactionEditorView: View {
         }
         .alert($store.scope(state: \.alert, action: \.alert))
         .sensoryFeedback(.success, trigger: store.isSaving) { old, new in old && !new }
-        .onAppear { isAmountFocused = !store.isEditing }
+        .onAppear {
+            isAmountFocused = !store.isEditing
+            store.send(.onAppear)
+        }
     }
 }
 

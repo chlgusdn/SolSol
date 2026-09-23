@@ -123,13 +123,12 @@ private struct TransactionRow: View {
 
     var body: some View {
         SDTransactionRow(
-            title: transaction.memo.isEmpty ? transaction.category.displayName : transaction.memo,
-            subtitle: transaction.memo.isEmpty ? nil : transaction.category.displayName,
+            title: transaction.title,
+            subtitle: transaction.memo.isEmpty ? transaction.category.name : transaction.memo,
             amount: transaction.signedAmount,
-            color: transaction.type == .income
-                ? DesignSystemAsset.income.swiftUIColor
-                : DesignSystemAsset.expense.swiftUIColor,
-            icon: transaction.type == .income ? .money : .tag
+            color: SDCategoryColor(rawValue: transaction.category.colorKey)?.color
+                ?? DesignSystemAsset.textSecondary.swiftUIColor,
+            icon: SDIcon(key: transaction.category.iconKey)
         )
     }
 }

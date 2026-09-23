@@ -38,7 +38,7 @@ struct AppFeatureTests {
     }
 
     @Test func editTransaction_pushesEditor_andPopsOnDelete() async {
-        let transaction = Domain.Transaction(id: UUID(1), type: .expense, amount: 5_000, category: .food, date: now)
+        let transaction = Domain.Transaction(id: UUID(1), type: .expense, amount: 5_000, category: .Default.food, title: "점심", date: now)
         let store = TestStore(initialState: AppFeature.State(month: .month(containing: now))) {
             AppFeature()
         } withDependencies: {

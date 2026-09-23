@@ -27,7 +27,7 @@ Projects/DesignSystem/
     │   └── SDIcon.swift             # 아이콘 → SF Symbol 매핑
     ├── Styles/                      # SDButtonStyle
     ├── Modifiers/                   # sdScreen, sdCard, sdToast, sdSheet(Style), sdShake  (sdShadow는 Tokens/SDShadow)
-    └── Components/                  # SDAmountText, SDTopBar, SDCategoryChip, SDTransactionRow, SDEmptyState, SDCategoryColor
+    └── Components/                  # SDAmountText, SDTopBar, SDCategoryChip, SDTransactionRow, SDEmptyState, SDCategoryColor, SDPageIndicator, SDProgressRing
 ```
 
 - 모든 컴포넌트·스타일·모디파이어는 **`SD` 접두사**
@@ -208,6 +208,8 @@ Tuist가 생성한 `DesignSystemAsset.<name>.swiftUIColor`로만 쓴다. `Color.
 | `SDCategoryChip` | `SDCategoryChip("식비", color: .red, isSelected:)` | 색 점 + 라벨, `SDRadius.pill`, 선택 시 색 테두리 + tint 배경 |
 | `SDTransactionRow` | `SDTransactionRow(title:, subtitle:, amount:, color:, icon:)` | 좌측 색 원형 아이콘 + 제목/부제 + 우측 금액 |
 | `SDEmptyState` | `SDEmptyState(icon:, title:, message:, actionTitle:, action:)` | 원형 tint 아이콘 + Pixel 제목 + 안내 + 선택적 버튼 |
+| `SDPageIndicator` | `SDPageIndicator(count: 4, current: $page)` | 현재 페이지는 `primary` 막대(너비 24), 나머지는 `textTertiary` 점(8). 점을 누르면 이동 |
+| `SDProgressRing` | `SDProgressRing(progress: 0.7, color:) { 가운데 내용 }` | 12시 방향부터 시계 방향으로 채움. 트랙은 색의 `SDOpacity.tint`, 선 두께 기본 `SDSpacing.m`, 둥근 끝 |
 | `.sdCard(_:radius:padding:)` | `.sdCard()` / `.sdCard(.floating, radius: SDRadius.l)` | `surface` 배경, 기본 여백 `SDSpacing.l`, 기본 그림자 `.card` |
 | `.sdScreen()` | 화면 루트 | `background` 전체 배경 |
 | `.sdToast(_:)` | `.sdToast($message)` | 하단 150pt 위 중앙, 검정 85%, `SDRadius.m`, `.sd.callout`, 2.2초 후 자동 닫힘 |
@@ -215,9 +217,10 @@ Tuist가 생성한 `DesignSystemAsset.<name>.swiftUIColor`로만 쓴다. `Color.
 | `.sdShake(trigger:)` | `.sdShake(trigger: count)` | 좌우 흔들림 0.5s |
 
 - 금액은 반드시 `SDAmountText` 또는 `Int.wonFormatted` / `signedWonFormatted`(Core)로 표시한다
-- 캘린더, 키패드, 차트, 예산 다이얼, 영수증 카드는 해당 Feature를 만들 때 DesignSystem에 추가한다
+- 캘린더, 키패드, 차트, 영수증 카드는 해당 Feature를 만들 때 DesignSystem에 추가한다. 예산 다이얼은 `SDProgressRing`을 쓴다
 
 ## 9. 화면 패턴 (기획서 요약)
+- **온보딩**: 첫 실행에만 표시. 4장 가로 스와이프(`TabView` page 스타일) + `SDPageIndicator` + 하단 CTA("다음" → 마지막 장 "이제부터 시작!") + 우상단 `.sdText` "건너뛰기"(마지막 장에서 숨김). 완료·건너뛰기 시 `SettingsClient.completeOnboarding()`. 앱 시작 시 완료 여부를 확인하는 동안은 빈 배경만 보여 홈이 깜빡이지 않게 한다
 - **내비게이션**: 탭바 없음. 홈이 허브이고 모든 하위 화면은 push, 좌상단 뒤로가기로 복귀
 - **입력 화면**: `surfaceDark` 헤더(← / 수익·지출 토글 / ✓ 저장) + Pixel 금액 + 카테고리 칩 + 제목·메모 + 고정 지출 체크 + 3×4 키패드. 토글은 포인트 색만 바꾸고 헤더 배경은 그대로
 - **저장 흐름**: 저장 → 토스트("지출을 저장했어요") → 0.65초 후 지출 리스트로 이동

@@ -57,7 +57,7 @@ public struct HomeView: View {
         }
         .scrollContentBackground(.hidden)
         .sdScreen()
-        .navigationTitle("솔솔")
+        .navigationTitle("쏠쏠")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {

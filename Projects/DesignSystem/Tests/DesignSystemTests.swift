@@ -11,7 +11,13 @@ struct DesignSystemTests {
     }
 
     @Test func colorAssets_existInBundle() {
-        for name in ["primary", "onPrimary", "income", "expense", "background", "surface", "textPrimary", "textSecondary", "separator"] {
+        let names = [
+            "primary", "cta", "income", "expense", "danger", "warning",
+            "background", "surface", "surfaceDark", "textPrimary", "textSecondary", "textTertiary", "border", "onPrimary",
+            "chartIncome", "chartExpense", "calendarSunday", "calendarSaturday",
+            "categoryRed", "categoryAmber", "categoryGreen", "categoryBlue", "categoryPurple", "categoryBrand"
+        ]
+        for name in names {
             #expect(UIColor(named: name, in: .module, compatibleWith: nil) != nil, "\(name) missing")
         }
     }

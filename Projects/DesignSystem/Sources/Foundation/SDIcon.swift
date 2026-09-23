@@ -20,6 +20,17 @@ public enum SDIcon: String, CaseIterable, Sendable {
     case budget = "shield.lefthalf.filled"
     case `repeat` = "arrow.clockwise"
     case receipt = "list.bullet.rectangle"
+    // 카테고리
+    case food = "fork.knife"
+    case cafe = "cup.and.saucer"
+    case transport = "bus"
+    case shopping = "bag"
+    case leisure = "figure.walk"
+
+    /// Domain에 저장된 아이콘 키(case 이름)로 찾는다. 모르는 키는 `.tag`
+    public init(key: String) {
+        self = Self.allCases.first { "\($0)" == key } ?? .tag
+    }
 
     public var systemName: String { rawValue }
     public var image: Image { Image(systemName: rawValue) }

@@ -51,6 +51,12 @@ struct DesignSystemTests {
         #expect(actual == hex, "\(name): \(String(actual, radix: 16))")
     }
 
+    @Test func icon_initByKey_fallsBackToTag() {
+        #expect(SDIcon(key: "food") == .food)
+        #expect(SDIcon(key: "repeat") == .repeat)
+        #expect(SDIcon(key: "unknown") == .tag)
+    }
+
     @Test func icons_resolveToSystemSymbols() {
         for icon in SDIcon.allCases {
             #expect(UIImage(systemName: icon.systemName) != nil, "\(icon.systemName) missing")

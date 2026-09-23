@@ -6,7 +6,7 @@ public enum AppProject {
         dependencies: [ModuleDependency]
     ) -> Project {
         let infoPlist: [String: Plist.Value] = [
-            "CFBundleDisplayName": "솔솔",
+            "CFBundleDisplayName": "쏠쏠",
             "CFBundleShortVersionString": "1.0.0",
             "CFBundleVersion": "1",
             "UILaunchScreen": [:],

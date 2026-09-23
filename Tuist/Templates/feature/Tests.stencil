@@ -1,0 +1,13 @@
+import ComposableArchitecture
+import Testing
+@testable import {{ name }}Feature
+
+@MainActor
+struct {{ name }}FeatureTests {
+    @Test func onAppear() async {
+        let store = TestStore(initialState: {{ name }}Feature.State()) {
+            {{ name }}Feature()
+        }
+        await store.send(.onAppear)
+    }
+}

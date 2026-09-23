@@ -1,0 +1,21 @@
+import Dependencies
+import DependenciesMacros
+import Domain
+import Foundation
+
+@DependencyClient
+public struct {{ name }}Client: Sendable {
+    public var fetchAll: @Sendable () async throws -> [String]
+}
+
+extension DependencyValues {
+    public var {{ name|lowerFirstLetter }}Client: {{ name }}Client {
+        get { self[{{ name }}Client.self] }
+        set { self[{{ name }}Client.self] = newValue }
+    }
+}
+
+extension {{ name }}Client: TestDependencyKey {
+    public static let testValue = Self()
+    public static let previewValue = Self(fetchAll: { [] })
+}

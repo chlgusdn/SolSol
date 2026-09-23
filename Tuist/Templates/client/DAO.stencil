@@ -1,0 +1,11 @@
+import Domain
+import Foundation
+import SQLiteData
+
+struct {{ name }}DAO: Sendable {
+    let database: any DatabaseWriter
+
+    func fetchAll() async throws -> [String] {
+        try await database.read { _ in [] }
+    }
+}

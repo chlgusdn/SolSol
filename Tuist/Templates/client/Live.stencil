@@ -1,0 +1,18 @@
+import Clients
+import Dependencies
+import SQLiteData
+
+extension {{ name }}Client: DependencyKey {
+    public static var liveValue: Self {
+        @Dependency(\.defaultDatabase) var database
+        return .live(database: database)
+    }
+
+    /// Data/Sources/Live/LiveDependencies.swift의 `bootstrapLive`에 등록할 것
+    static func live(database: any DatabaseWriter) -> Self {
+        let dao = {{ name }}DAO(database: database)
+        return Self(
+            fetchAll: dao.fetchAll
+        )
+    }
+}

@@ -35,10 +35,11 @@ public struct TransactionCategory: Identifiable, Hashable, Sendable {
     /// 사용자 카테고리 아이콘
     public static let customIconKey = "tag"
 
-    /// 앞뒤 공백을 제거하고 1…`nameLimit`자면 이름을, 아니면 nil을 돌려준다
+    /// 앞뒤 공백을 제거하고 1…`nameLimit`자면 이름을, 아니면 nil을 돌려준다.
+    /// 글자 수는 DB `length()`와 같게 유니코드 스칼라 개수로 센다 (이모지 조합·조합형 한글은 여러 개로 셈)
     public static func validatedName(_ name: String) -> String? {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard (1...nameLimit).contains(trimmed.count) else { return nil }
+        guard (1...nameLimit).contains(trimmed.unicodeScalars.count) else { return nil }
         return trimmed
     }
 }

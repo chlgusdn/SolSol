@@ -10,6 +10,14 @@ struct CategoryTests {
         #expect(TransactionCategory.validatedName("   ") == nil)
     }
 
+    @Test func validatedName_countsUnicodeScalarsLikeSQLite() {
+        // 그래핌 3개지만 스칼라 9개 — SQLite length() 기준 8자 초과
+        #expect(TransactionCategory.validatedName("👨‍👩‍👧‍👦배달") == nil)
+        // 조합형(NFD) 한글 "배달"은 스칼라 5개
+        #expect(TransactionCategory.validatedName("배달".decomposedStringWithCanonicalMapping) != nil)
+        #expect(TransactionCategory.validatedName("🇰🇷🇰🇷🇰🇷🇰🇷") == "🇰🇷🇰🇷🇰🇷🇰🇷")
+    }
+
     @Test func defaults_haveUniqueIdsAndOneIncomeCategory() {
         let all = TransactionCategory.Default.all
         #expect(Set(all.map(\.id)).count == all.count)

@@ -4,6 +4,7 @@ import ProjectDescriptionHelpers
 let project = AppProject.make(
     name: "SolSol",
     dependencies: [
+        .feature("Onboarding"),
         .feature("Home"),
         .feature("TransactionEditor"),
         .data,

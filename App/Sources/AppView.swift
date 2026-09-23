@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import DesignSystem
 import HomeFeature
+import OnboardingFeature
 import SwiftUI
 import TransactionEditorFeature
 
@@ -9,6 +10,26 @@ struct AppView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
+        Group {
+            if store.isCheckingOnboarding {
+                DesignSystemAsset.background.swiftUIColor.ignoresSafeArea()
+            } else if let onboardingStore = store.scope(state: \.onboarding, action: \.onboarding) {
+                OnboardingView(store: onboardingStore)
+                    .transition(.opacity)
+            } else {
+                main
+                    .transition(.opacity)
+            }
+        }
+        .animation(.sd.standard, value: store.onboarding == nil)
+        .tint(DesignSystemAsset.primary.swiftUIColor)
+        .onAppear { store.send(.onAppear) }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { store.send(.scenePhaseBecameActive) }
+        }
+    }
+
+    private var main: some View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
             HomeView(store: store.scope(state: \.home, action: \.home))
         } destination: { store in
@@ -22,11 +43,6 @@ struct AppView: View {
                 TransactionEditorView(store: store)
             }
             .presentationDetents([.large])
-        }
-        .tint(DesignSystemAsset.primary.swiftUIColor)
-        .onAppear { store.send(.onAppear) }
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .active { store.send(.scenePhaseBecameActive) }
         }
     }
 }

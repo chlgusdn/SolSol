@@ -3,6 +3,7 @@ import ComposableArchitecture
 import Domain
 import Foundation
 import HomeFeature
+import OnboardingFeature
 import Testing
 import TransactionEditorFeature
 @testable import SolSol
@@ -59,14 +60,72 @@ struct AppFeatureTests {
         }
     }
 
-    @Test func onAppear_syncsTime() async {
+    @Test func onAppear_firstLaunch_showsOnboarding_thenHomeAfterCompletion() async {
+        let store = TestStore(initialState: AppFeature.State(month: .month(containing: now))) {
+            AppFeature()
+        } withDependencies: {
+            $0.timeSyncClient.sync = { nil }
+            $0.settingsClient.isOnboardingCompleted = { false }
+            $0.settingsClient.completeOnboarding = {}
+        }
+
+        // 시간 동기화와 온보딩 확인은 병렬로 실행되어 받는 순서가 정해져 있지 않다
+        store.exhaustivity = .off(showSkippedAssertions: false)
+        await store.send(.onAppear)
+        await store.receive(\.onboardingStatusLoaded) {
+            $0.isCheckingOnboarding = false
+            $0.onboarding = OnboardingFeature.State()
+        }
+        await store.finish()
+        await store.skipReceivedActions(strict: false)
+        store.exhaustivity = .on
+
+        await store.send(\.onboarding.skipButtonTapped) { $0.onboarding?.isCompleting = true }
+        await store.receive(\.onboarding.completionSaved)
+        await store.receive(\.onboarding.delegate.completed) { $0.onboarding = nil }
+    }
+
+    @Test func onAppear_returningUser_skipsOnboarding() async {
+        let store = TestStore(initialState: AppFeature.State(month: .month(containing: now))) {
+            AppFeature()
+        } withDependencies: {
+            $0.timeSyncClient.sync = { self.now }
+            $0.settingsClient.isOnboardingCompleted = { true }
+        }
+
+        store.exhaustivity = .off(showSkippedAssertions: false)
+        await store.send(.onAppear)
+        await store.receive(\.onboardingStatusLoaded) { $0.isCheckingOnboarding = false }
+        await store.finish()
+        await store.skipReceivedActions(strict: false)
+        #expect(store.state.onboarding == nil)
+    }
+
+    @Test func onAppear_statusCheckFails_showsHome() async {
+        struct Failure: Error {}
+        let store = TestStore(initialState: AppFeature.State(month: .month(containing: now))) {
+            AppFeature()
+        } withDependencies: {
+            $0.timeSyncClient.sync = { nil }
+            $0.settingsClient.isOnboardingCompleted = { throw Failure() }
+        }
+
+        store.exhaustivity = .off(showSkippedAssertions: false)
+        await store.send(.onAppear)
+        await store.receive(\.onboardingStatusLoaded) { $0.isCheckingOnboarding = false }
+        await store.finish()
+        await store.skipReceivedActions(strict: false)
+        #expect(store.state.onboarding == nil)
+    }
+
+    @Test func scenePhaseActive_onlySyncsTime() async {
         let store = TestStore(initialState: AppFeature.State(month: .month(containing: now))) {
             AppFeature()
         } withDependencies: {
             $0.timeSyncClient.sync = { self.now }
         }
 
-        await store.send(.onAppear)
+        await store.send(.scenePhaseBecameActive)
         await store.receive(\.timeSynced)
     }
 }

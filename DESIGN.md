@@ -194,6 +194,9 @@ Tuist가 생성한 `DesignSystemAsset.<name>.swiftUIColor`로만 쓴다. `Color.
 | Pocket (텅장방지) | `.budget` | `shield.lefthalf.filled` |
 | RefreshCw (고정 지출) | `.repeat` | `arrow.clockwise` |
 | Receipt (고정 지출 카드) | `.receipt` | `list.bullet.rectangle` |
+| 카테고리: 식비 / 카페 / 교통 / 쇼핑 / 레저 | `.food` / `.cafe` / `.transport` / `.shopping` / `.leisure` | `fork.knife` / `cup.and.saucer` / `bus` / `bag` / `figure.walk` |
+
+- 카테고리 아이콘은 Domain `TransactionCategory.iconKey`에 **case 이름**으로 저장하고 `SDIcon(key:)`로 찾는다 (모르는 키는 `.tag`)
 
 ## 8. 컴포넌트
 

@@ -49,7 +49,7 @@ Domain       → Foundation만
 | live 등록 | `Data/Sources/Live/LiveDependencies.swift` | `bootstrapLive(database:)` |
 | DB 레코드 | `Data/Sources/Records/` | `XxxRecord.swift` |
 | 변환 | `Data/Sources/Mappers/` | `XxxMapper.swift` |
-| 마이그레이션 | `Data/Sources/Database/AppDatabase.swift` | `"vN_설명"` |
+| 마이그레이션 | 등록: `Data/Sources/Database/AppDatabase.swift`, 내용: `Database/MigrationVN.swift` | id는 `MigrationID.vN` (`"vN_설명"`) |
 | Feature | `Features/<Name>/Sources/` | `<Name>Feature.swift`, `<Name>View.swift` |
 | Feature 테스트 | `Features/<Name>/Tests/` | `<Name>FeatureTests.swift` |
 | 확장 | 해당 모듈 `Sources/Extensions/` | `Type+기능.swift` (예: `Int+Currency.swift`) |
@@ -69,6 +69,8 @@ Domain       → Foundation만
 - Feature의 `State`, `Action`, `init`, `body`, View와 View의 `init`은 `public`
 - Data의 Record, DAO, Mapper는 `internal`. 모듈 밖으로 나가는 것은 `appDatabase()`, `bootstrapLive`, `DateGenerator.trusted`뿐
 - `Domain.Transaction`은 `SwiftUI.Transaction`과 이름이 겹친다 → 각 Feature 모듈에 `Sources/Domain+Aliases.swift`(`public typealias Transaction = Domain.Transaction`)를 두고, 테스트에서는 `Domain.Transaction`으로 명시한다
+- **시스템 타입과 겹치는 이름을 새로 만들지 않는다.** 예: `Category`는 Objective-C 런타임 타입(`OpaquePointer`)과 겹쳐서 `TransactionCategory`로 지었다
+- 모듈 이름 `Data`는 `Foundation.Data`와 겹쳐 `Data.xxx`로 한정할 수 없다 → Data 모듈의 전역 함수는 메서드와 이름이 겹치지 않게 짓는다 (예: `observeDatabase`)
 
 ## 3. Domain 규칙
 - `struct` / `enum`만 사용한다. `class`, 싱글톤, 전역 가변 상태 금지
@@ -82,25 +84,30 @@ Domain       → Foundation만
 
 ## 4. Data 규칙 (SQLiteData)
 - DB 모델은 `@Table("테이블명") struct XxxRecord`로 정의하고, Mapper로 Domain 모델과 변환한다
-- Record의 enum 컬럼은 `String` raw value + `QueryBindable`
+- Record의 enum 컬럼은 `String` raw value + `QueryBindable` (예: `TransactionTypeColumn`)
+- 조인 결과는 튜플이 아니라 `@Selection` 구조체로 받는다 (`.select { TransactionWithCategory.Columns(transaction: $0, category: $1) }`)
+- 컬럼 저장 형식: UUID는 **소문자 텍스트**, Date는 `yyyy-MM-dd HH:mm:ss.SSS`(UTC) 텍스트, Bool은 0/1 정수. 마이그레이션 SQL과 테스트 데이터도 이 형식을 따른다
+- 하나만 존재하는 데이터(예산)는 `id = 1` CHECK 제약 + `upsert`로 저장한다. 키-값 설정은 `appSettings` 테이블
+- 기본 데이터(기본 카테고리 등)는 마이그레이션에서 **SQL 리터럴로 고정 id**를 넣는다. Domain 상수(`TransactionCategory.Default`)와 같은 값을 쓰고, 둘이 같은지 테스트한다
 - Record 타입은 Data 밖으로 절대 노출하지 않는다
 - 스키마 변경은 `DatabaseMigrator`에 **새 마이그레이션을 추가**한다. 이미 배포된 마이그레이션은 수정 금지
 - 테이블은 `STRICT`, 필요한 `CHECK` 제약과 인덱스를 함께 정의한다
 - 집계(합계, 기간 비교, 카테고리별 합산)는 SQL로 DB에서 처리한다 (`sum(filter:)`, `group(by:)`)
-- 관찰은 GRDB `ValueObservation` → `AsyncThrowingStream`으로 변환한다. 스트림 종료 시 내부 Task를 취소한다
+- 관찰은 공용 헬퍼 `observeDatabase(_:fetch:)`(GRDB `ValueObservation` → `AsyncThrowingStream`)를 쓴다. 스트림이 끝나면 관찰도 취소된다
 - Feature에서 `@FetchAll` / `@FetchOne`을 쓰지 않는다 — 읽기·쓰기 모두 Client를 통한다
 - DB 연결은 App 진입점에서 `appDatabase()`로 한 번만 연다
 
 ```swift
 // Data/Sources/Database/AppDatabase.swift
-func migrate(_ database: any DatabaseWriter) throws {
+func makeMigrator() -> DatabaseMigrator {
     var migrator = DatabaseMigrator()
     #if DEBUG
     migrator.eraseDatabaseOnSchemaChange = true
     #endif
-    migrator.registerMigration("v1_create_tables") { db in /* CREATE TABLE ... */ }
-    // migrator.registerMigration("v2_add_budget") { ... }   ← 새 변경은 여기 추가
-    try migrator.migrate(database)
+    migrator.registerMigration(MigrationID.v1) { db in /* CREATE TABLE ... */ }
+    migrator.registerMigration(MigrationID.v2, migrate: migrateV2)   // Database/MigrationV2.swift
+    // migrator.registerMigration(MigrationID.v3, migrate: migrateV3)  ← 새 변경은 여기 추가
+    return migrator
 }
 ```
 
@@ -111,7 +118,7 @@ func migrate(_ database: any DatabaseWriter) throws {
 - Client는 **Domain 모델만** 주고받는다
 - 클로저 인자에 레이블을 붙인다 (`_ month:`) → 호출은 `client.fetchMonth(month:)`
 - throw하지 않는 클로저는 기본값을 지정한다 (매크로 요구사항)
-- `testValue = Self()` (매크로가 만든 unimplemented), `previewValue`는 인메모리 구현
+- `testValue = Self()` (매크로가 만든 unimplemented), `previewValue`는 공용 인메모리 저장소 `PreviewStore`(Clients/Sources/Preview)로 구현한다 — 변경 시 관찰 스트림에도 반영된다
 - **새 Client는 `bootstrapLive(database:)`에 반드시 등록한다.** Data는 staticFramework라서 App이 직접 참조하지 않는 `XxxClient+Live.swift`는 링커가 제거하고, 그러면 `DependencyKey` 적합성이 사라져 앱에서 `testValue`(unimplemented)가 쓰인다
 
 ```swift
@@ -156,6 +163,10 @@ extension DependencyValues {
         defaultDatabase = database
         date = .trusted
         transactionClient = .live(database: database)
+        categoryClient = .live(database: database)
+        fixedExpenseClient = .live(database: database)
+        budgetClient = .live(database: database)
+        settingsClient = .live(database: database)
         timeSyncClient = .liveValue
         // 새 Client를 여기에 추가
     }
@@ -231,7 +242,9 @@ case .saveButtonTapped:
 - 의존성은 `withDependencies`로 **필요한 Client 메서드만** 교체한다. 나머지는 unimplemented로 남겨 의도치 않은 호출을 잡는다
 - 고정 값 주입: `$0.date = .constant(...)`, `$0.uuid = .incrementing`
 - 호출 인자 확인은 `LockIsolated`에 기록 후 `#expect`
-- **Data**: `DatabaseQueue()`(인메모리) + `migrate(_:)`로 DAO와 마이그레이션을 검증한다. 실제 파일 DB 금지
+- **Data**: `TestDatabase.make()`(인메모리 `DatabaseQueue` + 전체 마이그레이션)로 DAO를 검증한다. 실제 파일 DB 금지
+- **마이그레이션**: 새 마이그레이션마다 이전 버전 데이터가 옮겨지는지 테스트한다 — `makeMigrator().migrate(db, upTo: MigrationID.vN)`으로 이전 버전까지 적용 → 이전 스키마로 데이터 삽입 → `migrate(_:)` → 결과 검증
+- DB 제약(CHECK, 외래 키)이 잘못된 값을 거부하는지도 테스트한다
 - **Domain**: 순수 함수 단위 테스트. `Calendar`/`TimeZone`을 고정한다 (`Asia/Seoul`)
 - **DesignSystem**: 에셋(색상·폰트) 등록 여부를 테스트한다
 - **App**: `AppFeature`의 내비게이션 조립(push/pop, sheet 표시/해제)을 테스트한다

@@ -26,7 +26,7 @@ public struct HomeView: View {
 
             if let message = store.errorMessage {
                 Text(message)
-                    .font(.sd.caption)
+                    .font(.sd.footnote)
                     .foregroundStyle(DesignSystemAsset.expense.swiftUIColor)
             }
 
@@ -42,13 +42,17 @@ public struct HomeView: View {
                     }
                 } header: {
                     Text(group.day, format: .dateTime.month().day().weekday())
-                        .font(.sd.caption)
+                        .font(.sd.footnote)
                 }
             }
         }
         .overlay {
             if store.transactions.isEmpty && !store.isLoading {
-                ContentUnavailableView("거래 내역이 없어요", systemImage: "wonsign.circle", description: Text("+ 버튼으로 첫 거래를 기록해보세요"))
+                SDEmptyState(
+                    icon: .money,
+                    title: "아직 거래 내역이 없어요",
+                    message: "+ 버튼으로 첫 거래를 기록해보세요"
+                )
             }
         }
         .scrollContentBackground(.hidden)
@@ -59,7 +63,7 @@ public struct HomeView: View {
                 Button {
                     store.send(.addButtonTapped)
                 } label: {
-                    Image(systemName: "plus")
+                    SDIcon.plus.image
                 }
                 .accessibilityLabel("거래 추가")
             }
@@ -77,22 +81,22 @@ private struct SummaryCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: SDSpacing.m) {
             HStack {
-                Button(action: onPrevious) { Image(systemName: "chevron.left") }
+                Button(action: onPrevious) { SDIcon.back.image }
                     .accessibilityLabel("이전 달")
                 Text(month.start, format: .dateTime.year().month())
-                    .font(.sd.bodyBold)
+                    .font(.sd.displayHeadline)
                     .foregroundStyle(DesignSystemAsset.textPrimary.swiftUIColor)
-                Button(action: onNext) { Image(systemName: "chevron.right") }
+                Button(action: onNext) { SDIcon.chevronRight.image }
                     .accessibilityLabel("다음 달")
             }
             .buttonStyle(.borderless)
             .tint(DesignSystemAsset.primary.swiftUIColor)
 
-            SDAmountText(summary.balance, style: .signed, font: .sd.largeTitle)
+            SDAmountText(summary.balance, style: .signed, font: .sd.displayTitle)
 
             HStack(spacing: SDSpacing.xl) {
-                LabeledAmount(title: TransactionType.income.displayName, amount: summary.income, color: DesignSystemAsset.income.swiftUIColor)
-                LabeledAmount(title: TransactionType.expense.displayName, amount: summary.expense, color: DesignSystemAsset.expense.swiftUIColor)
+                LabeledAmount(title: TransactionType.income.displayName, amount: summary.income, style: .income)
+                LabeledAmount(title: TransactionType.expense.displayName, amount: summary.expense, style: .expense)
             }
         }
         .sdCard()
@@ -102,18 +106,14 @@ private struct SummaryCard: View {
 private struct LabeledAmount: View {
     let title: String
     let amount: Int
-    let color: Color
+    let style: SDAmountText.Style
 
     var body: some View {
         VStack(alignment: .leading, spacing: SDSpacing.xxs) {
             Text(title)
-                .font(.sd.caption)
+                .font(.sd.footnote)
                 .foregroundStyle(DesignSystemAsset.textSecondary.swiftUIColor)
-            Text(amount.wonFormatted)
-                .font(.sd.bodyBold)
-                .monospacedDigit()
-                .foregroundStyle(color)
-                .contentTransition(.numericText(value: Double(amount)))
+            SDAmountText(amount, style: style)
         }
     }
 }
@@ -122,30 +122,14 @@ private struct TransactionRow: View {
     let transaction: Transaction
 
     var body: some View {
-        HStack(spacing: SDSpacing.m) {
-            VStack(alignment: .leading, spacing: SDSpacing.xxs) {
-                Text(transaction.category.displayName)
-                    .font(.sd.body)
-                    .foregroundStyle(DesignSystemAsset.textPrimary.swiftUIColor)
-                if !transaction.memo.isEmpty {
-                    Text(transaction.memo)
-                        .font(.sd.caption)
-                        .foregroundStyle(DesignSystemAsset.textSecondary.swiftUIColor)
-                }
-            }
-            Spacer()
-            SDAmountText(transaction.signedAmount, style: .signed)
-        }
-        .contentShape(Rectangle())
-    }
-}
-
-#Preview {
-    NavigationStack {
-        HomeView(
-            store: Store(initialState: HomeFeature.State(month: .month(containing: .now))) {
-                HomeFeature()
-            }
+        SDTransactionRow(
+            title: transaction.memo.isEmpty ? transaction.category.displayName : transaction.memo,
+            subtitle: transaction.memo.isEmpty ? nil : transaction.category.displayName,
+            amount: transaction.signedAmount,
+            color: transaction.type == .income
+                ? DesignSystemAsset.income.swiftUIColor
+                : DesignSystemAsset.expense.swiftUIColor,
+            icon: transaction.type == .income ? .money : .tag
         )
     }
 }

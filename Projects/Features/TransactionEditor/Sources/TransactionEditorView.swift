@@ -28,7 +28,7 @@ public struct TransactionEditorView: View {
             Section("금액") {
                 TextField("0", text: $store.amountText)
                     .keyboardType(.numberPad)
-                    .font(.sd.title)
+                    .font(.sd.displayHeadline)
                     .focused($isAmountFocused)
             }
 

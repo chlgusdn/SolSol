@@ -10,6 +10,8 @@ public enum AppProject {
             "CFBundleShortVersionString": "1.0.0",
             "CFBundleVersion": "1",
             "UILaunchScreen": [:],
+            // 다크 토큰 확정 전까지 라이트 모드 고정 (DESIGN.md §1)
+            "UIUserInterfaceStyle": "Light",
             "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
             "ITSAppUsesNonExemptEncryption": false
         ]

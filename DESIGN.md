@@ -208,7 +208,7 @@ Tuist가 생성한 `DesignSystemAsset.<name>.swiftUIColor`로만 쓴다. `Color.
 | `SDCategoryChip` | `SDCategoryChip("식비", color: .red, isSelected:)` | 색 점 + 라벨, `SDRadius.pill`, 선택 시 색 테두리 + tint 배경 |
 | `SDTransactionRow` | `SDTransactionRow(title:, subtitle:, amount:, color:, icon:)` | 좌측 색 원형 아이콘 + 제목/부제 + 우측 금액 |
 | `SDEmptyState` | `SDEmptyState(icon:, title:, message:, actionTitle:, action:)` | 원형 tint 아이콘 + Pixel 제목 + 안내 + 선택적 버튼 |
-| `SDPageIndicator` | `SDPageIndicator(count: 4, current: $page)` | 현재 페이지는 `primary` 막대(너비 24), 나머지는 `textTertiary` 점(8). 점을 누르면 이동 |
+| `SDPageIndicator` | `SDPageIndicator(count: 4, current: $page)` | 현재 페이지는 `primary` 막대(너비 24), 나머지는 `textTertiary` 점(8). 표시 전용(탭 없음 — 점마다 44 영역 불가). VoiceOver는 조절 요소로 이동 |
 | `SDProgressRing` | `SDProgressRing(progress: 0.7, color:) { 가운데 내용 }` | 12시 방향부터 시계 방향으로 채움. 트랙은 색의 `SDOpacity.tint`, 선 두께 기본 `SDSpacing.m`, 둥근 끝 |
 | `.sdCard(_:radius:padding:)` | `.sdCard()` / `.sdCard(.floating, radius: SDRadius.l)` | `surface` 배경, 기본 여백 `SDSpacing.l`, 기본 그림자 `.card` |
 | `.sdScreen()` | 화면 루트 | `background` 전체 배경 |

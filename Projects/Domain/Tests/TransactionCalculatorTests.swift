@@ -51,6 +51,15 @@ struct TransactionCalculatorTests {
         #expect(groups.map(\.day) == [calendar.startOfDay(for: day2), calendar.startOfDay(for: day1)])
     }
 
+    @Test func settingTime_keepsDayAndTakesTime() {
+        let day = calendar.date(from: DateComponents(year: 2026, month: 9, day: 20))!
+        let now = calendar.date(from: DateComponents(year: 2026, month: 9, day: 24, hour: 14, minute: 30, second: 5))!
+
+        let result = day.settingTime(from: now, calendar: calendar)
+
+        #expect(result == calendar.date(from: DateComponents(year: 2026, month: 9, day: 20, hour: 14, minute: 30, second: 5)))
+    }
+
     @Test func dailyAmounts_expenseWinsOverIncome_incomeOnlyDayShowsIncome() {
         let day1 = calendar.date(from: DateComponents(year: 2026, month: 2, day: 1, hour: 9))!
         let day2 = calendar.date(from: DateComponents(year: 2026, month: 2, day: 2, hour: 9))!

@@ -12,7 +12,7 @@ struct StatisticsDAO: Sendable {
 
     static func snapshot(_ period: DateInterval, _ buckets: [DateInterval], in db: Database) throws -> StatisticsSnapshot {
         StatisticsSnapshot(
-            bucketTotals: try buckets.map { try TransactionDAO.summary($0, in: db) },
+            bucketTotals: try bucketTotals(buckets, in: db),
             categoryTotals: try categoryTotals(period, in: db),
             largestIncome: try largest(.income, period, in: db),
             largestExpense: try largest(.expense, period, in: db),
@@ -21,6 +21,35 @@ struct StatisticsDAO: Sendable {
                 .count()
                 .fetchOne(db) ?? 0
         )
+    }
+
+    /// 모든 칸의 합계를 한 번의 쿼리로 구한다 — 칸 경계는 기기 달력 기준으로 Swift가 정해 넘기고,
+    /// 거래가 없는 칸은 결과에 없으므로 0으로 채운다
+    private static func bucketTotals(_ buckets: [DateInterval], in db: Database) throws -> [TransactionSummary] {
+        guard !buckets.isEmpty else { return [] }
+        let values = buckets.enumerated()
+            .map { index, bucket -> QueryFragment in "(\(raw: index), \(bind: bucket.start), \(bind: bucket.end))" }
+            .joined(separator: ", ")
+        let rows = try #sql(
+            """
+            WITH "buckets"("index", "start", "end") AS (VALUES \(values))
+            SELECT "buckets"."index",
+                   COALESCE(SUM(CASE WHEN "t"."type" = 'income' THEN "t"."amount" END), 0),
+                   COALESCE(SUM(CASE WHEN "t"."type" = 'expense' THEN "t"."amount" END), 0)
+            FROM "buckets"
+            JOIN "transactionRecords" AS "t"
+              ON "t"."date" >= "buckets"."start" AND "t"."date" < "buckets"."end"
+            GROUP BY "buckets"."index"
+            """,
+            as: BucketTotal.self
+        )
+        .fetchAll(db)
+
+        var totals = Array(repeating: TransactionSummary.zero, count: buckets.count)
+        for row in rows where totals.indices.contains(row.index) {
+            totals[row.index] = TransactionSummary(income: row.income, expense: row.expense)
+        }
+        return totals
     }
 
     private static func categoryTotals(_ period: DateInterval, in db: Database) throws -> [CategoryTotal] {

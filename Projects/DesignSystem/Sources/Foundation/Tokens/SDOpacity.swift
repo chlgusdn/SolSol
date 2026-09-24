@@ -8,4 +8,6 @@ public enum SDOpacity {
     public static let toast: Double = 0.85
     /// 연한 배경 (선택된 칩, 아이콘 원형 배경)
     public static let tint: Double = 0.10
+    /// 어두운 헤더 위 토글 트랙
+    public static let onDarkTrack: Double = 0.22
 }

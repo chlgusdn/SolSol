@@ -21,4 +21,25 @@ public enum TransactionCalculator {
             .map { (day: $0.key, transactions: $0.value.sorted { $0.date > $1.date }) }
             .sorted { $0.day > $1.day }
     }
+
+    /// 날짜(일)별 캘린더 금액 — 지출이 있으면 지출 합계, 수입만 있으면 수입 합계
+    public static func dailyAmounts(
+        _ transactions: [Transaction],
+        calendar: Calendar = .current
+    ) -> [Date: DailyAmount] {
+        Dictionary(grouping: transactions) { calendar.startOfDay(for: $0.date) }
+            .compactMapValues { items in
+                let total = summary(of: items)
+                if total.expense > 0 { return .expense(total.expense) }
+                if total.income > 0 { return .income(total.income) }
+                return nil
+            }
+    }
+
+    /// 지난달 대비 지출 증감률(%, 반올림). 지난달 지출이 0이면 비교할 수 없어 nil
+    public static func expenseChangeRate(current: TransactionSummary, previous: TransactionSummary) -> Int? {
+        guard previous.expense > 0 else { return nil }
+        let rate = Double(current.expense - previous.expense) / Double(previous.expense) * 100
+        return Int(rate.rounded())
+    }
 }

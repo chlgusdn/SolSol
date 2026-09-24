@@ -20,6 +20,7 @@ public enum SDIcon: String, CaseIterable, Sendable {
     case budget = "shield.lefthalf.filled"
     case `repeat` = "arrow.clockwise"
     case receipt = "list.bullet.rectangle"
+    case deleteBackward = "delete.backward"
     // 카테고리
     case food = "fork.knife"
     case cafe = "cup.and.saucer"

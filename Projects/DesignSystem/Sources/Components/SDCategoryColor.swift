@@ -4,6 +4,18 @@ import SwiftUI
 public enum SDCategoryColor: String, CaseIterable, Sendable {
     case red, amber, green, blue, purple, brand
 
+    /// VoiceOver용 이름
+    public var displayName: String {
+        switch self {
+        case .red: "빨강"
+        case .amber: "노랑"
+        case .green: "초록"
+        case .blue: "파랑"
+        case .purple: "보라"
+        case .brand: "쏠쏠 초록"
+        }
+    }
+
     public var color: Color {
         switch self {
         case .red: DesignSystemAsset.categoryRed.swiftUIColor

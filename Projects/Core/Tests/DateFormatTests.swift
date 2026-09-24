@@ -14,5 +14,6 @@ struct DateFormatTests {
         #expect(date.monthDayFormatted == "1월 15일")
         #expect(date.monthDayWeekdayFormatted == "1월 15일 수요일")
         #expect(date.dotDateWeekdayFormatted == "2025.01.15 (수)")
+        #expect(date.dotDateFormatted == "2025.01.15")
     }
 }

@@ -6,25 +6,30 @@ import SQLiteData
 struct TransactionDAO: Sendable {
     let database: any DatabaseWriter
 
-    func fetchMonth(_ month: DateInterval) async throws -> [Transaction] {
+    func fetch(_ interval: DateInterval) async throws -> [Transaction] {
         try await database.read { db in
-            try Self.fetch(month, in: db)
+            try Self.fetch(interval, in: db)
         }
     }
 
     func fetchSummary(_ interval: DateInterval) async throws -> TransactionSummary {
         try await database.read { db in
-            let row = try TransactionRecord
-                .where { $0.date >= interval.start && $0.date < interval.end }
-                .select {
-                    (
-                        $0.amount.sum(filter: $0.type.eq(TransactionTypeColumn.income)) ?? 0,
-                        $0.amount.sum(filter: $0.type.eq(TransactionTypeColumn.expense)) ?? 0
-                    )
-                }
-                .fetchOne(db)
-            return TransactionSummary(income: row?.0 ?? 0, expense: row?.1 ?? 0)
+            try Self.summary(interval, in: db)
         }
+    }
+
+    /// 구간 [start, end)의 수입·지출 합계 (SQL SUM)
+    static func summary(_ interval: DateInterval, in db: Database) throws -> TransactionSummary {
+        let row = try TransactionRecord
+            .where { $0.date >= interval.start && $0.date < interval.end }
+            .select {
+                (
+                    $0.amount.sum(filter: $0.type.eq(TransactionTypeColumn.income)) ?? 0,
+                    $0.amount.sum(filter: $0.type.eq(TransactionTypeColumn.expense)) ?? 0
+                )
+            }
+            .fetchOne(db)
+        return TransactionSummary(income: row?.0 ?? 0, expense: row?.1 ?? 0)
     }
 
     func save(_ transaction: Transaction) async throws {
@@ -40,14 +45,14 @@ struct TransactionDAO: Sendable {
         }
     }
 
-    func observeMonth(_ month: DateInterval) -> AsyncThrowingStream<[Transaction], any Error> {
-        observeDatabase(database) { db in try Self.fetch(month, in: db) }
+    func observe(_ interval: DateInterval) -> AsyncThrowingStream<[Transaction], any Error> {
+        observeDatabase(database) { db in try Self.fetch(interval, in: db) }
     }
 
-    private static func fetch(_ month: DateInterval, in db: Database) throws -> [Transaction] {
+    private static func fetch(_ interval: DateInterval, in db: Database) throws -> [Transaction] {
         let rows = try TransactionRecord
             .join(CategoryRecord.all) { $0.categoryID.eq($1.id) }
-            .where { transaction, _ in transaction.date >= month.start && transaction.date < month.end }
+            .where { transaction, _ in transaction.date >= interval.start && transaction.date < interval.end }
             .order { transaction, _ in transaction.date.desc() }
             .select { TransactionWithCategory.Columns(transaction: $0, category: $1) }
             .fetchAll(db)

@@ -36,7 +36,7 @@ struct TransactionListFeatureTests {
         let store = TestStore(initialState: TransactionListFeature.State(month: month, today: now)) {
             TransactionListFeature()
         } withDependencies: {
-            $0.transactionClient.observeMonth = { _ in AsyncThrowingStream { $0.yield([lunch]); $0.finish() } }
+            $0.transactionClient.observe = { _ in AsyncThrowingStream { $0.yield([lunch]); $0.finish() } }
             $0.budgetClient.observe = { AsyncThrowingStream { $0.yield(budget); $0.finish() } }
             $0.transactionClient.fetchSummary = { interval in
                 requested.withValue { $0.append(interval) }

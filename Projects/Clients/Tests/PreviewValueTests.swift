@@ -8,12 +8,12 @@ struct PreviewValueTests {
     @Test func transaction_saveThenFetch() async throws {
         let client = TransactionClient.previewValue
         let month = DateInterval.month(containing: Date())
-        let before = try await client.fetchMonth(month: month)
+        let before = try await client.fetch(interval: month)
 
         let new = Transaction(id: UUID(), type: .expense, amount: 1_000, category: .Default.food, title: "간식", date: month.start)
         try await client.save(transaction: new)
 
-        let after = try await client.fetchMonth(month: month)
+        let after = try await client.fetch(interval: month)
         #expect(after.count == before.count + 1)
         #expect(after.contains(new))
     }
@@ -21,7 +21,7 @@ struct PreviewValueTests {
     @Test func transaction_observeEmitsAfterSave() async throws {
         let client = TransactionClient.previewValue
         let month = DateInterval.month(containing: Date())
-        var iterator = client.observeMonth(month: month).makeAsyncIterator()
+        var iterator = client.observe(interval: month).makeAsyncIterator()
         let initial = try #require(try await iterator.next())
 
         try await client.save(transaction: Transaction(id: UUID(), type: .expense, amount: 1, category: .Default.cafe, title: "t", date: month.start))

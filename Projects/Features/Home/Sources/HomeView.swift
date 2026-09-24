@@ -7,128 +7,130 @@ import SwiftUI
 
 public struct HomeView: View {
     let store: StoreOf<HomeFeature>
+    @State private var shortcutTapCount = 0
 
     public init(store: StoreOf<HomeFeature>) {
         self.store = store
     }
 
     public var body: some View {
-        List {
-            Section {
-                SummaryCard(month: store.month, summary: store.summary) {
-                    store.send(.previousMonthButtonTapped)
-                } onNext: {
-                    store.send(.nextMonthButtonTapped)
-                }
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.clear)
+        VStack(spacing: 0) {
+            // 스크롤 영역이 화면 위 가장자리에 닿지 않아야 카드가 상태 표시줄 아래로 넘어가지 않는다
+            MonthHeader(month: store.month.start, canMoveNext: store.canMoveToNextMonth) {
+                store.send(.previousMonthButtonTapped)
+            } onNext: {
+                store.send(.nextMonthButtonTapped)
             }
+            .padding(.horizontal, SDSpacing.page)
 
-            if let message = store.errorMessage {
-                Text(message)
-                    .font(.sd.footnote)
-                    .foregroundStyle(DesignSystemAsset.expense.swiftUIColor)
-            }
+            ScrollView {
+                VStack(spacing: SDSpacing.m) {
+                    SpendingCard(
+                        label: store.isTodaySelected ? "오늘 지출" : "\(store.selectedDay.monthDayFormatted) 지출",
+                        amount: store.selectedDayExpense,
+                        monthLabel: monthName,
+                        monthExpense: store.summary.expense
+                    )
 
-            ForEach(store.dailyGroups) { group in
-                Section {
-                    ForEach(group.transactions) { transaction in
-                        Button {
-                            store.send(.transactionTapped(transaction))
-                        } label: {
-                            TransactionRow(transaction: transaction)
+                    SDCalendar(
+                        month: store.month,
+                        today: store.today,
+                        selection: store.selectedDay,
+                        amount: { calendarAmount(store.dailyAmounts[$0]) },
+                        onSelect: { store.send(.dayTapped($0)) }
+                    )
+                    .sdCard(.floating, padding: SDSpacing.m)
+
+                    Button {
+                        store.send(.addButtonTapped)
+                    } label: {
+                        Label {
+                            Text("지출 추가")
+                        } icon: {
+                            SDIcon.plus.image.foregroundStyle(DesignSystemAsset.expense.swiftUIColor)
                         }
-                        .buttonStyle(.plain)
                     }
-                } header: {
-                    Text(group.day, format: .dateTime.month().day().weekday())
-                        .font(.sd.footnote)
+                    .buttonStyle(.sdSecondary)
+
+                    HStack(spacing: SDSpacing.cardGap) {
+                        ShortcutCard(icon: .money, title: "0원의 기적", subtitle: "무소비 데이 · 텅장방지") { open(.budget) }
+                        ShortcutCard(icon: .trendingUp, title: "통계", subtitle: "이번달은 얼마 썼을까요?") { open(.statistics) }
+                        ShortcutCard(icon: .repeat, title: "고정 지출", subtitle: "매달 빠져나가는 돈") { open(.fixedExpense) }
+                    }
+
+                    InsightBanner(insight: insight)
+
+                    if let message = store.errorMessage {
+                        Text(message)
+                            .font(.sd.footnote)
+                            .foregroundStyle(DesignSystemAsset.expense.swiftUIColor)
+                    }
+
+                    DayTransactionsCard(
+                        title: store.isTodaySelected ? "오늘 거래" : "\(store.selectedDay.monthDayFormatted) 거래",
+                        emptyTitle: store.isTodaySelected ? "아직 기록한 내역이 없어요" : "이 날은 기록된 내역이 없어요",
+                        transactions: store.selectedTransactions,
+                        onViewAll: { open(.transactionList) },
+                        onAdd: { store.send(.addButtonTapped) },
+                        onSelect: { store.send(.transactionTapped($0)) }
+                    )
                 }
+                .padding(.horizontal, SDSpacing.page)
+                .padding(.top, SDSpacing.xs)
+                .padding(.bottom, SDSpacing.xxl)
             }
         }
-        .overlay {
-            if store.transactions.isEmpty && !store.isLoading {
-                SDEmptyState(
-                    icon: .money,
-                    title: "아직 거래 내역이 없어요",
-                    message: "+ 버튼으로 첫 거래를 기록해보세요"
-                )
-            }
-        }
-        .scrollContentBackground(.hidden)
         .sdScreen()
-        .navigationTitle("쏠쏠")
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    store.send(.addButtonTapped)
-                } label: {
-                    SDIcon.plus.image
-                }
-                .accessibilityLabel("거래 추가")
-            }
-        }
+        .toolbar(.hidden, for: .navigationBar)
+        .sensoryFeedback(.selection, trigger: store.selectedDay)
+        .sensoryFeedback(.impact(weight: .light), trigger: store.month)
+        .sensoryFeedback(.impact(weight: .light), trigger: shortcutTapCount)
         .onAppear { store.send(.onAppear) }
     }
-}
 
-private struct SummaryCard: View {
-    let month: DateInterval
-    let summary: TransactionSummary
-    let onPrevious: () -> Void
-    let onNext: () -> Void
+    private var monthName: String {
+        store.isCurrentMonth ? "이번달" : store.month.start.formatted(.dateTime.month(.wide).locale(Locale(identifier: "ko_KR")))
+    }
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: SDSpacing.m) {
-            HStack {
-                Button(action: onPrevious) { SDIcon.back.image }
-                    .accessibilityLabel("이전 달")
-                Text(month.start, format: .dateTime.year().month())
-                    .font(.sd.displayHeadline)
-                    .foregroundStyle(DesignSystemAsset.textPrimary.swiftUIColor)
-                Button(action: onNext) { SDIcon.chevronRight.image }
-                    .accessibilityLabel("다음 달")
-            }
-            .buttonStyle(.borderless)
-            .tint(DesignSystemAsset.primary.swiftUIColor)
-
-            SDAmountText(summary.balance, style: .signed, font: .sd.displayTitle)
-
-            HStack(spacing: SDSpacing.xl) {
-                LabeledAmount(title: TransactionType.income.displayName, amount: summary.income, style: .income)
-                LabeledAmount(title: TransactionType.expense.displayName, amount: summary.expense, style: .expense)
-            }
+    private var insight: InsightBanner.Insight {
+        guard !store.transactions.isEmpty else {
+            return .init(icon: .info, title: "이번 달 기록을 시작해보아요", message: "수익과 지출을 기록하면 인사이트를 알려드려요")
         }
-        .sdCard()
+        let current = "\(monthName) 지출 \(store.summary.expense.wonFormatted)"
+        guard let rate = store.expenseChangeRate else {
+            return .init(icon: .trendingUp, title: "꾸준히 기록하고 있어요", message: current)
+        }
+        let title = switch rate {
+        case ..<0: "지난달보다 \(-rate)% 덜 썼어요 😆"
+        case 0: "지난달과 똑같이 썼어요 🙂"
+        default: "지난달보다 \(rate)% 더 썼어요 😞"
+        }
+        return .init(icon: .trendingUp, title: title, message: "\(current) · 지난달 \(store.previousSummary.expense.wonFormatted)")
+    }
+
+    private func calendarAmount(_ amount: DailyAmount?) -> SDCalendar.Amount? {
+        switch amount {
+        case let .expense(value):
+            SDCalendar.Amount(text: value.compactFormatted, accessibilityText: "지출 \(value.wonFormatted)")
+        case let .income(value):
+            SDCalendar.Amount(text: "+\(value.compactFormatted)", accessibilityText: "수입 \(value.wonFormatted)")
+        case nil:
+            nil
+        }
+    }
+
+    private func open(_ shortcut: HomeFeature.Shortcut) {
+        shortcutTapCount += 1
+        store.send(.shortcutTapped(shortcut))
     }
 }
 
-private struct LabeledAmount: View {
-    let title: String
-    let amount: Int
-    let style: SDAmountText.Style
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: SDSpacing.xxs) {
-            Text(title)
-                .font(.sd.footnote)
-                .foregroundStyle(DesignSystemAsset.textSecondary.swiftUIColor)
-            SDAmountText(amount, style: style)
-        }
-    }
-}
-
-private struct TransactionRow: View {
-    let transaction: Transaction
-
-    var body: some View {
-        SDTransactionRow(
-            title: transaction.title,
-            subtitle: transaction.memo.isEmpty ? transaction.category.name : transaction.memo,
-            amount: transaction.signedAmount,
-            color: SDCategoryColor(rawValue: transaction.category.colorKey)?.color
-                ?? DesignSystemAsset.textSecondary.swiftUIColor,
-            icon: SDIcon(key: transaction.category.iconKey)
+#Preview {
+    NavigationStack {
+        HomeView(
+            store: Store(initialState: HomeFeature.State(today: .now)) {
+                HomeFeature()
+            }
         )
     }
 }

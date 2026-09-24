@@ -37,6 +37,8 @@ struct AppView: View {
             switch store.case {
             case let .transactionEditor(store):
                 TransactionEditorView(store: store)
+            case let .comingSoon(store):
+                ComingSoonView(store: store)
             }
         }
         .sheet(item: $store.scope(state: \.destination?.transactionEditor, action: \.destination.transactionEditor)) { store in

@@ -14,6 +14,7 @@ struct AppFeature {
     @Reducer
     enum Path {
         case transactionEditor(TransactionEditorFeature)
+        case comingSoon(ComingSoonFeature)
     }
 
     @Reducer
@@ -31,8 +32,8 @@ struct AppFeature {
         var path = StackState<Path.State>()
         @Presents var destination: Destination.State?
 
-        init(month: DateInterval) {
-            self.home = HomeFeature.State(month: month)
+        init(today: Date) {
+            self.home = HomeFeature.State(today: today)
         }
     }
 
@@ -95,6 +96,10 @@ struct AppFeature {
                 state.path.append(.transactionEditor(TransactionEditorFeature.State(transaction: transaction)))
                 return .none
 
+            case let .home(.delegate(.open(shortcut))):
+                state.path.append(.comingSoon(ComingSoonFeature.State(title: shortcut.title)))
+                return .none
+
             case .home:
                 return .none
 
@@ -126,6 +131,17 @@ struct AppFeature {
     private func syncTime() -> Effect<Action> {
         .run { [timeSyncClient] send in
             await send(.timeSynced(await timeSyncClient.sync()))
+        }
+    }
+}
+
+extension HomeFeature.Shortcut {
+    var title: String {
+        switch self {
+        case .budget: "0원의 기적"
+        case .statistics: "통계"
+        case .fixedExpense: "고정 지출"
+        case .transactionList: "지출 리스트"
         }
     }
 }

@@ -18,4 +18,14 @@ extension Date {
     public var monthDayWeekdayFormatted: String {
         formatted(.dateTime.month().day().weekday(.wide).locale(Self.korean))
     }
+
+    /// "2025.01.15 (수)" — 기획서 고정 형식
+    public var dotDateWeekdayFormatted: String {
+        formatted(Date.VerbatimFormatStyle(
+            format: "\(year: .defaultDigits).\(month: .twoDigits).\(day: .twoDigits) (\(weekday: .abbreviated))",
+            locale: Self.korean,
+            timeZone: .current,
+            calendar: Calendar(identifier: .gregorian)
+        ))
+    }
 }

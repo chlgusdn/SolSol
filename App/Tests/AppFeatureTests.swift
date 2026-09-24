@@ -6,6 +6,7 @@ import HomeFeature
 import OnboardingFeature
 import Testing
 import TransactionEditorFeature
+import StatisticsFeature
 import TransactionListFeature
 @testable import SolSol
 
@@ -120,11 +121,23 @@ struct AppFeatureTests {
             AppFeature()
         }
 
-        await store.send(\.home.delegate.open, .statistics) {
-            $0.path[id: 0] = .comingSoon(ComingSoonFeature.State(title: "통계"))
+        await store.send(\.home.delegate.open, .budget) {
+            $0.path[id: 0] = .comingSoon(ComingSoonFeature.State(title: "0원의 기적"))
         }
         await store.send(\.home.delegate.open, .fixedExpense) {
             $0.path[id: 1] = .comingSoon(ComingSoonFeature.State(title: "고정 지출"))
+        }
+    }
+
+    @Test func statisticsShortcut_pushesStatisticsForThisMonth() async {
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
+            AppFeature()
+        } withDependencies: {
+            $0.date = .constant(now)
+        }
+
+        await store.send(\.home.delegate.open, .statistics) {
+            $0.path[id: 0] = .statistics(StatisticsFeature.State(today: self.now))
         }
     }
 

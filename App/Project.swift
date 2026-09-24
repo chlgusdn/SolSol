@@ -7,6 +7,7 @@ let project = AppProject.make(
         .feature("Onboarding"),
         .feature("Home"),
         .feature("TransactionList"),
+        .feature("Statistics"),
         .feature("TransactionEditor"),
         .data,
         .clients,

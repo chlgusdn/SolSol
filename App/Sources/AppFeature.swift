@@ -71,7 +71,7 @@ struct AppFeature {
                 )
 
             case .scenePhaseBecameActive:
-                return syncTime()
+                return .merge(syncTime(), .send(.home(.sceneBecameActive)))
 
             case .timeSynced:
                 return .none

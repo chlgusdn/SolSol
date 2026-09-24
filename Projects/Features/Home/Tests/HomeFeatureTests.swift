@@ -56,6 +56,28 @@ struct HomeFeatureTests {
         }
     }
 
+    @Test func monthChange_clearsPreviousMonthData() async {
+        var state = HomeFeature.State(today: now)
+        state.transactions = [transaction(0, .expense, 12_000)]
+        state.summary = TransactionSummary(expense: 12_000)
+        state.previousSummary = TransactionSummary(expense: 10_000)
+        let store = TestStore(initialState: state) {
+            HomeFeature()
+        } withDependencies: {
+            $0.transactionClient.observeMonth = { _ in .finished() }
+        }
+
+        let previous = month.shiftedMonth(by: -1)
+        await store.send(.previousMonthButtonTapped) {
+            $0.month = previous
+            $0.selectedDay = previous.start
+            $0.transactions = []
+            $0.summary = .zero
+            $0.previousSummary = .zero
+            $0.isLoading = true
+        }
+    }
+
     @Test func sceneBecameActive_sameDay_doesNothing() async {
         let store = TestStore(initialState: HomeFeature.State(today: now)) {
             HomeFeature()

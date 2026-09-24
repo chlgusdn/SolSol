@@ -161,16 +161,25 @@ public struct HomeFeature {
             if wasTodaySelected, state.isCurrentMonth { state.selectedDay = today }
             return false
         }
-        state.month = .month(containing: today)
-        state.selectedDay = today
+        show(.month(containing: today), selecting: today, in: &state)
         return true
     }
 
     /// 오늘이 있는 달로 오면 오늘을, 아니면 1일을 선택한다
     private func moveMonth(_ state: inout State, by offset: Int) -> Effect<Action> {
-        state.month = state.month.shiftedMonth(by: offset)
-        state.selectedDay = state.isCurrentMonth ? state.today : state.month.start
+        let month = state.month.shiftedMonth(by: offset)
+        let hasToday = month.start <= state.today && state.today < month.end
+        show(month, selecting: hasToday ? state.today : month.start, in: &state)
         return observe(&state)
+    }
+
+    /// 새 달의 관찰 결과가 오기 전까지 이전 달 거래·합계가 남아 보이지 않게 비운다
+    private func show(_ month: DateInterval, selecting day: Date, in state: inout State) {
+        state.month = month
+        state.selectedDay = day
+        state.transactions = []
+        state.summary = .zero
+        state.previousSummary = .zero
     }
 
     private func observe(_ state: inout State) -> Effect<Action> {

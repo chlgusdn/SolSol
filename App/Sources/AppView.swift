@@ -10,7 +10,8 @@ struct AppView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
-        Group {
+        // Group은 수정자를 조건부 자식마다 붙여 화면이 바뀔 때마다 onAppear가 다시 실행된다 — 안정적인 컨테이너에 붙인다
+        ZStack {
             if store.isCheckingOnboarding {
                 DesignSystemAsset.background.swiftUIColor.ignoresSafeArea()
             } else if let onboardingStore = store.scope(state: \.onboarding, action: \.onboarding) {

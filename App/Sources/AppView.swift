@@ -44,11 +44,6 @@ struct AppView: View {
                 ComingSoonView(store: store)
             }
         }
-        .sheet(item: $store.scope(state: \.destination?.transactionEditor, action: \.destination.transactionEditor)) { store in
-            NavigationStack {
-                TransactionEditorView(store: store)
-            }
-            .presentationDetents([.large])
-        }
+        .sdToast($store.toast.sending(\.toastChanged))
     }
 }

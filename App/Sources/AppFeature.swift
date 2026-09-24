@@ -1,6 +1,7 @@
 import Clients
 import ComposableArchitecture
 import Core
+import DesignSystem
 import Domain
 import Foundation
 import HomeFeature
@@ -19,11 +20,6 @@ struct AppFeature {
         case comingSoon(ComingSoonFeature)
     }
 
-    @Reducer
-    enum Destination {
-        case transactionEditor(TransactionEditorFeature)
-    }
-
     @ObservableState
     struct State: Equatable {
         /// 온보딩 완료 여부를 확인하는 중 (확인 전에는 홈을 보여주지 않는다)
@@ -32,7 +28,7 @@ struct AppFeature {
         var onboarding: OnboardingFeature.State?
         var home: HomeFeature.State
         var path = StackState<Path.State>()
-        @Presents var destination: Destination.State?
+        var toast: String?
 
         init(today: Date) {
             self.home = HomeFeature.State(today: today)
@@ -47,12 +43,14 @@ struct AppFeature {
         case onboarding(OnboardingFeature.Action)
         case home(HomeFeature.Action)
         case path(StackActionOf<Path>)
-        case destination(PresentationAction<Destination.Action>)
+        case toastChanged(String?)
+        case saveTransitionFinished(editor: StackElementID, transaction: Domain.Transaction, isNew: Bool)
     }
 
     @Dependency(\.timeSyncClient) var timeSyncClient
     @Dependency(\.settingsClient) var settingsClient
     @Dependency(\.date.now) var now
+    @Dependency(\.continuousClock) var clock
 
     var body: some ReducerOf<Self> {
         Scope(state: \.home, action: \.home) {
@@ -90,8 +88,8 @@ struct AppFeature {
             case .onboarding:
                 return .none
 
-            case .home(.delegate(.addTransaction)):
-                state.destination = .transactionEditor(TransactionEditorFeature.State(date: now))
+            case let .home(.delegate(.addTransaction(day))):
+                state.path.append(.transactionEditor(TransactionEditorFeature.State(date: day.settingTime(from: now))))
                 return .none
 
             case let .home(.delegate(.editTransaction(transaction))):
@@ -109,17 +107,35 @@ struct AppFeature {
             case .home:
                 return .none
 
-            case let .path(.element(id, .transactionEditor(.delegate(delegate)))):
-                switch delegate {
-                case .saved, .deleted, .cancelled:
-                    state.path.pop(from: id)
+            case let .path(.element(id, .transactionEditor(.delegate(.saved(transaction, isNew))))):
+                let kind = transaction.type == .income ? "수익" : "지출"
+                state.toast = isNew ? "\(kind)을 저장했어요" : "\(kind)을 수정했어요"
+                // 기획서: 토스트를 보여준 뒤 잠시 후 화면을 옮긴다
+                return .run { [clock] send in
+                    try await clock.sleep(for: SDDuration.saveToNavigate)
+                    await send(.saveTransitionFinished(editor: id, transaction: transaction, isNew: isNew))
                 }
+
+            case let .saveTransitionFinished(editorID, transaction, isNew):
+                guard state.path.ids.contains(editorID) else { return .none }
+                state.path.pop(from: editorID)
+                // 새 거래는 지출 리스트로 이동한다. 리스트에서 왔다면 그 리스트로 돌아간다
+                if isNew, !isTransactionList(state.path.last) {
+                    state.path.append(.transactionList(TransactionListFeature.State(
+                        month: .month(containing: transaction.date),
+                        today: now
+                    )))
+                }
+                return .none
+
+            case let .toastChanged(toast):
+                state.toast = toast
                 return .none
 
             case let .path(.element(_, .transactionList(.delegate(delegate)))):
                 switch delegate {
                 case .addTransaction:
-                    state.destination = .transactionEditor(TransactionEditorFeature.State(date: now))
+                    state.path.append(.transactionEditor(TransactionEditorFeature.State(date: now)))
                 case let .editTransaction(transaction):
                     state.path.append(.transactionEditor(TransactionEditorFeature.State(transaction: transaction)))
                 case .openBudgetSettings:
@@ -129,20 +145,17 @@ struct AppFeature {
 
             case .path:
                 return .none
-
-            case .destination(.presented(.transactionEditor(.delegate))):
-                state.destination = nil
-                return .none
-
-            case .destination:
-                return .none
             }
         }
         .ifLet(\.onboarding, action: \.onboarding) {
             OnboardingFeature()
         }
         .forEach(\.path, action: \.path)
-        .ifLet(\.$destination, action: \.destination)
+    }
+
+    private func isTransactionList(_ element: Path.State?) -> Bool {
+        if case .transactionList = element { return true }
+        return false
     }
 
     private func syncTime() -> Effect<Action> {
@@ -164,4 +177,3 @@ extension HomeFeature.Shortcut {
 }
 
 extension AppFeature.Path.State: Equatable {}
-extension AppFeature.Destination.State: Equatable {}

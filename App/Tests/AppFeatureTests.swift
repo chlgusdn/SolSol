@@ -13,52 +13,106 @@ import TransactionListFeature
 struct AppFeatureTests {
     private let now = Date(timeIntervalSince1970: 1_800_000_000)
 
-    @Test func addTransaction_presentsEditorSheet_andDismissesOnSave() async {
+    @Test func addFromHome_pushesEditorOnSelectedDay_thenToastAndMovesToList() async {
+        let clock = TestClock()
+        let calendar = Calendar.current
+        let selectedDay = calendar.startOfDay(for: calendar.date(byAdding: .day, value: -2, to: now)!)
         let store = TestStore(initialState: AppFeature.State(today: now)) {
             AppFeature()
         } withDependencies: {
             $0.date = .constant(now)
             $0.uuid = .incrementing
+            $0.continuousClock = clock
             $0.transactionClient.save = { _ in }
         }
 
-        await store.send(\.home.delegate.addTransaction) {
-            $0.destination = .transactionEditor(TransactionEditorFeature.State(date: self.now))
+        let recordedAt = selectedDay.settingTime(from: now)
+        await store.send(\.home.delegate.addTransaction, selectedDay) {
+            $0.path[id: 0] = .transactionEditor(TransactionEditorFeature.State(date: recordedAt))
         }
-        await store.send(\.destination.transactionEditor.binding.amountText, "1000") {
-            $0.destination?.modify(\.transactionEditor) { $0.amountText = "1000" }
+        await store.send(\.path[id: 0].transactionEditor.keypadTapped, .digit(5)) {
+            $0.path[id: 0]?.modify(\.transactionEditor) { $0.amount = 5 }
         }
-        await store.send(\.destination.transactionEditor.saveButtonTapped) {
-            $0.destination?.modify(\.transactionEditor) { $0.isSaving = true }
+        await store.send(\.path[id: 0].transactionEditor.saveButtonTapped) {
+            $0.path[id: 0]?.modify(\.transactionEditor) { $0.isSaving = true }
         }
-        await store.receive(\.destination.transactionEditor.saveFinished) {
-            $0.destination?.modify(\.transactionEditor) { $0.isSaving = false }
+        await store.receive(\.path[id: 0].transactionEditor.saveFinished) {
+            $0.path[id: 0]?.modify(\.transactionEditor) { $0.isSaved = true }
         }
-        await store.receive(\.destination.transactionEditor.delegate.saved) {
-            $0.destination = nil
+        await store.receive(\.path[id: 0].transactionEditor.delegate.saved) {
+            $0.toast = "지출을 저장했어요"
+        }
+        await clock.advance(by: .milliseconds(650))
+        await store.receive(\.saveTransitionFinished) {
+            $0.path[id: 0] = nil
+            $0.path[id: 1] = .transactionList(TransactionListFeature.State(month: .month(containing: recordedAt), today: self.now))
         }
     }
 
-    @Test func editTransaction_pushesEditor_andPopsOnDelete() async {
+    @Test func addFromList_returnsToThatList() async {
+        let clock = TestClock()
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
+            AppFeature()
+        } withDependencies: {
+            $0.date = .constant(now)
+            $0.continuousClock = clock
+        }
+        let transaction = Domain.Transaction(id: UUID(1), type: .income, amount: 5_000, category: .Default.income, title: "용돈", date: now)
+
+        await store.send(\.home.delegate.open, .transactionList) {
+            $0.path[id: 0] = .transactionList(TransactionListFeature.State(month: .month(containing: self.now), today: self.now))
+        }
+        await store.send(\.path[id: 0].transactionList.delegate.addTransaction) {
+            $0.path[id: 1] = .transactionEditor(TransactionEditorFeature.State(date: self.now))
+        }
+        await store.send(.path(.element(id: 1, action: .transactionEditor(.delegate(.saved(transaction, isNew: true)))))) {
+            $0.toast = "수익을 저장했어요"
+        }
+        await clock.advance(by: .milliseconds(650))
+        await store.receive(\.saveTransitionFinished) {
+            $0.path[id: 1] = nil
+        }
+    }
+
+    @Test func edit_savesThenPopsBack_withEditToast() async {
+        let clock = TestClock()
         let transaction = Domain.Transaction(id: UUID(1), type: .expense, amount: 5_000, category: .Default.food, title: "점심", date: now)
         let store = TestStore(initialState: AppFeature.State(today: now)) {
             AppFeature()
         } withDependencies: {
-            $0.transactionClient.delete = { _ in }
+            $0.continuousClock = clock
         }
 
         await store.send(\.home.delegate.editTransaction, transaction) {
             $0.path[id: 0] = .transactionEditor(TransactionEditorFeature.State(transaction: transaction))
         }
-        await store.send(\.path[id: 0].transactionEditor.deleteButtonTapped) {
-            $0.path[id: 0]?.modify(\.transactionEditor) { $0.isSaving = true }
+        await store.send(.path(.element(id: 0, action: .transactionEditor(.delegate(.saved(transaction, isNew: false)))))) {
+            $0.toast = "지출을 수정했어요"
         }
-        await store.receive(\.path[id: 0].transactionEditor.deleteFinished) {
-            $0.path[id: 0]?.modify(\.transactionEditor) { $0.isSaving = false }
-        }
-        await store.receive(\.path[id: 0].transactionEditor.delegate.deleted) {
+        await clock.advance(by: .milliseconds(650))
+        await store.receive(\.saveTransitionFinished) {
             $0.path = StackState()
         }
+    }
+
+    @Test func saveTransition_afterUserLeftEditor_doesNothing() async {
+        let clock = TestClock()
+        let transaction = Domain.Transaction(id: UUID(1), type: .expense, amount: 5_000, category: .Default.food, title: "점심", date: now)
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
+            AppFeature()
+        } withDependencies: {
+            $0.continuousClock = clock
+        }
+
+        await store.send(\.home.delegate.editTransaction, transaction) {
+            $0.path[id: 0] = .transactionEditor(TransactionEditorFeature.State(transaction: transaction))
+        }
+        await store.send(.path(.element(id: 0, action: .transactionEditor(.delegate(.saved(transaction, isNew: true)))))) {
+            $0.toast = "지출을 저장했어요"
+        }
+        await store.send(.path(.popFrom(id: 0))) { $0.path = StackState() }
+        await clock.advance(by: .milliseconds(650))
+        await store.receive(\.saveTransitionFinished)
     }
 
     @Test func shortcut_pushesComingSoonScreenWithTitle() async {
@@ -94,7 +148,7 @@ struct AppFeatureTests {
             $0.path[id: 2] = .comingSoon(ComingSoonFeature.State(title: "예산 설정"))
         }
         await store.send(\.path[id: 0].transactionList.delegate.addTransaction) {
-            $0.destination = .transactionEditor(TransactionEditorFeature.State(date: self.now))
+            $0.path[id: 3] = .transactionEditor(TransactionEditorFeature.State(date: self.now))
         }
     }
 

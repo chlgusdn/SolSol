@@ -55,7 +55,7 @@ Domain       → Foundation만
 | 확장 | 해당 모듈 `Sources/Extensions/` | `Type+기능.swift` (예: `Int+Currency.swift`) |
 
 - 새 모듈·Feature·Client는 **직접 만들지 말고 `tuist scaffold`** 로 생성한다
-- 파일 하나에 주요 타입 하나. 그 타입 전용의 작은 private 타입(예: View의 하위 View)은 같은 파일에 둔다
+- 파일 하나에 주요 타입 하나. **View는 하위 View까지 한 파일에 하나** — 화면 전용 하위 View는 `Features/<Name>/Sources/Components/<ViewName>.swift`에 `internal`로 둔다
 - 파일을 추가·삭제하면 `tuist generate`를 다시 실행한다
 
 ### 네이밍

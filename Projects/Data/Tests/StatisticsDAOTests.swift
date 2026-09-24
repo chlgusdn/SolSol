@@ -59,6 +59,26 @@ struct StatisticsDAOTests {
         #expect(byName["쇼핑"] == CategoryTotal(category: .Default.shopping, amount: 30_000, count: 1))
     }
 
+    @Test func bucketTotals_manyBuckets_oneQuery_fillsEmptyWithZero_andSplitsAtBoundary() async throws {
+        let database = try TestDatabase.make()
+        let transactions = TransactionDAO(database: database)
+        let months = (0..<36).map { offset in
+            DateInterval.month(containing: calendar.date(byAdding: .month, value: offset, to: day(1, 1))!, calendar: calendar)
+        }
+        // 월 경계 정각의 거래는 새 달 칸에 들어간다
+        try await transactions.save(transaction(.expense, 1_000, on: months[1].start))
+        try await transactions.save(transaction(.income, 5_000, on: months[35].start.addingTimeInterval(3_600)))
+        let period = DateInterval(start: months[0].start, end: months[35].end)
+
+        let snapshot = try await database.read { db in try StatisticsDAO.snapshot(period, months, in: db) }
+
+        #expect(snapshot.bucketTotals.count == 36)
+        #expect(snapshot.bucketTotals[0] == .zero)
+        #expect(snapshot.bucketTotals[1] == TransactionSummary(expense: 1_000))
+        #expect(snapshot.bucketTotals[35] == TransactionSummary(income: 5_000))
+        #expect(snapshot.bucketTotals.filter { $0 != .zero }.count == 2)
+    }
+
     @Test func snapshot_emptyPeriod_isEmpty() async throws {
         let database = try TestDatabase.make()
         let period = DateInterval(start: day(9, 1), end: day(9, 2))

@@ -1,11 +1,17 @@
 import Clients
 import ComposableArchitecture
+import Core
 import Domain
 import Foundation
 
-/// 거래 추가/수정 화면
+/// 수익/지출 입력·수정 — 키패드 금액 + 카테고리·제목·메모·날짜·고정 지출
 @Reducer
 public struct TransactionEditorFeature {
+    @Reducer(state: .equatable, action: .equatable)
+    public enum Destination {
+        case addCategory(AddCategoryFeature)
+    }
+
     @ObservableState
     public struct State: Equatable {
         public enum Mode: Equatable, Sendable {
@@ -15,25 +21,30 @@ public struct TransactionEditorFeature {
 
         public var mode: Mode
         public var type: TransactionType
-        public var amountText: String
+        public var amount: Int
         public var title: String
+        public var memo: String
         public var categoryID: TransactionCategory.ID
         /// 선택 가능한 지출 카테고리 (onAppear에 DB에서 불러온다)
         public var expenseCategories: [TransactionCategory] = TransactionCategory.Default.expenses
-        public var memo: String
         public var date: Date
         public var isFixed: Bool
         public var isSaving = false
+        public var isSaved = false
+        public var shakeCount = 0
+        public var toast: String?
+        public var isDatePickerPresented = false
+        @Presents public var destination: Destination.State?
         @Presents public var alert: AlertState<Action.Alert>?
 
         /// 새 거래 작성
-        public init(date: Date) {
+        public init(date: Date, type: TransactionType = .expense) {
             self.mode = .create
-            self.type = .expense
-            self.amountText = ""
+            self.type = type
+            self.amount = 0
             self.title = ""
-            self.categoryID = TransactionCategory.Default.food.id
             self.memo = ""
+            self.categoryID = type == .income ? TransactionCategory.Default.income.id : TransactionCategory.Default.food.id
             self.date = date
             self.isFixed = false
         }
@@ -42,10 +53,10 @@ public struct TransactionEditorFeature {
         public init(transaction: Transaction) {
             self.mode = .edit(transaction.id)
             self.type = transaction.type
-            self.amountText = String(transaction.amount)
+            self.amount = transaction.amount
             self.title = transaction.title
-            self.categoryID = transaction.category.id
             self.memo = transaction.memo
+            self.categoryID = transaction.category.id
             self.date = transaction.date
             self.isFixed = transaction.isFixed
             if transaction.type == .expense, !expenseCategories.contains(transaction.category) {
@@ -53,16 +64,8 @@ public struct TransactionEditorFeature {
             }
         }
 
-        /// 1 … `Transaction.maxAmount` 범위의 금액
-        public var amount: Int? {
-            Int(amountText.filter(\.isNumber)).flatMap { (1...Transaction.maxAmount).contains($0) ? $0 : nil }
-        }
-
-        public var isAmountOverLimit: Bool {
-            (Int(amountText.filter(\.isNumber)) ?? 0) > Transaction.maxAmount
-        }
-
-        public var canSave: Bool { amount != nil && !isSaving }
+        public var isEditing: Bool { mode != .create }
+        public var canSave: Bool { amount > 0 && !isSaving }
 
         public var availableCategories: [TransactionCategory] {
             switch type {
@@ -76,7 +79,6 @@ public struct TransactionEditorFeature {
                 ?? availableCategories.first
                 ?? TransactionCategory.Default.food
         }
-        public var isEditing: Bool { mode != .create }
     }
 
     public enum Action: BindableAction, Equatable {
@@ -85,12 +87,16 @@ public struct TransactionEditorFeature {
         case categoriesLoaded([TransactionCategory])
         case categoriesLoadFailed(String)
         case typeChanged(TransactionType)
+        case keypadTapped(AmountInput.Key)
+        case categoryTapped(TransactionCategory.ID)
+        case addCategoryButtonTapped
+        case fixedToggled
+        case dateRowTapped
+        case dateSelected(Date)
         case saveButtonTapped
-        case deleteButtonTapped
-        case cancelButtonTapped
-        case saveFinished
-        case deleteFinished
-        case operationFailed(String)
+        case saveFinished(Transaction)
+        case saveFailed(String)
+        case destination(PresentationAction<Destination.Action>)
         case alert(PresentationAction<Alert>)
         case delegate(Delegate)
 
@@ -98,9 +104,7 @@ public struct TransactionEditorFeature {
 
         @CasePathable
         public enum Delegate: Equatable, Sendable {
-            case saved
-            case deleted
-            case cancelled
+            case saved(Transaction, isNew: Bool)
         }
     }
 
@@ -156,8 +160,39 @@ public struct TransactionEditorFeature {
                 }
                 return .none
 
+            case let .keypadTapped(key):
+                switch AmountInput.apply(key, to: state.amount) {
+                case let .updated(amount):
+                    state.amount = amount
+                case .overLimit:
+                    state.shakeCount += 1
+                    state.toast = "최대 \(Transaction.maxAmount.compactFormatted)원까지 입력할 수 있어요"
+                }
+                return .none
+
+            case let .categoryTapped(id):
+                state.categoryID = id
+                return .none
+
+            case .addCategoryButtonTapped:
+                state.destination = .addCategory(AddCategoryFeature.State())
+                return .none
+
+            case .fixedToggled:
+                state.isFixed.toggle()
+                return .none
+
+            case .dateRowTapped:
+                state.isDatePickerPresented = true
+                return .none
+
+            case let .dateSelected(day):
+                state.date = day.settingTime(from: state.date)
+                state.isDatePickerPresented = false
+                return .none
+
             case .saveButtonTapped:
-                guard let amount = state.amount, !state.isSaving else { return .none }
+                guard state.canSave, !state.isSaved else { return .none }
                 state.isSaving = true
                 let id: Transaction.ID = switch state.mode {
                 case .create: uuid()
@@ -167,7 +202,7 @@ public struct TransactionEditorFeature {
                 let transaction = Transaction(
                     id: id,
                     type: state.type,
-                    amount: amount,
+                    amount: state.amount,
                     category: state.selectedCategory,
                     title: title.isEmpty ? Transaction.defaultTitle(for: state.type) : title,
                     memo: String(state.memo.trimmingCharacters(in: .whitespacesAndNewlines).prefix(Transaction.memoLimit)),
@@ -176,33 +211,17 @@ public struct TransactionEditorFeature {
                 )
                 return .run { [transactionClient] send in
                     try await transactionClient.save(transaction: transaction)
-                    await send(.saveFinished)
+                    await send(.saveFinished(transaction))
                 } catch: { error, send in
-                    await send(.operationFailed(error.localizedDescription))
+                    await send(.saveFailed(error.localizedDescription))
                 }
 
-            case .deleteButtonTapped:
-                guard case let .edit(id) = state.mode, !state.isSaving else { return .none }
-                state.isSaving = true
-                return .run { [transactionClient] send in
-                    try await transactionClient.delete(id: id)
-                    await send(.deleteFinished)
-                } catch: { error, send in
-                    await send(.operationFailed(error.localizedDescription))
-                }
+            case let .saveFinished(transaction):
+                // 부모가 토스트 후 화면을 옮길 때까지 다시 저장되지 않도록 isSaving을 유지한다
+                state.isSaved = true
+                return .send(.delegate(.saved(transaction, isNew: !state.isEditing)))
 
-            case .cancelButtonTapped:
-                return .send(.delegate(.cancelled))
-
-            case .saveFinished:
-                state.isSaving = false
-                return .send(.delegate(.saved))
-
-            case .deleteFinished:
-                state.isSaving = false
-                return .send(.delegate(.deleted))
-
-            case let .operationFailed(message):
+            case let .saveFailed(message):
                 state.isSaving = false
                 state.alert = AlertState {
                     TextState("저장하지 못했어요")
@@ -211,10 +230,18 @@ public struct TransactionEditorFeature {
                 }
                 return .none
 
-            case .alert, .delegate:
+            case let .destination(.presented(.addCategory(.delegate(.added(category))))):
+                state.expenseCategories.append(category)
+                state.categoryID = category.id
+                state.destination = nil
+                return .none
+
+            case .destination, .alert, .delegate:
                 return .none
             }
         }
+        .ifLet(\.$destination, action: \.destination)
         .ifLet(\.$alert, action: \.alert)
     }
 }
+

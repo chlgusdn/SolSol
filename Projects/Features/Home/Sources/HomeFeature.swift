@@ -73,7 +73,7 @@ public struct HomeFeature {
 
         @CasePathable
         public enum Delegate: Equatable, Sendable {
-            case addTransaction
+            case addTransaction(on: Date)
             case editTransaction(Transaction)
             case open(Shortcut)
         }
@@ -109,7 +109,7 @@ public struct HomeFeature {
                 return .none
 
             case .addButtonTapped:
-                return .send(.delegate(.addTransaction))
+                return .send(.delegate(.addTransaction(on: state.selectedDay)))
 
             case let .shortcutTapped(shortcut):
                 return .send(.delegate(.open(shortcut)))

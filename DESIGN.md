@@ -28,6 +28,7 @@ Projects/DesignSystem/
     ├── Styles/                      # SDButtonStyle
     ├── Modifiers/                   # sdScreen, sdCard, sdToast, sdSheet(Style), sdShake  (sdShadow는 Tokens/SDShadow)
     └── Components/                  # SDAmountText, SDTopBar, SDCategoryChip, SDTransactionRow, SDEmptyState, SDCategoryColor, SDPageIndicator, SDProgressRing, SDCalendar, SDKeypad, SDFlowLayout
+        └── Charts/                 # SDBarChart, SDLineChart, SDDonutChart, SDChartPoint
 ```
 
 - 모든 컴포넌트·스타일·모디파이어는 **`SD` 접두사**
@@ -211,9 +212,11 @@ Tuist가 생성한 `DesignSystemAsset.<name>.swiftUIColor`로만 쓴다. `Color.
 | `SDEmptyState` | `SDEmptyState(icon:, title:, message:, actionTitle:, action:)` | 원형 tint 아이콘 + Pixel 제목 + 안내 + 선택적 버튼 |
 | `SDPageIndicator` | `SDPageIndicator(count: 4, current: $page)` | 현재 페이지는 `primary` 막대(너비 24), 나머지는 `textTertiary` 점(8). 표시 전용(탭 없음 — 점마다 44 영역 불가). VoiceOver는 조절 요소로 이동 |
 | `SDProgressRing` | `SDProgressRing(progress: 0.7, color:) { 가운데 내용 }` | 12시 방향부터 시계 방향으로 채움. 트랙은 색의 `SDOpacity.tint`, 선 두께 기본 `SDSpacing.m`, 둥근 끝 |
-| `SDCalendar` | `SDCalendar(month:, today:, selection:, amount: { SDCalendar.Amount(text:, accessibilityText:) }, onSelect:)` | 일요일 시작 7열. 오늘은 `primary` 원, 선택일은 `primary` 링, 날짜 아래 `textSecondary` 금액(`compactFormatted` — "1.2만"). 칸 높이 44, 폭은 열 너비 |
+| `SDCalendar` | `SDCalendar(month:, today:, selection:, amount: { SDCalendar.Amount(text:, accessibilityText:) }, onSelect:)` | 일요일 시작 7열. 오늘은 `primary` 원, 선택일은 `primary` 링, 날짜 아래 `textSecondary` 금액(`compactFormatted` — "1.2만"). 칸 높이 44, 폭은 열 너비. `range:`를 주면 기간 선택 모드(양 끝 `primary` 원, 사이 연한 `primary`) |
 | `SDKeypad` | `SDKeypad { key in … }` | 3×4 (1…9, 00, 0, ⌫), Pixel 숫자, 키 높이 54. 누름 시 `border` 배경 |
 | `SDFlowLayout` | `SDFlowLayout(spacing:) { 칩들 }` | 폭이 다른 요소를 가로로 채우고 넘치면 줄바꿈 (카테고리 칩) |
+| `SDBarChart` / `SDLineChart` | `SDBarChart(points:, averageIncome:, averageExpense:, selection:)` | Swift Charts. 수익 `chartIncome` · 지출 `chartExpense` + 글로우, 평균은 점선. 드래그하면 세로 마커 + 툴팁(칸 제목·수익·지출). x축 라벨은 최대 7개, y축은 축약 금액 |
+| `SDDonutChart` | `SDDonutChart(slices:)` | 비중 도넛 + 범례(이름·%). 색 없는 조각(기타)은 `textTertiary` |
 | `.sdCard(_:radius:padding:)` | `.sdCard()` / `.sdCard(.floating, radius: SDRadius.l)` | `surface` 배경, 기본 여백 `SDSpacing.l`, 기본 그림자 `.card` |
 | `.sdScreen()` | 화면 루트 | `background` 전체 배경 |
 | `.sdToast(_:)` | `.sdToast($message)` | 하단 150pt 위 중앙, 검정 85%, `SDRadius.m`, `.sd.callout`, 2.2초 후 자동 닫힘 |
@@ -221,12 +224,13 @@ Tuist가 생성한 `DesignSystemAsset.<name>.swiftUIColor`로만 쓴다. `Color.
 | `.sdShake(trigger:)` | `.sdShake(trigger: count)` | 좌우 흔들림 0.5s |
 
 - 금액은 반드시 `SDAmountText` 또는 `Int.wonFormatted` / `signedWonFormatted`(Core)로 표시한다
-- 차트, 영수증 카드는 해당 Feature를 만들 때 DesignSystem에 추가한다. 예산 다이얼은 `SDProgressRing`을 쓴다
+- 영수증 카드는 고정 지출 화면을 만들 때 DesignSystem에 추가한다. 예산 다이얼은 `SDProgressRing`을 쓴다
 
 ## 9. 화면 패턴 (기획서 요약)
 - **온보딩**: 첫 실행에만 표시. 4장 가로 스와이프(`TabView` page 스타일) + `SDPageIndicator` + 하단 CTA("다음" → 마지막 장 "이제부터 시작!") + 우상단 `.sdText` "건너뛰기"(마지막 장에서 숨김). 완료·건너뛰기 시 `SettingsClient.completeOnboarding()`. 앱 시작 시 완료 여부를 확인하는 동안은 빈 배경만 보여 홈이 깜빡이지 않게 한다
 - **홈**: 월 이동(← 2025년 1월 →) → 선택일 지출 카드("오늘 지출" / "1월 15일 지출" + 이번달 총 지출) → `SDCalendar` → "지출 추가" → 바로가기 카드 3개(0원의 기적·통계·고정 지출) → 인사이트 배너(지난달 대비 지출 증감) → 선택일 거래 + "전체보기". 월 이동은 이번 달까지만 가능하다(이번 달에서는 → 숨김). 월을 옮기면 오늘이 있는 달은 오늘, 아니면 1일을 선택한다. 내비게이션 바는 숨기고, 월 이동은 스크롤 밖에 고정해 카드가 상태 표시줄 영역을 넘지 않게 한다
 - **지출 리스트**: 상단 제목 "2025년 1월"(홈에서 보던 달) → 요약 카드(총 지출, 예산 사용률 바 + "예산 X원의 N%", 수입) → 날짜별 그룹(헤더 "2025.01.15 (수)" + 그날 지출) → 하단 고정 "내역 추가". 예산 사용률은 **예산 기간(시작일~만기일) 지출** 기준. 예산이 없으면 "아직 예산을 설정하지 않았어요" + "설정하기". 행을 누르면 수정, 왼쪽으로 밀면 삭제(확인 알림)
+- **통계**: `surfaceDark` 헤더("통계" + 안내) 아래 흰 시트(상단 `SDRadius.drawer`). 기간 버튼("2026.09.01 ~ 2026.09.24", 기본 이번 달 1일~오늘) → 탭(평균·추세·지출 보고) → Pixel 인사이트 → 차트 → 가장 큰 수익·지출, 자주 사용된 지출. 차트 한 칸은 기간이 31일 이하면 하루, 넘으면 한 달. 평균 탭은 "하루(월) 평균 지출·수입" + 막대 + 평균 점선. 추세 탭은 앞·뒤 절반 평균 지출 비교 문구. 지출 보고는 상위 4개 카테고리 + 기타. 기간 시트: 최근 7·14·30일 + 범위 캘린더(첫 탭 시작, 둘째 탭 종료, 거꾸로면 자동 교체) + "이 기간으로 볼게요"
 - **내비게이션**: 탭바 없음. 홈이 허브이고 모든 하위 화면은 push, 좌상단 뒤로가기로 복귀
 - **입력 화면**: push. `surfaceDark` 헤더(← / 수익·지출 토글 / ✓ 저장, 금액 0이면 비활성) + Pixel 금액 + 지출 카테고리 칩(+ 카테고리 추가 시트) + 제목·메모·날짜 카드 + 고정 지출 체크 + `SDKeypad`. 토글은 포인트 색만 바꾸고 헤더 배경은 그대로. 날짜는 홈에서 고른 날(리스트에서는 오늘)로 시작하고 날짜 행으로 바꾼다. 수정도 같은 화면(삭제는 리스트 스와이프만). 상한 초과 시 흔들림 + 토스트 + `.error` 햅틱
 - **저장 흐름**: 저장 → 토스트("지출을 저장했어요" / 수정은 "지출을 수정했어요") → 0.65초 후 이동. 새 거래는 지출 리스트로(리스트에서 왔으면 그 리스트로 복귀), 수정은 이전 화면으로. 토스트는 화면이 바뀌어도 보이도록 App이 띄운다

@@ -4,6 +4,7 @@ import HomeFeature
 import OnboardingFeature
 import SwiftUI
 import TransactionEditorFeature
+import TransactionListFeature
 
 struct AppView: View {
     @Bindable var store: StoreOf<AppFeature>
@@ -37,6 +38,8 @@ struct AppView: View {
             switch store.case {
             case let .transactionEditor(store):
                 TransactionEditorView(store: store)
+            case let .transactionList(store):
+                TransactionListView(store: store)
             case let .comingSoon(store):
                 ComingSoonView(store: store)
             }

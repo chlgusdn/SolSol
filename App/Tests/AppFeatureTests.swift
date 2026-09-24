@@ -6,6 +6,7 @@ import HomeFeature
 import OnboardingFeature
 import Testing
 import TransactionEditorFeature
+import TransactionListFeature
 @testable import SolSol
 
 @MainActor
@@ -68,8 +69,32 @@ struct AppFeatureTests {
         await store.send(\.home.delegate.open, .statistics) {
             $0.path[id: 0] = .comingSoon(ComingSoonFeature.State(title: "통계"))
         }
+        await store.send(\.home.delegate.open, .fixedExpense) {
+            $0.path[id: 1] = .comingSoon(ComingSoonFeature.State(title: "고정 지출"))
+        }
+    }
+
+    @Test func viewAll_pushesTransactionListForHomeMonth_andRoutesItsDelegates() async {
+        let transaction = Domain.Transaction(id: UUID(1), type: .expense, amount: 5_000, category: .Default.food, title: "점심", date: now)
+        var initialState = AppFeature.State(today: now)
+        initialState.home.month = initialState.home.month.shiftedMonth(by: -1)
+        let store = TestStore(initialState: initialState) {
+            AppFeature()
+        } withDependencies: {
+            $0.date = .constant(now)
+        }
+
         await store.send(\.home.delegate.open, .transactionList) {
-            $0.path[id: 1] = .comingSoon(ComingSoonFeature.State(title: "지출 리스트"))
+            $0.path[id: 0] = .transactionList(TransactionListFeature.State(month: initialState.home.month, today: self.now))
+        }
+        await store.send(\.path[id: 0].transactionList.delegate.editTransaction, transaction) {
+            $0.path[id: 1] = .transactionEditor(TransactionEditorFeature.State(transaction: transaction))
+        }
+        await store.send(\.path[id: 0].transactionList.delegate.openBudgetSettings) {
+            $0.path[id: 2] = .comingSoon(ComingSoonFeature.State(title: "예산 설정"))
+        }
+        await store.send(\.path[id: 0].transactionList.delegate.addTransaction) {
+            $0.destination = .transactionEditor(TransactionEditorFeature.State(date: self.now))
         }
     }
 

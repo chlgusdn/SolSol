@@ -6,6 +6,7 @@ let project = AppProject.make(
     dependencies: [
         .feature("Onboarding"),
         .feature("Home"),
+        .feature("TransactionList"),
         .feature("TransactionEditor"),
         .data,
         .clients,

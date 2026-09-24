@@ -7,6 +7,7 @@ import HomeFeature
 import OnboardingFeature
 import OSLog
 import TransactionEditorFeature
+import TransactionListFeature
 
 /// 루트 Reducer — Feature 간 이동을 조립한다
 @Reducer
@@ -14,6 +15,7 @@ struct AppFeature {
     @Reducer
     enum Path {
         case transactionEditor(TransactionEditorFeature)
+        case transactionList(TransactionListFeature)
         case comingSoon(ComingSoonFeature)
     }
 
@@ -96,6 +98,10 @@ struct AppFeature {
                 state.path.append(.transactionEditor(TransactionEditorFeature.State(transaction: transaction)))
                 return .none
 
+            case .home(.delegate(.open(.transactionList))):
+                state.path.append(.transactionList(TransactionListFeature.State(month: state.home.month, today: now)))
+                return .none
+
             case let .home(.delegate(.open(shortcut))):
                 state.path.append(.comingSoon(ComingSoonFeature.State(title: shortcut.title)))
                 return .none
@@ -107,6 +113,17 @@ struct AppFeature {
                 switch delegate {
                 case .saved, .deleted, .cancelled:
                     state.path.pop(from: id)
+                }
+                return .none
+
+            case let .path(.element(_, .transactionList(.delegate(delegate)))):
+                switch delegate {
+                case .addTransaction:
+                    state.destination = .transactionEditor(TransactionEditorFeature.State(date: now))
+                case let .editTransaction(transaction):
+                    state.path.append(.transactionEditor(TransactionEditorFeature.State(transaction: transaction)))
+                case .openBudgetSettings:
+                    state.path.append(.comingSoon(ComingSoonFeature.State(title: "예산 설정")))
                 }
                 return .none
 

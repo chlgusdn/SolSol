@@ -1,7 +1,8 @@
 import Core
 import SwiftUI
 
-/// 월 캘린더 — 일요일 시작 7열. 오늘은 `primary` 원, 선택일은 `primary` 링, 날짜 아래 금액
+/// 월 캘린더 — 일요일 시작 7열. 오늘은 `primary` 원, 선택일은 `primary` 링, 날짜 아래 금액.
+/// `range`를 주면 기간 선택 모드: 양 끝은 `primary` 원, 사이는 연한 `primary`
 public struct SDCalendar: View {
     /// 날짜 아래 표시할 금액
     public struct Amount: Equatable, Sendable {
@@ -17,6 +18,7 @@ public struct SDCalendar: View {
     private let month: DateInterval
     private let today: Date
     private let selection: Date
+    private let range: ClosedRange<Date>?
     private let calendar: Calendar
     private let amount: (Date) -> Amount?
     private let onSelect: (Date) -> Void
@@ -25,13 +27,15 @@ public struct SDCalendar: View {
         month: DateInterval,
         today: Date,
         selection: Date,
+        range: ClosedRange<Date>? = nil,
         calendar: Calendar = .current,
-        amount: @escaping (Date) -> Amount?,
+        amount: @escaping (Date) -> Amount? = { _ in nil },
         onSelect: @escaping (Date) -> Void
     ) {
         self.month = month
         self.today = today
         self.selection = selection
+        self.range = range
         self.calendar = calendar
         self.amount = amount
         self.onSelect = onSelect
@@ -67,9 +71,21 @@ public struct SDCalendar: View {
         return Array(repeating: nil, count: leading) + days
     }
 
+    private enum RangeRole { case endpoint, inside }
+
+    private func rangeRole(_ day: Date) -> RangeRole? {
+        guard let range else { return nil }
+        if calendar.isDate(day, inSameDayAs: range.lowerBound) || calendar.isDate(day, inSameDayAs: range.upperBound) {
+            return .endpoint
+        }
+        return range.contains(day) ? .inside : nil
+    }
+
     private func dayCell(_ day: Date) -> some View {
-        let isToday = calendar.isDate(day, inSameDayAs: today)
-        let isSelected = calendar.isDate(day, inSameDayAs: selection)
+        let role = rangeRole(day)
+        let isToday = range == nil && calendar.isDate(day, inSameDayAs: today)
+        let isSelected = range == nil ? calendar.isDate(day, inSameDayAs: selection) : role != nil
+        let isFilled = isToday || role == .endpoint
         let amount = amount(day)
         let weekdayIndex = calendar.component(.weekday, from: day) - 1
 
@@ -79,11 +95,13 @@ public struct SDCalendar: View {
             VStack(spacing: SDSpacing.xxs) {
                 Text("\(calendar.component(.day, from: day))")
                     .font(.sd.displayCaption)
-                    .foregroundStyle(isToday ? DesignSystemAsset.onPrimary.swiftUIColor : weekdayColor(weekdayIndex, fallback: DesignSystemAsset.textPrimary.swiftUIColor))
+                    .foregroundStyle(isFilled ? DesignSystemAsset.onPrimary.swiftUIColor : weekdayColor(weekdayIndex, fallback: DesignSystemAsset.textPrimary.swiftUIColor))
                     .frame(width: SDSize.iconXL - SDSpacing.s, height: SDSize.iconXL - SDSpacing.s)
                     .background {
-                        if isToday {
+                        if isFilled {
                             Circle().fill(DesignSystemAsset.primary.swiftUIColor)
+                        } else if role == .inside {
+                            Circle().fill(DesignSystemAsset.primary.swiftUIColor.opacity(SDOpacity.tint))
                         } else if isSelected {
                             Circle().strokeBorder(DesignSystemAsset.primary.swiftUIColor, lineWidth: SDSize.borderThick)
                         }

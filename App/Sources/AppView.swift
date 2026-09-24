@@ -4,6 +4,7 @@ import HomeFeature
 import OnboardingFeature
 import SwiftUI
 import TransactionEditorFeature
+import StatisticsFeature
 import TransactionListFeature
 
 struct AppView: View {
@@ -40,6 +41,8 @@ struct AppView: View {
                 TransactionEditorView(store: store)
             case let .transactionList(store):
                 TransactionListView(store: store)
+            case let .statistics(store):
+                StatisticsView(store: store)
             case let .comingSoon(store):
                 ComingSoonView(store: store)
             }

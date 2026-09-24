@@ -50,6 +50,36 @@ struct TransactionCalculatorTests {
 
         #expect(groups.map(\.day) == [calendar.startOfDay(for: day2), calendar.startOfDay(for: day1)])
     }
+
+    @Test func dailyAmounts_expenseWinsOverIncome_incomeOnlyDayShowsIncome() {
+        let day1 = calendar.date(from: DateComponents(year: 2026, month: 2, day: 1, hour: 9))!
+        let day2 = calendar.date(from: DateComponents(year: 2026, month: 2, day: 2, hour: 9))!
+        let transactions = [
+            Transaction(id: UUID(0), type: .expense, amount: 12_000, category: .Default.food, title: "점심", date: day1),
+            Transaction(id: UUID(1), type: .expense, amount: 3_000, category: .Default.food, title: "커피", date: day1),
+            Transaction(id: UUID(2), type: .income, amount: 50_000, category: .Default.income, title: "용돈", date: day1),
+            Transaction(id: UUID(3), type: .income, amount: 3_000_000, category: .Default.income, title: "월급", date: day2)
+        ]
+
+        let amounts = TransactionCalculator.dailyAmounts(transactions, calendar: calendar)
+
+        #expect(amounts == [
+            calendar.startOfDay(for: day1): .expense(15_000),
+            calendar.startOfDay(for: day2): .income(3_000_000)
+        ])
+    }
+
+    @Test func expenseChangeRate_roundsPercent_nilWithoutPreviousExpense() {
+        #expect(TransactionCalculator.expenseChangeRate(
+            current: TransactionSummary(expense: 880_000), previous: TransactionSummary(expense: 1_000_000)
+        ) == -12)
+        #expect(TransactionCalculator.expenseChangeRate(
+            current: TransactionSummary(expense: 1_010), previous: TransactionSummary(expense: 1_000)
+        ) == 1)
+        #expect(TransactionCalculator.expenseChangeRate(
+            current: TransactionSummary(expense: 10_000), previous: TransactionSummary(income: 5_000)
+        ) == nil)
+    }
 }
 
 private extension UUID {

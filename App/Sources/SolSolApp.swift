@@ -8,7 +8,7 @@ struct SolSolApp: App {
     @MainActor static let store = Store(
         initialState: {
             @Dependency(\.date.now) var now
-            return AppFeature.State(month: .month(containing: now))
+            return AppFeature.State(today: now)
         }()
     ) {
         AppFeature()

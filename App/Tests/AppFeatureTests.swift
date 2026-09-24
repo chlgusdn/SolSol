@@ -13,7 +13,7 @@ struct AppFeatureTests {
     private let now = Date(timeIntervalSince1970: 1_800_000_000)
 
     @Test func addTransaction_presentsEditorSheet_andDismissesOnSave() async {
-        let store = TestStore(initialState: AppFeature.State(month: .month(containing: now))) {
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
             AppFeature()
         } withDependencies: {
             $0.date = .constant(now)
@@ -40,7 +40,7 @@ struct AppFeatureTests {
 
     @Test func editTransaction_pushesEditor_andPopsOnDelete() async {
         let transaction = Domain.Transaction(id: UUID(1), type: .expense, amount: 5_000, category: .Default.food, title: "점심", date: now)
-        let store = TestStore(initialState: AppFeature.State(month: .month(containing: now))) {
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
             AppFeature()
         } withDependencies: {
             $0.transactionClient.delete = { _ in }
@@ -60,8 +60,21 @@ struct AppFeatureTests {
         }
     }
 
+    @Test func shortcut_pushesComingSoonScreenWithTitle() async {
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
+            AppFeature()
+        }
+
+        await store.send(\.home.delegate.open, .statistics) {
+            $0.path[id: 0] = .comingSoon(ComingSoonFeature.State(title: "통계"))
+        }
+        await store.send(\.home.delegate.open, .transactionList) {
+            $0.path[id: 1] = .comingSoon(ComingSoonFeature.State(title: "지출 리스트"))
+        }
+    }
+
     @Test func onAppear_firstLaunch_showsOnboarding_thenHomeAfterCompletion() async {
-        let store = TestStore(initialState: AppFeature.State(month: .month(containing: now))) {
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
             AppFeature()
         } withDependencies: {
             $0.timeSyncClient.sync = { nil }
@@ -86,7 +99,7 @@ struct AppFeatureTests {
     }
 
     @Test func onAppear_returningUser_skipsOnboarding() async {
-        let store = TestStore(initialState: AppFeature.State(month: .month(containing: now))) {
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
             AppFeature()
         } withDependencies: {
             $0.timeSyncClient.sync = { self.now }
@@ -103,7 +116,7 @@ struct AppFeatureTests {
 
     @Test func onAppear_statusCheckFails_showsHome() async {
         struct Failure: Error {}
-        let store = TestStore(initialState: AppFeature.State(month: .month(containing: now))) {
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
             AppFeature()
         } withDependencies: {
             $0.timeSyncClient.sync = { nil }
@@ -119,7 +132,7 @@ struct AppFeatureTests {
     }
 
     @Test func scenePhaseActive_onlySyncsTime() async {
-        let store = TestStore(initialState: AppFeature.State(month: .month(containing: now))) {
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
             AppFeature()
         } withDependencies: {
             $0.timeSyncClient.sync = { self.now }

@@ -94,7 +94,7 @@ public struct TransactionListFeature {
                 let month = state.month
                 return .merge(
                     .run { [transactionClient] send in
-                        for try await transactions in transactionClient.observeMonth(month: month) {
+                        for try await transactions in transactionClient.observe(interval: month) {
                             await send(.transactionsUpdated(transactions))
                         }
                     } catch: { error, send in

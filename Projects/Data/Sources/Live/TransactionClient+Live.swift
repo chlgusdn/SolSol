@@ -11,11 +11,11 @@ extension TransactionClient: DependencyKey {
     static func live(database: any DatabaseWriter) -> Self {
         let dao = TransactionDAO(database: database)
         return Self(
-            fetchMonth: dao.fetchMonth,
+            fetch: dao.fetch,
             fetchSummary: dao.fetchSummary,
             save: dao.save,
             delete: dao.delete,
-            observeMonth: dao.observeMonth
+            observe: dao.observe
         )
     }
 }

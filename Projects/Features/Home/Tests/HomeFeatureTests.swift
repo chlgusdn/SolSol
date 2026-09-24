@@ -45,7 +45,7 @@ struct HomeFeatureTests {
         let store = TestStore(initialState: HomeFeature.State(today: firstDay)) {
             HomeFeature()
         } withDependencies: {
-            $0.transactionClient.observeMonth = { _ in .finished() }
+            $0.transactionClient.observe = { _ in .finished() }
         }
 
         let january = DateInterval.month(containing: firstDay).shiftedMonth(by: -1)
@@ -64,7 +64,7 @@ struct HomeFeatureTests {
         let store = TestStore(initialState: state) {
             HomeFeature()
         } withDependencies: {
-            $0.transactionClient.observeMonth = { _ in .finished() }
+            $0.transactionClient.observe = { _ in .finished() }
         }
 
         let previous = month.shiftedMonth(by: -1)
@@ -96,7 +96,7 @@ struct HomeFeatureTests {
             HomeFeature()
         } withDependencies: {
             $0.date = .constant(nextMorning)
-            $0.transactionClient.observeMonth = { month in
+            $0.transactionClient.observe = { month in
                 requested.withValue { $0.append(month) }
                 return .finished()
             }
@@ -147,7 +147,7 @@ struct HomeFeatureTests {
             HomeFeature()
         } withDependencies: {
             $0.date = .constant(tomorrow)
-            $0.transactionClient.observeMonth = { _ in
+            $0.transactionClient.observe = { _ in
                 AsyncThrowingStream { $0.yield([lunch]); $0.finish() }
             }
             $0.transactionClient.fetchSummary = { interval in
@@ -178,7 +178,7 @@ struct HomeFeatureTests {
         let store = TestStore(initialState: HomeFeature.State(today: now)) {
             HomeFeature()
         } withDependencies: {
-            $0.transactionClient.observeMonth = { month in
+            $0.transactionClient.observe = { month in
                 requested.withValue { $0.append(month) }
                 return .finished()
             }
@@ -231,7 +231,7 @@ struct HomeFeatureTests {
             HomeFeature()
         } withDependencies: {
             $0.date = .constant(now)
-            $0.transactionClient.observeMonth = { _ in AsyncThrowingStream { $0.finish(throwing: Failure()) } }
+            $0.transactionClient.observe = { _ in AsyncThrowingStream { $0.finish(throwing: Failure()) } }
         }
 
         await store.send(.onAppear) { $0.isLoading = true }

@@ -27,7 +27,7 @@ struct MigrationTests {
         try migrate(database)
 
         let month = DateInterval(start: .distantPast, end: .distantFuture)
-        let transactions = try await TransactionDAO(database: database).fetchMonth(month)
+        let transactions = try await TransactionDAO(database: database).fetch(month)
         let byID = Dictionary(uniqueKeysWithValues: transactions.map { ($0.id.uuidString.lowercased().suffix(1), $0) })
 
         #expect(transactions.count == 4)

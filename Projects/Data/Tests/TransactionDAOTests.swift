@@ -29,7 +29,7 @@ struct TransactionDAOTests {
         try await dao.save(inMarch)
         try await dao.save(expense(5_000, on: date(4, 1)))
 
-        #expect(try await dao.fetchMonth(march) == [inMarch])
+        #expect(try await dao.fetch(march) == [inMarch])
     }
 
     @Test func save_existingId_updates() async throws {
@@ -42,7 +42,7 @@ struct TransactionDAOTests {
         transaction.category = .Default.transport
         try await dao.save(transaction)
 
-        #expect(try await dao.fetchMonth(month) == [transaction])
+        #expect(try await dao.fetch(month) == [transaction])
     }
 
     @Test func save_unknownCategory_failsForeignKey() async throws {
@@ -77,15 +77,15 @@ struct TransactionDAOTests {
 
         try await dao.delete(transaction.id)
 
-        #expect(try await dao.fetchMonth(month).isEmpty)
+        #expect(try await dao.fetch(month).isEmpty)
     }
 
-    @Test func observeMonth_emitsOnChange() async throws {
+    @Test func observe_emitsOnChange() async throws {
         let dao = try makeDAO()
         let month = DateInterval.month(containing: date(3, 1), calendar: calendar)
         let transaction = expense(1_000, on: date(3, 2))
 
-        var iterator = dao.observeMonth(month).makeAsyncIterator()
+        var iterator = dao.observe(month).makeAsyncIterator()
         #expect(try await iterator.next() == [])
 
         try await dao.save(transaction)

@@ -116,7 +116,7 @@ func makeMigrator() -> DatabaseMigrator {
 - 인터페이스는 Clients, live 구현은 Data에 둔다
 - 실제 로직은 **DAO의 일반 메서드**에 작성하고, live는 DAO 메서드를 클로저에 연결만 한다
 - Client는 **Domain 모델만** 주고받는다
-- 클로저 인자에 레이블을 붙인다 (`_ month:`) → 호출은 `client.fetchMonth(month:)`
+- 클로저 인자에 레이블을 붙인다 (`_ interval:`) → 호출은 `client.fetch(interval:)`
 - throw하지 않는 클로저는 기본값을 지정한다 (매크로 요구사항)
 - `testValue = Self()` (매크로가 만든 unimplemented), `previewValue`는 공용 인메모리 저장소 `PreviewStore`(Clients/Sources/Preview)로 구현한다 — 변경 시 관찰 스트림에도 반영된다
 - **새 Client는 `bootstrapLive(database:)`에 반드시 등록한다.** Data는 staticFramework라서 App이 직접 참조하지 않는 `XxxClient+Live.swift`는 링커가 제거하고, 그러면 `DependencyKey` 적합성이 사라져 앱에서 `testValue`(unimplemented)가 쓰인다
@@ -125,9 +125,9 @@ func makeMigrator() -> DatabaseMigrator {
 // Clients/Sources/TransactionClient.swift
 @DependencyClient
 public struct TransactionClient: Sendable {
-    public var fetchMonth: @Sendable (_ month: DateInterval) async throws -> [Transaction]
+    public var fetch: @Sendable (_ interval: DateInterval) async throws -> [Transaction]
     public var save: @Sendable (_ transaction: Transaction) async throws -> Void
-    public var observeMonth: @Sendable (_ month: DateInterval) -> AsyncThrowingStream<[Transaction], any Error> = { _ in .finished() }
+    public var observe: @Sendable (_ interval: DateInterval) -> AsyncThrowingStream<[Transaction], any Error> = { _ in .finished() }
 }
 
 extension DependencyValues {
@@ -153,7 +153,7 @@ extension TransactionClient: DependencyKey {
 
     static func live(database: any DatabaseWriter) -> Self {
         let dao = TransactionDAO(database: database)
-        return Self(fetchMonth: dao.fetchMonth, save: dao.save, observeMonth: dao.observeMonth)
+        return Self(fetch: dao.fetch, save: dao.save, observe: dao.observe)
     }
 }
 
@@ -255,7 +255,7 @@ case .saveButtonTapped:
     let store = TestStore(initialState: HomeFeature.State(month: month)) {
         HomeFeature()
     } withDependencies: {
-        $0.transactionClient.observeMonth = { _ in AsyncThrowingStream { $0.yield([sample]); $0.finish() } }
+        $0.transactionClient.observe = { _ in AsyncThrowingStream { $0.yield([sample]); $0.finish() } }
         $0.transactionClient.fetchSummary = { _ in TransactionSummary(income: 0, expense: 12_000) }
     }
     await store.send(.onAppear) { $0.isLoading = true }

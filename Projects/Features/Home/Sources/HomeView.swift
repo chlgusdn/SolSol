@@ -25,6 +25,8 @@ public struct HomeView: View {
 
             ScrollView {
                 VStack(spacing: SDSpacing.m) {
+                    // SDCalendar가 날짜마다 호출하므로 한 번만 계산한다
+                    let amounts = store.dailyAmounts
                     SpendingCard(
                         label: store.isTodaySelected ? "오늘 지출" : "\(store.selectedDay.monthDayFormatted) 지출",
                         amount: store.selectedDayExpense,
@@ -36,7 +38,7 @@ public struct HomeView: View {
                         month: store.month,
                         today: store.today,
                         selection: store.selectedDay,
-                        amount: { calendarAmount(store.dailyAmounts[$0]) },
+                        amount: { calendarAmount(amounts[$0]) },
                         onSelect: { store.send(.dayTapped($0)) }
                     )
                     .sdCard(.floating, padding: SDSpacing.m)

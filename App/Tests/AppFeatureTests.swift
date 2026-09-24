@@ -131,14 +131,16 @@ struct AppFeatureTests {
         #expect(store.state.onboarding == nil)
     }
 
-    @Test func scenePhaseActive_onlySyncsTime() async {
+    @Test func scenePhaseActive_syncsTimeAndRefreshesHome_withoutRecheckingOnboarding() async {
         let store = TestStore(initialState: AppFeature.State(today: now)) {
             AppFeature()
         } withDependencies: {
+            $0.date = .constant(now)
             $0.timeSyncClient.sync = { self.now }
         }
 
         await store.send(.scenePhaseBecameActive)
+        await store.receive(\.home.sceneBecameActive)
         await store.receive(\.timeSynced)
     }
 }

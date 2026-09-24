@@ -16,6 +16,7 @@ extension DependencyValues {
         fixedExpenseClient = .live(database: database)
         budgetClient = .live(database: database)
         settingsClient = .live(database: database)
+        statisticsClient = .live(database: database)
         timeSyncClient = .liveValue
     }
 }

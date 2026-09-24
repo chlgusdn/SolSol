@@ -15,18 +15,8 @@ struct BudgetSetupBanner: View {
                     .foregroundStyle(DesignSystemAsset.textSecondary.swiftUIColor)
             }
             Spacer(minLength: 0)
-            // 배너 안이라 CTA보다 작게 그리고, 터치 영역은 44를 유지한다
-            Button(action: action) {
-                Text("설정하기")
-                    .font(.sd.callout)
-                    .foregroundStyle(DesignSystemAsset.onPrimary.swiftUIColor)
-                    .padding(.horizontal, SDSpacing.m)
-                    .padding(.vertical, SDSpacing.s)
-                    .background(RoundedRectangle(cornerRadius: SDRadius.s).fill(DesignSystemAsset.cta.swiftUIColor))
-                    .frame(minHeight: SDSize.touchTarget)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
+            Button("설정하기", action: action)
+                .buttonStyle(.sdPrimarySmall)
         }
         .padding(SDSpacing.m)
         .background(

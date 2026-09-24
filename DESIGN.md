@@ -202,7 +202,7 @@ Tuist가 생성한 `DesignSystemAsset.<name>.swiftUIColor`로만 쓴다. `Color.
 
 | 이름 | 사용법 | 규격 |
 |------|--------|------|
-| `SDButtonStyle` | `.buttonStyle(.sdPrimary)` / `.sdPrimaryCompact` / `.sdSecondary` / `.sdText` | primary: `cta` 배경 + `onPrimary` 글자, 전체 너비, 높이 54, `SDRadius.s`, `.sd.headline`. compact: 내용 너비, 높이 44. secondary: `surface` + `border` 테두리. text: 배경 없음, `primary` 글자. 비활성 `SDOpacity.disabled` |
+| `SDButtonStyle` | `.buttonStyle(.sdPrimary)` / `.sdPrimaryCompact` / `.sdPrimarySmall` / `.sdSecondary` / `.sdText` | primary: `cta` 배경 + `onPrimary` 글자, 전체 너비, 높이 54, `SDRadius.s`, `.sd.headline`. compact: 내용 너비, 높이 44. small: 카드·배너 안 버튼, `.sd.callout`, 보이는 높이 약 32 + 터치 영역 44. secondary: `surface` + `border` 테두리. text: 배경 없음, `primary` 글자. 비활성 `SDOpacity.disabled` |
 | `SDAmountText` | `SDAmountText(12_000, style: .signed, font: .sd.displayBody)` | `.plain` / `.signed`(부호 + 수입·지출 색) / `.income` / `.expense`. Pixel 폰트, 숫자 전환 애니메이션 |
 | `SDTopBar` | `SDTopBar(title:, style: .light/.dark, onBack:, trailing:)` | 뒤로가기 44 영역 + 가운데 제목 + 우측 액션. `.dark`는 `surfaceDark` 배경 |
 | `SDCategoryChip` | `SDCategoryChip("식비", color: .red, isSelected:)` | 색 점 + 라벨, `SDRadius.pill`, 선택 시 색 테두리 + tint 배경 |

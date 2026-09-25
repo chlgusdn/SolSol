@@ -73,6 +73,8 @@ struct BudgetTests {
         #expect(budget.status(spent: 700_000) == .warning)
         #expect(budget.status(spent: 899_999) == .warning)
         #expect(budget.status(spent: 900_000) == .danger)
+        #expect(budget.status(spent: 1_000_000) == .danger)
+        #expect(budget.status(spent: 1_000_001) == .exceeded)
         #expect(budget.usageRatio(spent: 500_000) == 0.5)
         #expect(budget.remaining(spent: 1_200_000) == -200_000)
     }
@@ -89,6 +91,66 @@ struct BudgetTests {
         #expect(budget.daysRemaining(from: date(1, 30, hour: 23), calendar: calendar) == 1)
         #expect(budget.daysRemaining(from: date(1, 31, hour: 23), calendar: calendar) == 0)
         #expect(budget.daysRemaining(from: date(2, 5), calendar: calendar) == 0)
+    }
+
+    @Test func isExpired_afterDueDateOnly() {
+        let budget = Budget.suggested(amount: 1_000, startDate: date(1, 1), dueDate: date(1, 31, hour: 9))
+        #expect(!budget.isExpired(at: date(1, 31, hour: 23), calendar: calendar))
+        #expect(budget.isExpired(at: date(2, 1, hour: 0), calendar: calendar))
+    }
+
+    @Test func result_recordsSpentAndOverAmount() {
+        let budget = Budget.suggested(amount: 1_000_000, startDate: date(1, 1), dueDate: date(1, 31))
+        let over = budget.result(spent: 1_200_000, id: UUID())
+        #expect(over.isExceeded)
+        #expect(over.overAmount == 200_000)
+        #expect(over.usageRatio == 1.2)
+        let kept = budget.result(spent: 800_000, id: UUID())
+        #expect(!kept.isExceeded)
+        #expect(kept.overAmount == 0)
+    }
+
+    @Test func differencePercent_signedAndNeverZeroUnlessExact() {
+        let budget = Budget.suggested(amount: 1_000_000, startDate: date(1, 1), dueDate: date(1, 31))
+        #expect(budget.differencePercent(spent: 1_200_000) == 20)
+        #expect(budget.differencePercent(spent: 850_000) == -15)
+        #expect(budget.differencePercent(spent: 1_000_000) == 0)
+        #expect(budget.differencePercent(spent: 1_001_000) == 1)
+        #expect(budget.differencePercent(spent: 999_000) == -1)
+        #expect(budget.result(spent: 1_200_000, id: UUID()).differencePercent == 20)
+    }
+
+    @Test func newAlert_onlyWhenMoreSevereThanNotified() {
+        #expect(BudgetStatus.safe.newAlert(since: nil) == nil)
+        #expect(BudgetStatus.warning.newAlert(since: nil) == .warning)
+        #expect(BudgetStatus.warning.newAlert(since: .warning) == nil)
+        #expect(BudgetStatus.danger.newAlert(since: .warning) == .danger)
+        #expect(BudgetStatus.warning.newAlert(since: .danger) == nil)
+        #expect(BudgetStatus.exceeded.newAlert(since: .danger) == .exceeded)
+    }
+
+    @Test func remainingPeriodRatio_fullAtStart_emptyAtDue() {
+        let budget = Budget.suggested(amount: 1_000, startDate: date(1, 1), dueDate: date(1, 11))
+        #expect(budget.remainingPeriodRatio(from: date(1, 1), calendar: calendar) == 1)
+        #expect(budget.remainingPeriodRatio(from: date(1, 6), calendar: calendar) == 0.5)
+        #expect(budget.remainingPeriodRatio(from: date(1, 11), calendar: calendar) == 0)
+        #expect(budget.remainingPeriodRatio(from: date(2, 1), calendar: calendar) == 0)
+        let sameDay = Budget.suggested(amount: 1_000, startDate: date(1, 1), dueDate: date(1, 1))
+        #expect(sameDay.remainingPeriodRatio(from: date(1, 1), calendar: calendar) == 0)
+    }
+
+    @Test func withAmount_rescalesUntouchedThresholds_keepsCustomOnes() {
+        let suggested = Budget.suggested(amount: 1_000_000, startDate: date(1, 1), dueDate: date(1, 31))
+        let rescaled = suggested.withAmount(500_000)
+        #expect(rescaled.warnAmount == 350_000)
+        #expect(rescaled.dangerAmount == 450_000)
+
+        var custom = suggested
+        custom.warnAmount = 600_000
+        let kept = custom.withAmount(2_000_000)
+        #expect(kept.amount == 2_000_000)
+        #expect(kept.warnAmount == 600_000)
+        #expect(kept.dangerAmount == 900_000)
     }
 }
 

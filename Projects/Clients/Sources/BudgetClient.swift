@@ -12,9 +12,8 @@ public struct BudgetClient: Sendable {
     public var save: @Sendable (_ budget: Budget) async throws -> Void
     public var clear: @Sendable () async throws -> Void
     public var observe: @Sendable () -> AsyncThrowingStream<Budget?, any Error> = { .finished() }
-    /// 경고·위험·초과 중 이미 알린 가장 심각한 단계
-    public var notifiedStatus: @Sendable () async throws -> BudgetStatus?
-    public var setNotifiedStatus: @Sendable (_ status: BudgetStatus?) async throws -> Void
+    /// 이미 알린 단계보다 `status`가 심각하면 기록하고 true (원자적). 예산이 없거나 이미 알렸으면 false
+    public var raiseNotifiedStatus: @Sendable (_ status: BudgetStatus) async throws -> Bool
     /// 끝난 예산의 결과를 기록하고 `budget`으로 바꾼다 (nil이면 예산을 지운다)
     public var close: @Sendable (_ result: BudgetResult, _ closedAt: Date, _ budget: Budget?) async throws -> Void
     /// 가장 최근에 끝난 예산의 결과
@@ -45,8 +44,11 @@ extension BudgetClient: TestDependencyKey {
             },
             clear: { await store.update { $0 = nil } },
             observe: { store.stream() },
-            notifiedStatus: { await notified.get() },
-            setNotifiedStatus: { status in await notified.update { $0 = status } },
+            raiseNotifiedStatus: { status in
+                guard status.newAlert(since: await notified.get()) != nil else { return false }
+                await notified.update { $0 = status }
+                return true
+            },
             close: { result, _, budget in
                 await results.update { $0.append(result) }
                 await store.update { $0 = budget }

@@ -38,18 +38,35 @@ struct BudgetDAOTests {
         #expect(try await iterator.next() == .some(nil))
     }
 
-    @Test func notifiedStatus_persists_andResetsWhenBudgetSaved() async throws {
+    @Test func raiseNotifiedStatus_onlyWhenMoreSevere_andResetsWhenBudgetSaved() async throws {
         let dao = BudgetDAO(database: try TestDatabase.make())
+        #expect(try await dao.raiseNotifiedStatus(.warning) == false)
+
         let budget = Budget.suggested(amount: 1_000_000, startDate: start, dueDate: due)
         try await dao.save(budget)
         #expect(try await dao.notifiedStatus() == nil)
 
-        try await dao.setNotifiedStatus(.danger)
+        #expect(try await dao.raiseNotifiedStatus(.warning) == true)
+        #expect(try await dao.raiseNotifiedStatus(.warning) == false)
+        #expect(try await dao.raiseNotifiedStatus(.danger) == true)
+        #expect(try await dao.raiseNotifiedStatus(.warning) == false)
         #expect(try await dao.notifiedStatus() == .danger)
         #expect(try await dao.fetch() == budget)
 
         try await dao.save(budget.withAmount(2_000_000))
         #expect(try await dao.notifiedStatus() == nil)
+    }
+
+    @Test func raiseNotifiedStatus_concurrentCalls_onlyOneSucceeds() async throws {
+        let dao = BudgetDAO(database: try TestDatabase.make())
+        try await dao.save(.suggested(amount: 1_000_000, startDate: start, dueDate: due))
+
+        let results = try await withThrowingTaskGroup(of: Bool.self) { group in
+            for _ in 0..<10 { group.addTask { try await dao.raiseNotifiedStatus(.warning) } }
+            return try await group.reduce(into: [Bool]()) { $0.append($1) }
+        }
+
+        #expect(results.filter { $0 }.count == 1)
     }
 
     @Test func close_invalidResult_isRejected_andKeepsBudget() async throws {

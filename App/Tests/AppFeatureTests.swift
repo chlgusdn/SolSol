@@ -249,8 +249,13 @@ struct AppFeatureTests {
             $0.date = .constant(now)
             $0.continuousClock = clock
             $0.budgetClient.fetch = { budget }
-            $0.budgetClient.notifiedStatus = { notified.value }
-            $0.budgetClient.setNotifiedStatus = { notified.setValue($0) }
+            $0.budgetClient.raiseNotifiedStatus = { status in
+                notified.withValue { current in
+                    guard status.newAlert(since: current) != nil else { return false }
+                    current = status
+                    return true
+                }
+            }
             $0.transactionClient.fetchSummary = { _ in TransactionSummary(expense: 80_000) }
         }
 

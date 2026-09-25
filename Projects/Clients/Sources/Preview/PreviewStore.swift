@@ -14,10 +14,17 @@ actor PreviewStore<Value: Sendable> {
     }
 
     func update(_ transform: @Sendable (inout Value) -> Void) {
-        transform(&value)
+        modify(transform)
+    }
+
+    /// 읽고 판단하고 바꾸는 일을 actor 안에서 한 번에 한다 (조건부 갱신용)
+    @discardableResult
+    func modify<Result: Sendable>(_ transform: @Sendable (inout Value) -> Result) -> Result {
+        let result = transform(&value)
         for continuation in continuations.values {
             continuation.yield(value)
         }
+        return result
     }
 
     /// 현재 값을 먼저 보내고, 이후 변경마다 보낸다

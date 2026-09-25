@@ -61,6 +61,7 @@ public struct Budget: Hashable, Sendable {
     }
 
     public func status(spent: Int) -> BudgetStatus {
+        if spent > amount { return .exceeded }
         if spent >= dangerAmount { return .danger }
         if spent >= warnAmount { return .warning }
         return .safe
@@ -76,6 +77,19 @@ public struct Budget: Hashable, Sendable {
         amount - spent
     }
 
+    /// 예산 대비 더 쓴(+) / 아낀(-) 비율 %
+    public func differencePercent(spent: Int) -> Int {
+        Self.differencePercent(spent: spent, amount: amount)
+    }
+
+    /// 반올림하되, 조금이라도 넘거나 남았으면 0%가 되지 않게 한다 ("딱 맞게"와 구분)
+    static func differencePercent(spent: Int, amount: Int) -> Int {
+        guard amount > 0, spent != amount else { return 0 }
+        let percent = Int((Double(spent - amount) / Double(amount) * 100).rounded())
+        if percent == 0 { return spent > amount ? 1 : -1 }
+        return percent
+    }
+
     /// 만기일까지 남은 일수 (만기일 당일 0, 지나면 0)
     public func daysRemaining(from now: Date, calendar: Calendar = .current) -> Int {
         let days = calendar.dateComponents(
@@ -85,11 +99,76 @@ public struct Budget: Hashable, Sendable {
         ).day ?? 0
         return max(0, days)
     }
+
+    /// 만기일이 지났는지 (만기일 당일까지는 진행 중)
+    public func isExpired(at now: Date, calendar: Calendar = .current) -> Bool {
+        calendar.startOfDay(for: now) > calendar.startOfDay(for: dueDate)
+    }
+
+    /// 끝난 예산의 결과 기록
+    public func result(spent: Int, id: UUID) -> BudgetResult {
+        BudgetResult(id: id, amount: amount, startDate: startDate, dueDate: dueDate, spent: spent)
+    }
+
+    /// 전체 기간(시작일~만기일) 중 남은 날의 비율 0…1 — 텅장방지 다이얼
+    public func remainingPeriodRatio(from now: Date, calendar: Calendar = .current) -> Double {
+        let total = calendar.dateComponents(
+            [.day],
+            from: calendar.startOfDay(for: startDate),
+            to: calendar.startOfDay(for: dueDate)
+        ).day ?? 0
+        guard total > 0 else { return 0 }
+        return min(1, max(0, Double(daysRemaining(from: now, calendar: calendar)) / Double(total)))
+    }
+
+    /// 예산 금액을 바꾼다. 경고·위험 금액을 손대지 않았으면(기본 70·90%) 새 금액에 맞춰 다시 정한다
+    public func withAmount(_ newAmount: Int) -> Budget {
+        let untouched = self == .suggested(amount: amount, startDate: startDate, dueDate: dueDate)
+            || (warnAmount == 0 && dangerAmount == 0)
+        guard untouched else {
+            var budget = self
+            budget.amount = newAmount
+            return budget
+        }
+        return .suggested(amount: newAmount, startDate: startDate, dueDate: dueDate)
+    }
 }
 
-/// 텅장방지 단계
-public enum BudgetStatus: Hashable, Sendable {
+/// 텅장방지 단계 — 뒤로 갈수록 심각하다
+public enum BudgetStatus: String, Hashable, Sendable, Comparable, CaseIterable {
     case safe
     case warning
     case danger
+    /// 예산 금액을 넘음
+    case exceeded
+
+    public static func < (lhs: Self, rhs: Self) -> Bool {
+        allCases.firstIndex(of: lhs)! < allCases.firstIndex(of: rhs)!
+    }
+
+    public var displayName: String {
+        switch self {
+        case .safe: "안전"
+        case .warning: "경고"
+        case .danger: "위험"
+        case .exceeded: "초과"
+        }
+    }
+
+    /// 선을 넘는 순간 한 번 띄우는 알림 문구
+    public var alertMessage: String? {
+        switch self {
+        case .safe: nil
+        case .warning: "경고 금액을 넘었어요. 지출에 주의해요"
+        case .danger: "위험 금액에 도달했어요! 텅장 주의 🚨"
+        case .exceeded: "예산을 넘었어요. 남은 기간은 아껴 써요"
+        }
+    }
+
+    /// 이미 알린 단계보다 심각해졌을 때만 새로 알릴 단계를 돌려준다
+    public func newAlert(since notified: BudgetStatus?) -> BudgetStatus? {
+        guard self != .safe else { return nil }
+        guard let notified else { return self }
+        return self > notified ? self : nil
+    }
 }

@@ -1,12 +1,13 @@
+import BudgetFeature
 import Clients
 import ComposableArchitecture
 import Domain
 import Foundation
 import HomeFeature
 import OnboardingFeature
+import StatisticsFeature
 import Testing
 import TransactionEditorFeature
-import StatisticsFeature
 import TransactionListFeature
 @testable import SolSol
 
@@ -24,6 +25,7 @@ struct AppFeatureTests {
             $0.date = .constant(now)
             $0.uuid = .incrementing
             $0.continuousClock = clock
+            $0.budgetClient.fetch = { nil }
             $0.transactionClient.save = { _ in }
         }
 
@@ -57,6 +59,7 @@ struct AppFeatureTests {
         } withDependencies: {
             $0.date = .constant(now)
             $0.continuousClock = clock
+            $0.budgetClient.fetch = { nil }
         }
         let transaction = Domain.Transaction(id: UUID(1), type: .income, amount: 5_000, category: .Default.income, title: "용돈", date: now)
 
@@ -81,7 +84,9 @@ struct AppFeatureTests {
         let store = TestStore(initialState: AppFeature.State(today: now)) {
             AppFeature()
         } withDependencies: {
+            $0.date = .constant(now)
             $0.continuousClock = clock
+            $0.budgetClient.fetch = { nil }
         }
 
         await store.send(\.home.delegate.editTransaction, transaction) {
@@ -102,7 +107,9 @@ struct AppFeatureTests {
         let store = TestStore(initialState: AppFeature.State(today: now)) {
             AppFeature()
         } withDependencies: {
+            $0.date = .constant(now)
             $0.continuousClock = clock
+            $0.budgetClient.fetch = { nil }
         }
 
         await store.send(\.home.delegate.editTransaction, transaction) {
@@ -121,11 +128,8 @@ struct AppFeatureTests {
             AppFeature()
         }
 
-        await store.send(\.home.delegate.open, .budget) {
-            $0.path[id: 0] = .comingSoon(ComingSoonFeature.State(title: "0원의 기적"))
-        }
         await store.send(\.home.delegate.open, .fixedExpense) {
-            $0.path[id: 1] = .comingSoon(ComingSoonFeature.State(title: "고정 지출"))
+            $0.path[id: 0] = .comingSoon(ComingSoonFeature.State(title: "고정 지출"))
         }
     }
 
@@ -158,11 +162,149 @@ struct AppFeatureTests {
             $0.path[id: 1] = .transactionEditor(TransactionEditorFeature.State(transaction: transaction))
         }
         await store.send(\.path[id: 0].transactionList.delegate.openBudgetSettings) {
-            $0.path[id: 2] = .comingSoon(ComingSoonFeature.State(title: "예산 설정"))
+            $0.path[id: 2] = .budgetSettings(BudgetSettingsFeature.State(today: self.now))
         }
         await store.send(\.path[id: 0].transactionList.delegate.addTransaction) {
             $0.path[id: 3] = .transactionEditor(TransactionEditorFeature.State(date: self.now))
         }
+    }
+
+    @Test func budgetShortcut_opensStatus_settingsSaveReturnsToStatus() async {
+        let clock = TestClock()
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
+            AppFeature()
+        } withDependencies: {
+            $0.date = .constant(now)
+            $0.continuousClock = clock
+        }
+
+        await store.send(\.home.delegate.open, .budget) {
+            $0.path[id: 0] = .budgetStatus(BudgetStatusFeature.State(today: self.now))
+        }
+        await store.send(\.path[id: 0].budgetStatus.delegate.openSettings) {
+            $0.path[id: 1] = .budgetSettings(BudgetSettingsFeature.State(today: self.now))
+        }
+        await store.send(\.path[id: 1].budgetSettings.delegate.saved) {
+            $0.toast = "예산을 저장했어요"
+        }
+        await clock.advance(by: .milliseconds(650))
+        await store.receive(\.budgetSaveTransitionFinished) {
+            $0.path[id: 1] = nil
+        }
+    }
+
+    @Test func budgetSettingsFromList_savesThenOpensStatus() async {
+        let clock = TestClock()
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
+            AppFeature()
+        } withDependencies: {
+            $0.date = .constant(now)
+            $0.continuousClock = clock
+        }
+
+        await store.send(\.home.delegate.open, .transactionList) {
+            $0.path[id: 0] = .transactionList(TransactionListFeature.State(month: .month(containing: self.now), today: self.now))
+        }
+        await store.send(\.path[id: 0].transactionList.delegate.openBudgetSettings) {
+            $0.path[id: 1] = .budgetSettings(BudgetSettingsFeature.State(today: self.now))
+        }
+        await store.send(\.path[id: 1].budgetSettings.delegate.saved) {
+            $0.toast = "예산을 저장했어요"
+        }
+        await clock.advance(by: .milliseconds(650))
+        await store.receive(\.budgetSaveTransitionFinished) {
+            $0.path[id: 1] = nil
+            $0.path[id: 2] = .budgetStatus(BudgetStatusFeature.State(today: self.now))
+        }
+    }
+
+    @Test func budgetStatus_addExpense_pushesEditor() async {
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
+            AppFeature()
+        } withDependencies: {
+            $0.date = .constant(now)
+        }
+
+        await store.send(\.home.delegate.open, .budget) {
+            $0.path[id: 0] = .budgetStatus(BudgetStatusFeature.State(today: self.now))
+        }
+        await store.send(\.path[id: 0].budgetStatus.delegate.addExpense) {
+            $0.path[id: 1] = .transactionEditor(TransactionEditorFeature.State(date: self.now))
+        }
+    }
+
+    @Test func expenseSave_crossingWarning_raisesAlertOnce_withToastAndHaptic() async {
+        let clock = TestClock()
+        let calendar = Calendar.current
+        let budget = Budget.suggested(
+            amount: 100_000,
+            startDate: calendar.date(byAdding: .day, value: -5, to: now)!,
+            dueDate: calendar.date(byAdding: .day, value: 5, to: now)!
+        )
+        let notified = LockIsolated<BudgetStatus?>(nil)
+        let transaction = Domain.Transaction(id: UUID(1), type: .expense, amount: 80_000, category: .Default.food, title: "장보기", date: now)
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
+            AppFeature()
+        } withDependencies: {
+            $0.date = .constant(now)
+            $0.continuousClock = clock
+            $0.budgetClient.fetch = { budget }
+            $0.budgetClient.notifiedStatus = { notified.value }
+            $0.budgetClient.setNotifiedStatus = { notified.setValue($0) }
+            $0.transactionClient.fetchSummary = { _ in TransactionSummary(expense: 80_000) }
+        }
+
+        await store.send(\.home.delegate.editTransaction, transaction) {
+            $0.path[id: 0] = .transactionEditor(TransactionEditorFeature.State(transaction: transaction))
+        }
+        await store.send(.path(.element(id: 0, action: .transactionEditor(.delegate(.saved(transaction, isNew: false)))))) {
+            $0.toast = "지출을 수정했어요"
+        }
+        await store.receive(\.budgetAlertRaised, .warning) {
+            $0.budgetAlert = .warning
+            $0.budgetAlertCount = 1
+            $0.toast = "경고 금액을 넘었어요. 지출에 주의해요"
+        }
+        await clock.advance(by: .milliseconds(650))
+        await store.receive(\.saveTransitionFinished) { $0.path = StackState() }
+        #expect(notified.value == .warning)
+
+        // 같은 단계는 다시 알리지 않는다
+        await store.send(\.home.delegate.editTransaction, transaction) {
+            $0.path[id: 1] = .transactionEditor(TransactionEditorFeature.State(transaction: transaction))
+        }
+        await store.send(.path(.element(id: 1, action: .transactionEditor(.delegate(.saved(transaction, isNew: false)))))) {
+            $0.toast = "지출을 수정했어요"
+        }
+        await clock.advance(by: .milliseconds(650))
+        await store.receive(\.saveTransitionFinished) { $0.path = StackState() }
+    }
+
+    @Test func expenseSave_expiredBudget_noAlert() async {
+        let clock = TestClock()
+        let calendar = Calendar.current
+        let expired = Budget.suggested(
+            amount: 100_000,
+            startDate: calendar.date(byAdding: .day, value: -30, to: now)!,
+            dueDate: calendar.date(byAdding: .day, value: -1, to: now)!
+        )
+        let transaction = Domain.Transaction(id: UUID(1), type: .expense, amount: 500_000, category: .Default.food, title: "장보기", date: now)
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
+            AppFeature()
+        } withDependencies: {
+            $0.date = .constant(now)
+            $0.continuousClock = clock
+            $0.budgetClient.fetch = { expired }
+        }
+
+        await store.send(\.home.delegate.editTransaction, transaction) {
+            $0.path[id: 0] = .transactionEditor(TransactionEditorFeature.State(transaction: transaction))
+        }
+        await store.send(.path(.element(id: 0, action: .transactionEditor(.delegate(.saved(transaction, isNew: false)))))) {
+            $0.toast = "지출을 수정했어요"
+        }
+        await clock.advance(by: .milliseconds(650))
+        await store.receive(\.saveTransitionFinished) { $0.path = StackState() }
     }
 
     @Test func onAppear_firstLaunch_showsOnboarding_thenHomeAfterCompletion() async {

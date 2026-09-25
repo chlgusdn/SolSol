@@ -1,10 +1,12 @@
+import BudgetFeature
 import ComposableArchitecture
 import DesignSystem
+import Domain
 import HomeFeature
 import OnboardingFeature
+import StatisticsFeature
 import SwiftUI
 import TransactionEditorFeature
-import StatisticsFeature
 import TransactionListFeature
 
 struct AppView: View {
@@ -43,10 +45,23 @@ struct AppView: View {
                 TransactionListView(store: store)
             case let .statistics(store):
                 StatisticsView(store: store)
+            case let .budgetStatus(store):
+                BudgetStatusView(store: store)
+            case let .budgetSettings(store):
+                BudgetSettingsView(store: store)
             case let .comingSoon(store):
                 ComingSoonView(store: store)
             }
         }
         .sdToast($store.toast.sending(\.toastChanged))
+        .sdHapticPattern(hapticPattern, trigger: store.budgetAlertCount)
+    }
+
+    private var hapticPattern: SDHapticPattern? {
+        switch store.budgetAlert {
+        case .warning: .warning
+        case .danger, .exceeded: .danger
+        case .safe, nil: nil
+        }
     }
 }

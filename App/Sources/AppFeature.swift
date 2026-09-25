@@ -219,7 +219,7 @@ struct AppFeature {
             let spent = try await transactionClient.fetchSummary(interval: period).expense
             let status = budget.status(spent: spent)
             // 확인이 동시에 돌아도 단계를 실제로 올린 쪽만 알린다
-            guard status != .safe, try await budgetClient.raiseNotifiedStatus(status: status) else { return }
+            guard status != .safe, try await budgetClient.raiseNotifiedStatus(status: status, budget: budget) else { return }
             await send(.budgetAlertRaised(status))
         } catch: { error, _ in
             // 알림 확인 실패가 저장 흐름을 막으면 안 된다

@@ -249,7 +249,7 @@ struct AppFeatureTests {
             $0.date = .constant(now)
             $0.continuousClock = clock
             $0.budgetClient.fetch = { budget }
-            $0.budgetClient.raiseNotifiedStatus = { status in
+            $0.budgetClient.raiseNotifiedStatus = { status, _ in
                 notified.withValue { current in
                     guard status.newAlert(since: current) != nil else { return false }
                     current = status

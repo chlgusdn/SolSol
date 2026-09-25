@@ -217,10 +217,10 @@ struct AppFeature {
             let period = budget.period()
             guard period.start <= date, date < period.end else { return }
             let spent = try await transactionClient.fetchSummary(interval: period).expense
-            let notified = try await budgetClient.notifiedStatus()
-            guard let alert = budget.status(spent: spent).newAlert(since: notified) else { return }
-            try await budgetClient.setNotifiedStatus(status: alert)
-            await send(.budgetAlertRaised(alert))
+            let status = budget.status(spent: spent)
+            // 확인이 동시에 돌아도 단계를 실제로 올린 쪽만 알린다
+            guard status != .safe, try await budgetClient.raiseNotifiedStatus(status: status) else { return }
+            await send(.budgetAlertRaised(status))
         } catch: { error, _ in
             // 알림 확인 실패가 저장 흐름을 막으면 안 된다
             Logger.app.error("텅장방지 알림 확인 실패: \(error.localizedDescription)")

@@ -15,8 +15,7 @@ extension BudgetClient: DependencyKey {
             save: dao.save,
             clear: dao.clear,
             observe: dao.observe,
-            notifiedStatus: dao.notifiedStatus,
-            setNotifiedStatus: dao.setNotifiedStatus,
+            raiseNotifiedStatus: dao.raiseNotifiedStatus,
             close: dao.close,
             latestResult: dao.latestResult
         )

@@ -97,16 +97,18 @@ struct BudgetStatusFeatureTests {
         #expect(cleared.value)
     }
 
-    @Test func delete_expiredBudget_archivesResult() async {
+    @Test func delete_expiredBudget_archivesResultWithSpentFromDatabase() async {
         let closed = LockIsolated<(BudgetResult, Budget?)?>(nil)
         var state = BudgetStatusFeature.State(today: day(11))
         state.budget = budget
-        state.spent = 1_200_000
+        // 화면의 spent를 아직 못 불러온 상태여도 DB 합계로 기록한다
+        state.spent = 0
         let store = TestStore(initialState: state) {
             BudgetStatusFeature()
         } withDependencies: {
             $0.date = .constant(now)
             $0.uuid = .incrementing
+            $0.transactionClient.fetchSummary = { _ in TransactionSummary(expense: 1_200_000) }
             $0.budgetClient.close = { result, _, next in closed.setValue((result, next)) }
         }
         store.exhaustivity = .off
@@ -116,6 +118,25 @@ struct BudgetStatusFeatureTests {
         await store.receive(\.deleteFinished)
         #expect(closed.value?.0 == budget.result(spent: 1_200_000, id: UUID(0)))
         #expect(closed.value?.1 == nil)
+    }
+
+    @Test func delete_expiredBudget_summaryFailure_keepsBudget() async {
+        struct Failure: Error {}
+        var state = BudgetStatusFeature.State(today: day(11))
+        state.budget = budget
+        let store = TestStore(initialState: state) {
+            BudgetStatusFeature()
+        } withDependencies: {
+            $0.date = .constant(now)
+            $0.uuid = .incrementing
+            $0.transactionClient.fetchSummary = { _ in throw Failure() }
+        }
+        store.exhaustivity = .off
+
+        await store.send(.deleteButtonTapped)
+        await store.send(\.alert.confirmDelete)
+        await store.receive(\.loadFailed)
+        #expect(store.state.budget == state.budget)
     }
 
     @Test func buttons_sendDelegates() async {
@@ -158,6 +179,35 @@ struct BudgetSettingsFeatureTests {
         }
 
         await store.send(.onAppear)
+        await store.receive(\.loaded) {
+            $0.hasLoaded = true
+            $0.draft = existing
+            $0.isExisting = true
+        }
+        #expect(store.state.canSave)
+    }
+
+    @Test func loadFailure_blocksSave_untilRetrySucceeds() async {
+        struct Failure: Error {}
+        let existing = Budget.suggested(amount: 500_000, startDate: day(-3), dueDate: day(20))
+        let fails = LockIsolated(true)
+        let store = TestStore(initialState: BudgetSettingsFeature.State(today: now)) {
+            BudgetSettingsFeature()
+        } withDependencies: {
+            $0.uuid = .incrementing
+            $0.budgetClient.fetch = {
+                if fails.value { throw Failure() }
+                return existing
+            }
+        }
+
+        await store.send(.onAppear)
+        await store.receive(\.loadFailed) { $0.loadErrorMessage = Failure().localizedDescription }
+        #expect(!store.state.hasLoaded)
+        #expect(!store.state.canSave)
+
+        fails.setValue(false)
+        await store.send(.retryLoadButtonTapped) { $0.loadErrorMessage = nil }
         await store.receive(\.loaded) {
             $0.hasLoaded = true
             $0.draft = existing
@@ -220,7 +270,7 @@ struct BudgetSettingsFeatureTests {
             $0.amountEntry = nil
         }
         await store.send(.saveButtonTapped) { $0.isSaving = true }
-        await store.receive(\.saveFinished)
+        await store.receive(\.saveFinished) { $0.savedCount = 1 }
         await store.receive(\.delegate.saved)
 
         #expect(closed.value?.0 == result)
@@ -254,7 +304,7 @@ struct BudgetSettingsFeatureTests {
         #expect(store.state.canSave)
 
         await store.send(.saveButtonTapped) { $0.isSaving = true }
-        await store.receive(\.saveFinished)
+        await store.receive(\.saveFinished) { $0.savedCount = 1 }
         await store.receive(\.delegate.saved)
         #expect(saved.value == store.state.draft)
     }

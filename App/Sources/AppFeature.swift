@@ -136,7 +136,7 @@ struct AppFeature {
                         try await clock.sleep(for: SDDuration.saveToNavigate)
                         await send(.saveTransitionFinished(editor: id, transaction: transaction, isNew: isNew))
                     },
-                    checkBudgetAlert()
+                    transaction.type == .expense ? checkBudgetAlert(for: transaction.date) : .none
                 )
 
             case let .budgetAlertRaised(status):
@@ -208,12 +208,15 @@ struct AppFeature {
         .forEach(\.path, action: \.path)
     }
 
-    /// 지출 저장으로 경고·위험·초과 선을 새로 넘었으면 예산마다 단계별로 한 번 알린다
-    private func checkBudgetAlert() -> Effect<Action> {
+    /// 지출 저장으로 경고·위험·초과 선을 새로 넘었으면 예산마다 단계별로 한 번 알린다.
+    /// 예산 기간 밖 지출은 선을 넘게 할 수 없으므로 확인하지 않는다
+    private func checkBudgetAlert(for date: Date) -> Effect<Action> {
         let today = now
         return .run { [budgetClient, transactionClient] send in
             guard let budget = try await budgetClient.fetch(), !budget.isExpired(at: today) else { return }
-            let spent = try await transactionClient.fetchSummary(interval: budget.period()).expense
+            let period = budget.period()
+            guard period.start <= date, date < period.end else { return }
+            let spent = try await transactionClient.fetchSummary(interval: period).expense
             let notified = try await budgetClient.notifiedStatus()
             guard let alert = budget.status(spent: spent).newAlert(since: notified) else { return }
             try await budgetClient.setNotifiedStatus(status: alert)

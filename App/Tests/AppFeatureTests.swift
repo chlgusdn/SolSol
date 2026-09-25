@@ -280,6 +280,47 @@ struct AppFeatureTests {
         await store.receive(\.saveTransitionFinished) { $0.path = StackState() }
     }
 
+    @Test func incomeSave_orExpenseOutsideBudgetPeriod_doesNotCheckAlert() async {
+        let clock = TestClock()
+        let calendar = Calendar.current
+        let budget = Budget.suggested(
+            amount: 100_000,
+            startDate: calendar.date(byAdding: .day, value: -5, to: now)!,
+            dueDate: calendar.date(byAdding: .day, value: 5, to: now)!
+        )
+        let salary = Domain.Transaction(id: UUID(1), type: .income, amount: 3_000_000, category: .Default.income, title: "월급", date: now)
+        let oldExpense = Domain.Transaction(
+            id: UUID(2), type: .expense, amount: 500_000, category: .Default.food, title: "지난달",
+            date: calendar.date(byAdding: .day, value: -40, to: now)!
+        )
+        let store = TestStore(initialState: AppFeature.State(today: now)) {
+            AppFeature()
+        } withDependencies: {
+            $0.date = .constant(now)
+            $0.continuousClock = clock
+            // 수입은 확인하지 않고, 기간 밖 지출은 합계를 조회하지 않는다 (호출되면 unimplemented로 실패)
+            $0.budgetClient.fetch = { budget }
+        }
+
+        await store.send(\.home.delegate.editTransaction, salary) {
+            $0.path[id: 0] = .transactionEditor(TransactionEditorFeature.State(transaction: salary))
+        }
+        await store.send(.path(.element(id: 0, action: .transactionEditor(.delegate(.saved(salary, isNew: false)))))) {
+            $0.toast = "수익을 수정했어요"
+        }
+        await clock.advance(by: .milliseconds(650))
+        await store.receive(\.saveTransitionFinished) { $0.path = StackState() }
+
+        await store.send(\.home.delegate.editTransaction, oldExpense) {
+            $0.path[id: 1] = .transactionEditor(TransactionEditorFeature.State(transaction: oldExpense))
+        }
+        await store.send(.path(.element(id: 1, action: .transactionEditor(.delegate(.saved(oldExpense, isNew: false)))))) {
+            $0.toast = "지출을 수정했어요"
+        }
+        await clock.advance(by: .milliseconds(650))
+        await store.receive(\.saveTransitionFinished) { $0.path = StackState() }
+    }
+
     @Test func expenseSave_expiredBudget_noAlert() async {
         let clock = TestClock()
         let calendar = Calendar.current

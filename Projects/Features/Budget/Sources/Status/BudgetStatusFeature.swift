@@ -95,13 +95,19 @@ public struct BudgetStatusFeature {
                 return .none
 
             case .alert(.presented(.confirmDelete)):
-                // 끝난 예산은 결과를 남겨 다음 예산을 정할 때 보여준다
+                // 끝난 예산은 결과를 남겨 다음 예산을 정할 때 보여준다.
+                // 화면의 spent는 아직 불러오지 못했을 수 있어 DB에서 다시 집계하고, 실패하면 삭제하지 않는다
                 let archive = state.isExpired
-                    ? state.budget.map { (result: $0.result(spent: state.spent, id: uuid()), closedAt: now) }
+                    ? state.budget.map { (budget: $0, id: uuid(), closedAt: now) }
                     : nil
-                return .run { [budgetClient] send in
+                return .run { [budgetClient, transactionClient] send in
                     if let archive {
-                        try await budgetClient.close(result: archive.result, closedAt: archive.closedAt, budget: nil)
+                        let spent = try await transactionClient.fetchSummary(interval: archive.budget.period()).expense
+                        try await budgetClient.close(
+                            result: archive.budget.result(spent: spent, id: archive.id),
+                            closedAt: archive.closedAt,
+                            budget: nil
+                        )
                     } else {
                         try await budgetClient.clear()
                     }

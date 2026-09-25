@@ -54,7 +54,15 @@ public struct BudgetSettingsView: View {
                     AlertRangePreview(budget: store.draft)
                 }
 
-                if let message = store.validationMessage ?? store.errorMessage {
+                if let loadError = store.loadErrorMessage {
+                    VStack(alignment: .leading, spacing: SDSpacing.s) {
+                        Text("예산을 불러오지 못했어요. \(loadError)")
+                            .font(.sd.footnote)
+                            .foregroundStyle(DesignSystemAsset.expense.swiftUIColor)
+                        Button("다시 불러오기") { store.send(.retryLoadButtonTapped) }
+                            .buttonStyle(.sdPrimarySmall)
+                    }
+                } else if let message = store.validationMessage ?? store.errorMessage {
                     Text(message)
                         .font(.sd.footnote)
                         .foregroundStyle(DesignSystemAsset.expense.swiftUIColor)
@@ -91,7 +99,7 @@ public struct BudgetSettingsView: View {
             ) { store.send(.dateSelected(field, $0)) }
             .sdSheetStyle()
         }
-        .sensoryFeedback(.success, trigger: store.isSaving) { old, new in !old && new }
+        .sensoryFeedback(.success, trigger: store.savedCount)
         .onAppear { store.send(.onAppear) }
     }
 

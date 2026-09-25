@@ -31,6 +31,10 @@ public struct BudgetSettingsFeature {
         public var pendingResult: BudgetResult?
         public var hasLoaded = false
         public var isSaving = false
+        /// 저장이 끝날 때마다 늘어난다 (성공 햅틱 트리거)
+        public var savedCount = 0
+        /// 불러오기에 실패했으면 기존 예산을 덮어쓰지 않도록 저장을 막고 다시 시도하게 한다
+        public var loadErrorMessage: String?
         public var errorMessage: String?
         public var datePickerField: DateField?
         @Presents public var amountEntry: AmountEntryFeature.State?
@@ -69,6 +73,8 @@ public struct BudgetSettingsFeature {
         case binding(BindingAction<State>)
         case onAppear
         case loaded(Loaded)
+        case loadFailed(String)
+        case retryLoadButtonTapped
         case amountRowTapped(AmountField)
         case dateRowTapped(DateField)
         case dateSelected(DateField, Date)
@@ -111,8 +117,9 @@ public struct BudgetSettingsFeature {
             case .binding:
                 return .none
 
-            case .onAppear:
+            case .onAppear, .retryLoadButtonTapped:
                 guard !state.hasLoaded else { return .none }
+                state.loadErrorMessage = nil
                 let today = state.today
                 let resultID = uuid()
                 return .run { [budgetClient, transactionClient] send in
@@ -129,7 +136,7 @@ public struct BudgetSettingsFeature {
                     let result = budget.result(spent: spent, id: resultID)
                     await send(.loaded(.init(lastResult: result, pendingResult: result)))
                 } catch: { error, send in
-                    await send(.operationFailed(error.localizedDescription))
+                    await send(.loadFailed(error.localizedDescription))
                 }
 
             case let .loaded(loaded):
@@ -140,6 +147,10 @@ public struct BudgetSettingsFeature {
                     state.draft = current
                     state.isExisting = true
                 }
+                return .none
+
+            case let .loadFailed(message):
+                state.loadErrorMessage = message
                 return .none
 
             case let .amountRowTapped(field):
@@ -191,11 +202,11 @@ public struct BudgetSettingsFeature {
 
             case .saveFinished:
                 // 부모가 토스트 후 화면을 옮길 때까지 다시 저장되지 않도록 isSaving을 유지한다
+                state.savedCount += 1
                 return .send(.delegate(.saved))
 
             case let .operationFailed(message):
                 state.isSaving = false
-                state.hasLoaded = true
                 state.errorMessage = message
                 return .none
 

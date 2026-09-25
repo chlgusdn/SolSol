@@ -37,6 +37,48 @@ struct BudgetDAOTests {
         try await dao.clear()
         #expect(try await iterator.next() == .some(nil))
     }
+
+    @Test func notifiedStatus_persists_andResetsWhenBudgetSaved() async throws {
+        let dao = BudgetDAO(database: try TestDatabase.make())
+        let budget = Budget.suggested(amount: 1_000_000, startDate: start, dueDate: due)
+        try await dao.save(budget)
+        #expect(try await dao.notifiedStatus() == nil)
+
+        try await dao.setNotifiedStatus(.danger)
+        #expect(try await dao.notifiedStatus() == .danger)
+        #expect(try await dao.fetch() == budget)
+
+        try await dao.save(budget.withAmount(2_000_000))
+        #expect(try await dao.notifiedStatus() == nil)
+    }
+
+    @Test func close_invalidResult_isRejected_andKeepsBudget() async throws {
+        let dao = BudgetDAO(database: try TestDatabase.make())
+        let budget = Budget.suggested(amount: 1_000_000, startDate: start, dueDate: due)
+        try await dao.save(budget)
+        let negative = BudgetResult(id: UUID(), amount: 1_000_000, startDate: start, dueDate: due, spent: -1)
+
+        await #expect(throws: (any Error).self) { try await dao.close(negative, closedAt: due, replacingWith: nil) }
+        #expect(try await dao.fetch() == budget)
+    }
+
+    @Test func close_archivesResult_thenReplacesOrClearsBudget() async throws {
+        let dao = BudgetDAO(database: try TestDatabase.make())
+        let first = Budget.suggested(amount: 1_000_000, startDate: start, dueDate: due)
+        try await dao.save(first)
+        #expect(try await dao.latestResult() == nil)
+
+        let firstResult = first.result(spent: 1_200_000, id: UUID())
+        let next = Budget.suggested(amount: 900_000, startDate: due, dueDate: due.addingTimeInterval(30 * 86_400))
+        try await dao.close(firstResult, closedAt: due, replacingWith: next)
+        #expect(try await dao.fetch() == next)
+        #expect(try await dao.latestResult() == firstResult)
+
+        let nextResult = next.result(spent: 500_000, id: UUID())
+        try await dao.close(nextResult, closedAt: due.addingTimeInterval(31 * 86_400), replacingWith: nil)
+        #expect(try await dao.fetch() == nil)
+        #expect(try await dao.latestResult() == nextResult)
+    }
 }
 
 struct SettingsDAOTests {

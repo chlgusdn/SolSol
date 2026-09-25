@@ -39,10 +39,12 @@ func makeMigrator() -> DatabaseMigrator {
             """)
     }
     migrator.registerMigration(MigrationID.v2, migrate: migrateV2)
+    migrator.registerMigration(MigrationID.v3, migrate: migrateV3)
     return migrator
 }
 
 enum MigrationID {
     static let v1 = "v1_create_tables"
     static let v2 = "v2_categories_budget_fixed_expense"
+    static let v3 = "v3_budget_alerts_and_results"
 }

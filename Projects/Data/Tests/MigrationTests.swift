@@ -45,4 +45,22 @@ struct MigrationTests {
         let categories = try await CategoryDAO(database: database).fetchAll()
         #expect(!categories.contains { $0.name == "의료/건강" })
     }
+
+    @Test func v2ToV3_keepsBudget_withNoNotifiedStatus() async throws {
+        let database = try DatabaseQueue()
+        try makeMigrator().migrate(database, upTo: MigrationID.v2)
+        try await database.write { db in
+            try db.execute(sql: """
+                INSERT INTO "budgetRecords" ("id", "amount", "startDate", "dueDate", "warnAmount", "dangerAmount")
+                VALUES (1, 1000000, '2026-09-01 00:00:00.000', '2026-09-30 00:00:00.000', 700000, 900000)
+                """)
+        }
+
+        try migrate(database)
+
+        let dao = BudgetDAO(database: database)
+        #expect(try await dao.fetch()?.amount == 1_000_000)
+        #expect(try await dao.notifiedStatus() == nil)
+        #expect(try await dao.latestResult() == nil)
+    }
 }

@@ -43,7 +43,7 @@ SolSol/
 │   └── Templates/                    # tuist scaffold feature / client
 ├── App/                              # @main, AppFeature(루트 Reducer), AppView
 └── Projects/
-    ├── Features/<Name>/              # 화면 단위 모듈 (Home, TransactionEditor)
+    ├── Features/<Name>/              # 기능 단위 모듈 — 연관 화면을 함께 둔다 (Home, Budget, …)
     ├── Clients/                      # @DependencyClient 인터페이스 + previewValue
     ├── Data/                         # DAO, liveValue, @Table Record, Mapper, 마이그레이션, Kronos
     ├── Domain/                       # 순수 모델 + 계산 로직
@@ -57,8 +57,8 @@ SolSol/
 SolSolApp (@main) ── prepareDependencies { $0.bootstrapLive(database:) }
  └── AppView ⇄ Store<AppFeature>
       ├── home: HomeFeature
-      ├── path: StackState<Path>        ← push (거래 수정)
-      └── @Presents destination         ← sheet (새 거래)
+      ├── path: StackState<Path>        ← push (입력·수정, 지출 리스트, 통계, 텅장방지 …)
+      └── toast                         ← 화면이 바뀌어도 보이는 저장 토스트
 
 View ─send(Action)─▶ Reducer ─(State 변경)─▶ View
                         └─ .run ─▶ @Dependency(\.xxxClient) ─▶ Domain 모델
@@ -95,7 +95,7 @@ mise가 활성화되지 않은 셸에서는 앞에 `mise exec --`를 붙인다.
 ### 새 Feature 추가
 1. `tuist scaffold feature --name Xxx` → `Projects/Features/Xxx` 생성 (Workspace는 `Projects/**` glob이라 수정 불필요)
 2. 필요한 Client가 없으면 `tuist scaffold client --name Xxx` → **`bootstrapLive`에 등록** (RULE.md §5)
-3. `XxxFeature` / `XxxView` 작성 (RULE.md §6–7, DESIGN.md)
+3. 화면마다 `XxxFeature` / `XxxView` 작성 (RULE.md §2·§6–7, DESIGN.md). 같은 기능의 화면은 한 모듈의 하위 폴더로 둔다
 4. `TestStore` 테스트 작성 (RULE.md §10)
 5. `App/Project.swift`에 `.feature("Xxx")` 추가, `AppFeature`의 `Path` / `Destination`에 case 추가 + delegate 처리
 6. `tuist generate` → 빌드 → 테스트

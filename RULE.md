@@ -30,7 +30,8 @@ Domain       → Foundation만
 
 - **Domain**은 어떤 모듈도, TCA도, SwiftUI도 import하지 않는다
 - **Features**는 Data를 import하지 않는다 — DB 접근은 반드시 Client를 통한다
-- **Feature끼리는 서로 import하지 않는다** — 화면 간 이동은 `AppFeature`가 조립한다
+- **Feature 모듈은 기능 단위다** — 한 흐름으로 이어지고 같은 데이터·표시 규칙을 쓰는 화면들(예: 텅장방지 + 예산 설정)은 한 모듈에 둔다. 따로 쓰이는 기능은 모듈을 나눈다
+- **Feature 모듈끼리는 서로 import하지 않는다** — 화면 간 이동은 모듈 안이든 밖이든 `AppFeature`가 조립한다
 - **DesignSystem**은 TCA와 Domain을 import하지 않는다
 - **Kronos**는 Data에서만 import한다
 - 모듈 의존성은 `Project.swift`에서 `ModuleDependency` 헬퍼로만 선언한다 (`.domain`, `.feature("Home")`, `.external(.sqliteData)` …)
@@ -50,12 +51,12 @@ Domain       → Foundation만
 | DB 레코드 | `Data/Sources/Records/` | `XxxRecord.swift` |
 | 변환 | `Data/Sources/Mappers/` | `XxxMapper.swift` |
 | 마이그레이션 | 등록: `Data/Sources/Database/AppDatabase.swift`, 내용: `Database/MigrationVN.swift` | id는 `MigrationID.vN` (`"vN_설명"`) |
-| Feature | `Features/<Name>/Sources/` | `<Name>Feature.swift`, `<Name>View.swift` |
+| Feature | `Features/<Name>/Sources/` (화면이 여럿이면 `Sources/<Screen>/`) | `<Screen>Feature.swift`, `<Screen>View.swift` |
 | Feature 테스트 | `Features/<Name>/Tests/` | `<Name>FeatureTests.swift` |
 | 확장 | 해당 모듈 `Sources/Extensions/` | `Type+기능.swift` (예: `Int+Currency.swift`) |
 
 - 새 모듈·Feature·Client는 **직접 만들지 말고 `tuist scaffold`** 로 생성한다
-- 파일 하나에 주요 타입 하나. **View는 하위 View까지 한 파일에 하나** — 화면 전용 하위 View는 `Features/<Name>/Sources/Components/<ViewName>.swift`에 `internal`로 둔다
+- 파일 하나에 주요 타입 하나. **View는 하위 View까지 한 파일에 하나** — 화면 전용 하위 View는 그 화면 폴더의 `Components/<ViewName>.swift`에, 같은 모듈의 여러 화면이 함께 쓰는 것은 `Sources/Shared/`에 `internal`로 둔다
 - 파일을 추가·삭제하면 `tuist generate`를 다시 실행한다
 
 ### 네이밍

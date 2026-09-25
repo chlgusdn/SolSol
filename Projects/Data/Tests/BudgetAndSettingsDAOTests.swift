@@ -40,16 +40,16 @@ struct BudgetDAOTests {
 
     @Test func raiseNotifiedStatus_onlyWhenMoreSevere_andResetsWhenBudgetSaved() async throws {
         let dao = BudgetDAO(database: try TestDatabase.make())
-        #expect(try await dao.raiseNotifiedStatus(.warning) == false)
-
         let budget = Budget.suggested(amount: 1_000_000, startDate: start, dueDate: due)
+        #expect(try await dao.raiseNotifiedStatus(.warning, for: budget) == false)
+
         try await dao.save(budget)
         #expect(try await dao.notifiedStatus() == nil)
 
-        #expect(try await dao.raiseNotifiedStatus(.warning) == true)
-        #expect(try await dao.raiseNotifiedStatus(.warning) == false)
-        #expect(try await dao.raiseNotifiedStatus(.danger) == true)
-        #expect(try await dao.raiseNotifiedStatus(.warning) == false)
+        #expect(try await dao.raiseNotifiedStatus(.warning, for: budget) == true)
+        #expect(try await dao.raiseNotifiedStatus(.warning, for: budget) == false)
+        #expect(try await dao.raiseNotifiedStatus(.danger, for: budget) == true)
+        #expect(try await dao.raiseNotifiedStatus(.warning, for: budget) == false)
         #expect(try await dao.notifiedStatus() == .danger)
         #expect(try await dao.fetch() == budget)
 
@@ -57,12 +57,24 @@ struct BudgetDAOTests {
         #expect(try await dao.notifiedStatus() == nil)
     }
 
+    @Test func raiseNotifiedStatus_budgetReplacedMeanwhile_doesNotRecord() async throws {
+        let dao = BudgetDAO(database: try TestDatabase.make())
+        let old = Budget.suggested(amount: 1_000_000, startDate: start, dueDate: due)
+        let replaced = Budget.suggested(amount: 2_000_000, startDate: start, dueDate: due)
+        try await dao.save(replaced)
+
+        #expect(try await dao.raiseNotifiedStatus(.danger, for: old) == false)
+        #expect(try await dao.notifiedStatus() == nil)
+        #expect(try await dao.raiseNotifiedStatus(.warning, for: replaced) == true)
+    }
+
     @Test func raiseNotifiedStatus_concurrentCalls_onlyOneSucceeds() async throws {
         let dao = BudgetDAO(database: try TestDatabase.make())
-        try await dao.save(.suggested(amount: 1_000_000, startDate: start, dueDate: due))
+        let budget = Budget.suggested(amount: 1_000_000, startDate: start, dueDate: due)
+        try await dao.save(budget)
 
         let results = try await withThrowingTaskGroup(of: Bool.self) { group in
-            for _ in 0..<10 { group.addTask { try await dao.raiseNotifiedStatus(.warning) } }
+            for _ in 0..<10 { group.addTask { try await dao.raiseNotifiedStatus(.warning, for: budget) } }
             return try await group.reduce(into: [Bool]()) { $0.append($1) }
         }
 

@@ -37,10 +37,12 @@ struct BudgetDAO: Sendable {
         }
     }
 
-    /// 이미 알린 단계보다 심각할 때만 기록하고 true — 읽기·비교·기록을 한 트랜잭션에서 해 동시에 불려도 한 번만 true
-    func raiseNotifiedStatus(_ status: BudgetStatus) async throws -> Bool {
+    /// 이미 알린 단계보다 심각할 때만 기록하고 true — 읽기·비교·기록을 한 트랜잭션에서 해 동시에 불려도 한 번만 true.
+    /// 단계를 계산한 `budget`이 그사이 교체됐으면 새 예산에 이전 예산의 단계를 남기지 않도록 false
+    func raiseNotifiedStatus(_ status: BudgetStatus, for budget: Budget) async throws -> Bool {
         try await database.write { db in
-            guard let record = try BudgetRecord.where({ $0.id.eq(BudgetRecord.singletonID) }).fetchOne(db) else {
+            guard let record = try BudgetRecord.where({ $0.id.eq(BudgetRecord.singletonID) }).fetchOne(db),
+                  BudgetMapper.toDomain(record) == budget else {
                 return false
             }
             guard status.newAlert(since: record.notifiedStatus.map(BudgetMapper.toDomain)) != nil else { return false }

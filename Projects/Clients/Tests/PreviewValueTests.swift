@@ -55,4 +55,20 @@ struct PreviewValueTests {
         try await client.completeOnboarding()
         #expect(try await client.isOnboardingCompleted() == true)
     }
+
+    @Test func budget_raiseNotifiedStatus_isAtomic_andIgnoresReplacedBudget() async throws {
+        let client = BudgetClient.previewValue
+        let budget = try #require(try await client.fetch())
+
+        let results = try await withThrowingTaskGroup(of: Bool.self) { group in
+            for _ in 0..<10 { group.addTask { try await client.raiseNotifiedStatus(status: .warning, budget: budget) } }
+            return try await group.reduce(into: [Bool]()) { $0.append($1) }
+        }
+        #expect(results.filter { $0 }.count == 1)
+
+        let replaced = budget.withAmount(budget.amount * 2)
+        try await client.save(budget: replaced)
+        #expect(try await client.raiseNotifiedStatus(status: .danger, budget: budget) == false)
+        #expect(try await client.raiseNotifiedStatus(status: .warning, budget: replaced) == true)
+    }
 }

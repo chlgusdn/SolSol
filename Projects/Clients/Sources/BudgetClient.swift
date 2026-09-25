@@ -34,28 +34,41 @@ extension BudgetClient: TestDependencyKey {
     public static var previewValue: Self {
         let now = Date()
         let dueDate = Calendar.current.date(byAdding: .day, value: 20, to: now) ?? now
-        let store = PreviewStore<Budget?>(.suggested(amount: 1_000_000, startDate: now, dueDate: dueDate))
-        let notified = PreviewStore<BudgetStatus?>(nil)
-        let results = PreviewStore<[BudgetResult]>([])
+        // 예산·알린 단계·결과를 한 상태로 두어 조건 확인과 갱신이 DAO 트랜잭션처럼 한 번에 일어나게 한다
+        let store = PreviewStore(PreviewBudgetState(
+            budget: .suggested(amount: 1_000_000, startDate: now, dueDate: dueDate)
+        ))
         return Self(
-            fetch: { await store.get() },
+            fetch: { await store.get().budget },
             save: { budget in
-                await store.update { $0 = budget }
-                await notified.update { $0 = nil }
+                await store.update {
+                    $0.budget = budget
+                    $0.notified = nil
+                }
             },
-            clear: { await store.update { $0 = nil } },
-            observe: { store.stream() },
+            clear: { await store.update { $0.budget = nil } },
+            observe: { store.stream(\.budget) },
             raiseNotifiedStatus: { status, budget in
-                guard await store.get() == budget, status.newAlert(since: await notified.get()) != nil else { return false }
-                await notified.update { $0 = status }
-                return true
+                await store.modify { state in
+                    guard state.budget == budget, status.newAlert(since: state.notified) != nil else { return false }
+                    state.notified = status
+                    return true
+                }
             },
             close: { result, _, budget in
-                await results.update { $0.append(result) }
-                await store.update { $0 = budget }
-                await notified.update { $0 = nil }
+                await store.update {
+                    $0.results.append(result)
+                    $0.budget = budget
+                    $0.notified = nil
+                }
             },
-            latestResult: { await results.get().last }
+            latestResult: { await store.get().results.last }
         )
     }
+}
+
+private struct PreviewBudgetState: Sendable {
+    var budget: Budget?
+    var notified: BudgetStatus?
+    var results: [BudgetResult] = []
 }

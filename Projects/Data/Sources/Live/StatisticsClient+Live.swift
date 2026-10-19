@@ -2,7 +2,7 @@ import Clients
 import Dependencies
 import SQLiteData
 
-extension StatisticsClient: DependencyKey {
+extension StatisticsClient: @retroactive DependencyKey {
     public static var liveValue: Self {
         @Dependency(\.defaultDatabase) var database
         return .live(database: database)

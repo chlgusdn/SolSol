@@ -3,7 +3,7 @@ import Dependencies
 import Foundation
 @preconcurrency import Kronos
 
-extension TimeSyncClient: DependencyKey {
+extension TimeSyncClient: @retroactive DependencyKey {
     public static let liveValue = Self(
         sync: {
             await withCheckedContinuation { continuation in

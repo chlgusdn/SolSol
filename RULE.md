@@ -154,6 +154,7 @@ func makeMigrator() -> DatabaseMigrator {
 - 인터페이스는 Clients, live 구현은 Data에 둔다
 - 실제 로직은 **DAO의 일반 메서드**에 작성하고, live는 DAO 메서드를 클로저에 연결만 한다
 - Client는 **Domain 모델만** 주고받는다
+- live 적합성은 `extension XxxClient: @retroactive DependencyKey`로 선언한다. Client 타입(Clients)과 `DependencyKey`(swift-dependencies)가 모두 다른 모듈 소속이라 Swift 6에서 retroactive conformance 경고가 나기 때문이다. `@retroactive`는 경고만 끄는 컴파일 시점 표기라서 아래 `bootstrapLive` 링크 문제와는 무관하다 — `bootstrapLive` 등록은 그대로 필요하다
 - 클로저 인자에 레이블을 붙인다 (`_ interval:`) → 호출은 `client.fetch(interval:)`
 - throw하지 않는 클로저는 기본값을 지정한다 (매크로 요구사항)
 - `testValue = Self()` (매크로가 만든 unimplemented), `previewValue`는 공용 인메모리 저장소 `PreviewStore`(Clients/Sources/Preview)로 구현한다 — 변경 시 관찰 스트림에도 반영된다
@@ -184,7 +185,7 @@ extension TransactionClient: TestDependencyKey {
 
 ```swift
 // Data/Sources/Live/TransactionClient+Live.swift — 연결만
-extension TransactionClient: DependencyKey {
+extension TransactionClient: @retroactive DependencyKey {
     public static var liveValue: Self {
         @Dependency(\.defaultDatabase) var database
         return .live(database: database)

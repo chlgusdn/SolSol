@@ -1,3 +1,5 @@
+// 등록 필수: Data/Sources/Live/LiveDependencies.swift의 `bootstrapLive(database:)`에
+// `{{ name|lowerFirstLetter }}Client = .live(database: database)`를 추가한다 — 빠지면 링커가 이 파일을 제거해 앱에서 unimplemented가 쓰인다
 import Clients
 import Dependencies
 import SQLiteData
@@ -8,7 +10,6 @@ extension {{ name }}Client: DependencyKey {
         return .live(database: database)
     }
 
-    /// Data/Sources/Live/LiveDependencies.swift의 `bootstrapLive`에 등록할 것
     static func live(database: any DatabaseWriter) -> Self {
         let dao = {{ name }}DAO(database: database)
         return Self(

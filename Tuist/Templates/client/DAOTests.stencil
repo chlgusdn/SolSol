@@ -1,0 +1,10 @@
+import Testing
+@testable import Data
+
+struct {{ name }}DAOTests {
+    @Test func fetchAll_emptyDatabase_returnsEmpty() async throws {
+        let dao = {{ name }}DAO(database: try TestDatabase.make())
+
+        #expect(try await dao.fetchAll().isEmpty)
+    }
+}

@@ -35,6 +35,8 @@ Projects/DesignSystem/
 - DesignSystem은 TCA·Domain을 모른다 — 값(`Int`, `String`, `Color`, 클로저)만 받는다
 - 기본 컨트롤을 감싼 새 View보다 `ButtonStyle`, `ViewModifier`를 우선한다
 - 두 개 이상의 Feature에서 같은 UI가 나오면 DesignSystem 컴포넌트로 올린다
+- View가 아닌 값 모음(팔레트·크기 등)은 `Components/`가 아니라 `Foundation/Tokens/`에 둔다 — `SDCategoryColor`는 옮길 대상이다 (RULE.md §2 "아직 규칙을 따르지 않는 기존 코드")
+- `Components/` 안에서는 같은 종류가 3개 이상일 때만 하위 폴더로 묶는다 (예: `Charts/`)
 - 모든 공개 컴포넌트는 `#Preview`를 제공하고 큰 Dynamic Type(`.xxxLarge`)을 확인한다
 
 ## 3. 색상

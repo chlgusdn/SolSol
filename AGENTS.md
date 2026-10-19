@@ -41,9 +41,18 @@ SolSol/
 │   ├── Package.swift / .resolved     # SPM 외부 의존성 (버전 업데이트는 의도적으로만)
 │   ├── ProjectDescriptionHelpers/    # Module, ModuleDependency, AppProject 헬퍼
 │   └── Templates/                    # tuist scaffold feature / client
-├── App/                              # @main, AppFeature(루트 Reducer), AppView
+├── App/Sources/
+│   ├── SolSolApp.swift               # @main
+│   ├── Root/                         # AppFeature(탭 선택 + 전역 일), AppView(TabView)
+│   ├── Coordinators/                 # <Tab>TabCoordinator — 탭별 push 조립 (홈·통계·설정)
+│   ├── Navigation/                   # AppPath(공유 push 대상), AppPath+<기능>(기능별 이동 규칙)
+│   └── Placeholder/                  # ComingSoon 등 임시 화면
 └── Projects/
-    ├── Features/<Name>/              # 기능 단위 모듈 — 연관 화면을 함께 둔다 (Home, Budget, …)
+    ├── Features/<기능>/              # 기능 단위 모듈 (Home, Budget, Statistics, …) — 나누는 기준은 RULE.md §1
+    │   ├── Sources/<Screen>/         #   화면마다 폴더 하나: <Screen>Feature, <Screen>View, Components/
+    │   ├── Sources/Shared/           #   모듈 안 여러 화면이 함께 쓰는 것
+    │   ├── Sources/Support/          #   Domain+Aliases
+    │   └── Tests/                    #   <Screen>FeatureTests — 화면마다 하나
     ├── Clients/                      # @DependencyClient 인터페이스 + previewValue
     ├── Data/                         # DAO, liveValue, @Table Record, Mapper, 마이그레이션, Kronos
     ├── Domain/                       # 순수 모델 + 계산 로직
@@ -55,16 +64,20 @@ SolSol/
 
 ```
 SolSolApp (@main) ── prepareDependencies { $0.bootstrapLive(database:) }
- └── AppView ⇄ Store<AppFeature>
-      ├── home: HomeFeature
-      ├── path: StackState<Path>        ← push (입력·수정, 지출 리스트, 통계, 텅장방지 …)
-      └── toast                         ← 화면이 바뀌어도 보이는 저장 토스트
+ └── AppView ⇄ Store<AppFeature>        ← 탭 선택, 시간 동기화, 온보딩
+      ├── TabView
+      │    ├── [홈]  HomeTabCoordinator         루트 Home       + path: StackState<AppPath>
+      │    ├── [통계] StatisticsTabCoordinator  루트 Statistics + path
+      │    └── [설정] SettingsTabCoordinator    루트 Settings   + path
+      └── toast · 예산 알림                ← TabView 바깥 — 탭이 바뀌어도 보인다
 
 View ─send(Action)─▶ Reducer ─(State 변경)─▶ View
                         └─ .run ─▶ @Dependency(\.xxxClient) ─▶ Domain 모델
 
 Reducer → Client(Clients) ← liveValue(Data) → DAO → SQLiteData → SQLite
 ```
+
+> 탭·코디네이터는 확정된 목표 구조다. 아직 구현 전이며, 지금 코드와 다른 부분은 RULE.md §2 "아직 규칙을 따르지 않는 기존 코드"에 있다.
 
 의존성 방향 (위반 금지 — 상세는 RULE.md §1):
 
@@ -87,18 +100,25 @@ mise가 활성화되지 않은 셸에서는 앞에 `mise exec --`를 붙인다.
 | 프로젝트 생성 | `tuist generate` (파일 추가/삭제, `Project.swift`·헬퍼 수정 후 필수) |
 | 전체 테스트 | `tuist test` 또는 `xcodebuild test -workspace SolSol.xcworkspace -scheme SolSol-Workspace -destination 'platform=iOS Simulator,name=<iOS 18+ 기기>' -skipMacroValidation` |
 | 모듈 테스트 | `-scheme <Module>` (예: `HomeFeature`, `Data`) |
-| 새 Feature | `tuist scaffold feature --name <Name>` |
-| 새 Client | `tuist scaffold client --name <Name>` |
+| 새 Feature 모듈 | `tuist scaffold feature --name <기능>` (첫 화면 이름 = 기능 이름) |
+| 기존 모듈에 화면 추가 | `tuist scaffold screen --feature <기능> --name <Screen>` |
+| 새 Client | `tuist scaffold client --name <Name>` (Client · DAO · live · DAO 테스트) |
 
 ## 작업 절차
 
+### 새 화면 추가
+1. 어느 기능 모듈에 넣을지 RULE.md §1 "Feature 모듈 나누기"로 정한다. 기존 모듈에 들어가면 2로, 독립 기능이면 "새 Feature 추가"로
+2. `tuist scaffold screen --feature Xxx --name Yyy` → `Sources/Yyy/`와 `Tests/YyyFeatureTests.swift` 생성
+3. `YyyFeature` / `YyyView` 작성 (RULE.md §2·§6–7, DESIGN.md), `TestStore` 테스트 작성 (RULE.md §10)
+4. push 화면이면 App에 연결 — `Navigation/AppPath`에 case 추가, delegate 처리는 `Navigation/AppPath+<기능>.swift`에 두고, 이 화면을 쌓는 탭 코디네이터에서 호출한다 (RULE.md §8). 모듈 안 시트는 부모 Feature의 `Destination`에 추가
+5. `tuist generate` → 빌드 → 테스트
+
 ### 새 Feature 추가
-1. `tuist scaffold feature --name Xxx` → `Projects/Features/Xxx` 생성 (Workspace는 `Projects/**` glob이라 수정 불필요)
-2. 필요한 Client가 없으면 `tuist scaffold client --name Xxx` → **`bootstrapLive`에 등록** (RULE.md §5)
-3. 화면마다 `XxxFeature` / `XxxView` 작성 (RULE.md §2·§6–7, DESIGN.md). 같은 기능의 화면은 한 모듈의 하위 폴더로 둔다
-4. `TestStore` 테스트 작성 (RULE.md §10)
-5. `App/Project.swift`에 `.feature("Xxx")` 추가, `AppFeature`의 `Path` / `Destination`에 case 추가 + delegate 처리
-6. `tuist generate` → 빌드 → 테스트
+1. `tuist scaffold feature --name Xxx` → `Projects/Features/Xxx` 생성 (`Sources/Xxx/`, `Sources/Support/Domain+Aliases.swift`, `Tests/XxxFeatureTests.swift`). Workspace는 `Projects/**` glob이라 수정 불필요
+2. 필요한 Client가 없으면 `tuist scaffold client --name Xxx` → 생성된 `XxxClient+Live.swift` 맨 위 주석대로 **`bootstrapLive`에 등록** (RULE.md §5)
+3. 화면을 작성하고 테스트한다. 화면을 더 넣으려면 "새 화면 추가" 2–3
+4. `App/Project.swift`에 `.feature("Xxx")` 추가 → 탭 루트면 `AppFeature`와 해당 `<Tab>TabCoordinator`에, push 화면이면 `AppPath`·`AppPath+Xxx.swift`에 연결 (RULE.md §8)
+5. `tuist generate` → 빌드 → 테스트
 
 ### 스키마 변경
 새 마이그레이션을 추가한다. 기존 마이그레이션은 수정하지 않는다 (RULE.md §4).
@@ -199,5 +219,6 @@ GitHub PR에서는 **"Create a merge commit"** 을 쓴다.
 - [ ] 전체 테스트 통과 (`SolSol-Workspace` 스킴)
 - [ ] 새 Client는 `bootstrapLive`에 등록됨 — 누락 시 앱에서 unimplemented 오류가 난다
 - [ ] 새 공개 View/컴포넌트에 `#Preview` 존재
+- [ ] 새 파일이 RULE.md §2 위치 규칙을 따르고, 테스트 파일이 대상 파일과 1:1로 있음
 - [ ] TODO / 스텁 / `.skip` 테스트 없음
 - [ ] 규칙을 바꿨다면 RULE.md / DESIGN.md를 함께 갱신

@@ -30,11 +30,24 @@ Domain       → Foundation만
 
 - **Domain**은 어떤 모듈도, TCA도, SwiftUI도 import하지 않는다
 - **Features**는 Data를 import하지 않는다 — DB 접근은 반드시 Client를 통한다
-- **Feature 모듈은 기능 단위다** — 한 흐름으로 이어지고 같은 데이터·표시 규칙을 쓰는 화면들(예: 텅장방지 + 예산 설정)은 한 모듈에 둔다. 따로 쓰이는 기능은 모듈을 나눈다
-- **Feature 모듈끼리는 서로 import하지 않는다** — 화면 간 이동은 모듈 안이든 밖이든 `AppFeature`가 조립한다
+- **Feature 모듈은 기능 단위다** — 아래 "Feature 모듈 나누기" 기준을 따른다
+- **Feature 모듈끼리는 서로 import하지 않는다** — push 이동은 모듈 안이든 밖이든 App 모듈의 탭 코디네이터가 조립한다 (§8)
 - **DesignSystem**은 TCA와 Domain을 import하지 않는다
 - **Kronos**는 Data에서만 import한다
 - 모듈 의존성은 `Project.swift`에서 `ModuleDependency` 헬퍼로만 선언한다 (`.domain`, `.feature("Home")`, `.external(.sqliteData)` …)
+
+### Feature 모듈 나누기
+- **이름은 화면이 아니라 기능(도메인 명사)으로 짓는다** — `Budget`, `Statistics`, `Settings` (○) / `BudgetSettings`, `TransactionList` (×)
+- 다음 중 하나라도 해당하면 **같은 모듈**에 둔다
+  - 같은 Domain 모델과 Client를 주로 쓴다
+  - 한 흐름으로 이어지는 화면이다 (목록 → 입력·수정, 현황 → 설정)
+  - 표시 규칙(상태 문구·색·포맷)이나 하위 View를 함께 쓴다
+- 다음에 해당하면 **모듈을 나눈다**
+  - 다른 기능 없이 혼자 진입하고 끝난다 (예: `Onboarding`)
+  - 여러 기능으로 들어가는 허브 화면이다 (예: `Home`)
+- 새 화면은 먼저 기존 기능 모듈에 들어갈 수 있는지 본다. 새 모듈은 위 기준으로 독립 기능일 때만 만든다
+- 피커·시트 같은 보조 화면은 그것을 띄우는 기능 모듈에 둔다 (예: `PeriodPicker` → `Statistics`)
+- 탭(§8)과 모듈은 1:1이 아니다 — 탭은 App의 조립 단위, 모듈은 기능 단위다 (예: 홈 탭에 `Home`·`Budget`·거래 화면이 함께 쌓인다)
 
 ## 2. 파일 생성 · 네이밍 · 접근 제어
 
@@ -42,34 +55,58 @@ Domain       → Foundation만
 
 | 종류 | 위치 | 이름 |
 |------|------|------|
-| 도메인 모델 | `Domain/Sources/Models/` | `Xxx.swift` |
-| 도메인 계산 | `Domain/Sources/Calculators/` | `XxxCalculator.swift`, `Type+Xxx.swift` |
+| 도메인 모델·값 타입 | `Domain/Sources/Models/` | `Xxx.swift` |
+| 도메인 계산 | `Domain/Sources/Calculators/` | 순수 함수 namespace `enum` (`XxxCalculator.swift`, `AmountInput.swift`) |
+| 도메인 확장 | `Domain/Sources/Extensions/` | `Type+기능.swift` (예: `Date+Time.swift`) |
 | Client 인터페이스 | `Clients/Sources/` | `XxxClient.swift` (인터페이스 + `DependencyValues` + `testValue` + `previewValue`) |
 | DAO | `Data/Sources/DAO/` | `XxxDAO.swift` |
 | live 연결 | `Data/Sources/Live/` | `XxxClient+Live.swift` |
 | live 등록 | `Data/Sources/Live/LiveDependencies.swift` | `bootstrapLive(database:)` |
-| DB 레코드 | `Data/Sources/Records/` | `XxxRecord.swift` |
+| DB 레코드 | `Data/Sources/Records/` | `@Table`만 — `XxxRecord.swift` |
+| 조회 결과 | `Data/Sources/Selections/` | `@Selection` 집계·조인 결과 — `XxxTotal.swift`, `XxxWithYyy.swift` |
 | 변환 | `Data/Sources/Mappers/` | `XxxMapper.swift` |
-| 마이그레이션 | 등록: `Data/Sources/Database/AppDatabase.swift`, 내용: `Database/MigrationVN.swift` | id는 `MigrationID.vN` (`"vN_설명"`) |
-| Feature | `Features/<Name>/Sources/` (화면이 여럿이면 `Sources/<Screen>/`) | `<Screen>Feature.swift`, `<Screen>View.swift` |
-| Feature 테스트 | `Features/<Name>/Tests/` | `<Name>FeatureTests.swift` |
+| 마이그레이션 | 등록: `Data/Sources/Database/AppDatabase.swift`, 내용: **v1부터 모두** `Database/MigrationVN.swift` | id는 `MigrationID.vN` (`"vN_설명"`) |
+| Feature 화면 | `Features/<기능>/Sources/<Screen>/` — **화면이 하나여도 화면 폴더를 둔다** | `<Screen>Feature.swift`, `<Screen>View.swift` |
+| 화면 전용 하위 View | `Features/<기능>/Sources/<Screen>/Components/` | `<ViewName>.swift` |
+| 모듈 안 공유 | `Features/<기능>/Sources/Shared/` | 여러 화면이 함께 쓰는 View·표시 규칙 (`internal`) |
+| 모듈 지원 | `Features/<기능>/Sources/Support/` | `Domain+Aliases.swift` |
+| Feature 테스트 | `Features/<기능>/Tests/` | 화면마다 `<Screen>FeatureTests.swift` |
+| App 루트 | `App/Sources/Root/` | `AppFeature.swift`, `AppView.swift` |
+| 탭 코디네이터 | `App/Sources/Coordinators/` | `<Tab>TabCoordinator.swift`, `<Tab>TabCoordinatorView.swift` |
+| push 대상·이동 규칙 | `App/Sources/Navigation/` | `AppPath.swift`, 기능별 `AppPath+<기능>.swift` |
+| 임시 화면 | `App/Sources/Placeholder/` | `ComingSoonFeature.swift` 등 |
 | 확장 | 해당 모듈 `Sources/Extensions/` | `Type+기능.swift` (예: `Int+Currency.swift`) |
+| 테스트 공용 도우미 | 해당 모듈 `Tests/Support/` | `TestDatabase.swift`, `TestCalendar.swift` |
 
-- 새 모듈·Feature·Client는 **직접 만들지 말고 `tuist scaffold`** 로 생성한다
-- 파일 하나에 주요 타입 하나. **View는 하위 View까지 한 파일에 하나** — 화면 전용 하위 View는 그 화면 폴더의 `Components/<ViewName>.swift`에, 같은 모듈의 여러 화면이 함께 쓰는 것은 `Sources/Shared/`에 `internal`로 둔다
+- 새 모듈·Feature·화면·Client는 **직접 만들지 말고 `tuist scaffold`** 로 생성한다 (`feature`, `screen`, `client` — AGENTS.md 명령어 표)
+- 파일 하나에 주요 타입 하나. **View는 하위 View까지 한 파일에 하나**
+- 하위 View 위치: 한 화면만 쓰면 `<Screen>/Components/`, 같은 모듈의 여러 화면이 쓰면 `Shared/`, **두 Feature 모듈 이상이 쓰면 DesignSystem `SDXxx`로 올린다** (Feature끼리 import할 수 없으므로 복사해 두지 않는다)
 - 파일을 추가·삭제하면 `tuist generate`를 다시 실행한다
+
+### 아직 규칙을 따르지 않는 기존 코드
+아래 파일은 위 위치 규칙을 정하기 전에 만들어졌다. **새 코드는 규칙을 따르고**, 아래 파일은 이동 작업을 따로 할 때까지 위치를 유지한다. 옮기면 이 목록에서 지운다.
+- Feature 화면 폴더 없음: `Home`, `Onboarding`, `Statistics`, `TransactionEditor`, `TransactionList` (`Budget`만 화면 폴더 사용)
+- `Domain+Aliases.swift`가 모든 Feature의 `Sources/` 바로 아래에 있음
+- Feature 테스트가 모듈마다 파일 하나 (`Budget`, `Statistics`, `TransactionEditor`는 Reducer 여러 개를 한 파일에서 검증)
+- `TransactionList` + `TransactionEditor`는 `Transaction` 기능 하나에 해당한다 — 합치는 작업은 보류 중. 새 거래 화면은 합친 뒤에 추가한다
+- Data: `Records/`의 `BucketTotal`·`CategoryExpenseTotal`·`TransactionWithCategory`(→ `Selections/`), v1 마이그레이션이 `AppDatabase.swift` 안에 있음, `BudgetAndSettingsDAOTests`·`CategoryAndFixedExpenseDAOTests`(DAO 2개를 한 파일에서 검증), `Tests/TestSupport.swift`(→ `Tests/Support/`)
+- Domain: `Calculators/Date+Time.swift`, `Calculators/MonthInterval.swift`(`DateInterval` 확장, → `Extensions/`)
+- DesignSystem: `Components/SDCategoryColor.swift`(→ `Foundation/Tokens/`), `DatePickSheet`(Budget)·`DatePickerSheet`(TransactionEditor) 중복(→ `SDDatePickerSheet`)
+- App: 탭·코디네이터 없이 `AppFeature`가 `Path`와 모든 push를 가짐, `ComingSoon*`이 `Sources/` 바로 아래에 있음
 
 ### 네이밍
 - 타입: `UpperCamelCase`. Feature는 `XxxFeature` / `XxxView`, Client는 `XxxClient`, DAO는 `XxxDAO`, 레코드는 `XxxRecord`
 - 테이블 이름: 복수형 camelCase (`transactionRecords`)
 - Bool: `is`/`has`/`can` 접두사 (`isLoading`, `canSave`)
 - 테스트 함수: `대상_조건_기대결과` (`save_existingId_updates`)
+- 테스트 파일: 대상 파일 이름 + `Tests` (`BudgetDAO` → `BudgetDAOTests`, `BudgetStatusFeature` → `BudgetStatusFeatureTests`). 파일 하나에서 대상 하나만 검증한다
+- 탭 코디네이터: `<Tab>TabCoordinator` (`HomeTabCoordinator`). 탭을 넘나드는 일은 `AppFeature`가 맡는다
 
 ### 접근 제어
 - 다른 모듈에서 쓰는 것만 `public`. 기본은 `internal`
 - Feature의 `State`, `Action`, `init`, `body`, View와 View의 `init`은 `public`
 - Data의 Record, DAO, Mapper는 `internal`. 모듈 밖으로 나가는 것은 `appDatabase()`, `bootstrapLive`, `DateGenerator.trusted`뿐
-- `Domain.Transaction`은 `SwiftUI.Transaction`과 이름이 겹친다 → 각 Feature 모듈에 `Sources/Domain+Aliases.swift`(`public typealias Transaction = Domain.Transaction`)를 두고, 테스트에서는 `Domain.Transaction`으로 명시한다
+- `Domain.Transaction`은 `SwiftUI.Transaction`과 이름이 겹친다 → 각 Feature 모듈에 `Sources/Support/Domain+Aliases.swift`(`public typealias Transaction = Domain.Transaction`)를 두고, 테스트에서는 `Domain.Transaction`으로 명시한다
 - **시스템 타입과 겹치는 이름을 새로 만들지 않는다.** 예: `Category`는 Objective-C 런타임 타입(`OpaquePointer`)과 겹쳐서 `TransactionCategory`로 지었다
 - 모듈 이름 `Data`는 `Foundation.Data`와 겹쳐 `Data.xxx`로 한정할 수 없다 → Data 모듈의 전역 함수는 메서드와 이름이 겹치지 않게 짓는다 (예: `observeDatabase`)
 
@@ -105,9 +142,9 @@ func makeMigrator() -> DatabaseMigrator {
     #if DEBUG
     migrator.eraseDatabaseOnSchemaChange = true
     #endif
-    migrator.registerMigration(MigrationID.v1) { db in /* CREATE TABLE ... */ }
+    migrator.registerMigration(MigrationID.v1, migrate: migrateV1)   // Database/MigrationV1.swift
     migrator.registerMigration(MigrationID.v2, migrate: migrateV2)   // Database/MigrationV2.swift
-    // migrator.registerMigration(MigrationID.v3, migrate: migrateV3)  ← 새 변경은 여기 추가
+    // migrator.registerMigration(MigrationID.vN, migrate: migrateVN)  ← 새 변경은 여기 추가 (AppDatabase에는 등록만)
     return migrator
 }
 ```
@@ -120,7 +157,8 @@ func makeMigrator() -> DatabaseMigrator {
 - 클로저 인자에 레이블을 붙인다 (`_ interval:`) → 호출은 `client.fetch(interval:)`
 - throw하지 않는 클로저는 기본값을 지정한다 (매크로 요구사항)
 - `testValue = Self()` (매크로가 만든 unimplemented), `previewValue`는 공용 인메모리 저장소 `PreviewStore`(Clients/Sources/Preview)로 구현한다 — 변경 시 관찰 스트림에도 반영된다
-- **새 Client는 `bootstrapLive(database:)`에 반드시 등록한다.** Data는 staticFramework라서 App이 직접 참조하지 않는 `XxxClient+Live.swift`는 링커가 제거하고, 그러면 `DependencyKey` 적합성이 사라져 앱에서 `testValue`(unimplemented)가 쓰인다
+- `tuist scaffold client`는 Client · DAO · live · DAO 테스트를 만든다. Record·Selection·Mapper는 DB 테이블이나 조회 결과가 새로 필요할 때만 직접 추가한다 (Settings처럼 기존 테이블을 쓰면 만들지 않는다)
+- **새 Client는 `bootstrapLive(database:)`에 반드시 등록한다.** scaffold가 자동으로 고치지 못하므로, 생성된 `XxxClient+Live.swift` 맨 위 주석대로 직접 추가한다. Data는 staticFramework라서 App이 직접 참조하지 않는 `XxxClient+Live.swift`는 링커가 제거하고, 그러면 `DependencyKey` 적합성이 사라져 앱에서 `testValue`(unimplemented)가 쓰인다
 
 ```swift
 // Clients/Sources/TransactionClient.swift
@@ -196,6 +234,16 @@ extension DependencyValues {
 - 사용자 확인·오류 표시는 `@Presents var alert: AlertState<Action.Alert>?`로 한다
 - 중복 실행 방지(예: `isSaving`) 같은 가드는 Reducer에서 처리한다
 
+### Reducer 파일 안 순서
+`scaffold` 템플릿도 이 순서를 따른다.
+1. 중첩 Reducer (`@Reducer enum Destination` / `Path`)
+2. `State` — 저장 프로퍼티 → computed property → `init`
+3. `Action` — case는 생명주기·사용자 행동 → 비동기 결과 → `binding` → `alert` / `destination` → `delegate` 순. 그 아래에 중첩 enum (`Alert`, `Delegate`) 정의
+4. `@Dependency` 프로퍼티
+5. `public init() {}`
+6. `body` — `BindingReducer()` → `Reduce { }` → `.ifLet` / `.forEach`
+7. `private` 헬퍼 메서드, `enum CancelID`
+
 ```swift
 case .saveButtonTapped:
     guard let amount = state.amount, !state.isSaving else { return .none }
@@ -217,12 +265,37 @@ case .saveButtonTapped:
 - 모든 공개 View에 `#Preview`를 둔다. 프리뷰 Store는 Client의 `previewValue`를 쓴다
 
 ## 8. 내비게이션 규칙
-- push: 부모의 `StackState<Path.State>` + `@Reducer enum Path`
-- 모달(sheet, fullScreenCover, alert, confirmationDialog): `@Presents var destination` + `@Reducer enum Destination`
-- 자식은 직접 이동하지 않고 `.delegate(...)`를 보낸다 → 부모가 `path.append` / `destination` 설정·해제
+
+### 구조
+탭은 **[홈] [통계] [설정]** 이다. 이동은 App 모듈에서만 조립한다 — Feature끼리 import할 수 없어서 여러 기능 화면을 쌓는 코드는 App에만 둘 수 있다.
+
+```
+AppFeature (Root/)            탭 선택 + 탭과 무관한 전역 일 (시간 동기화, 온보딩, 토스트, 예산 알림)
+ ├── HomeTabCoordinator       루트 Home       → 거래 목록·입력, 예산 현황·설정 push
+ ├── StatisticsTabCoordinator 루트 Statistics
+ └── SettingsTabCoordinator   루트 Settings
+        └── path: StackState<AppPath.State>   세 탭이 같은 AppPath를 쓴다 (Navigation/)
+```
+
+| 이동 | 맡는 곳 | 방식 |
+|------|--------|------|
+| 같은 탭 안 push / pop | `<Tab>TabCoordinator` | `StackState<AppPath.State>` |
+| 화면 위 시트·알림 | 그 화면의 Feature | `@Presents var destination` / `alert` |
+| 탭 전환 | `AppFeature` | 코디네이터의 `.delegate(.switchTab(...))` 처리 |
+| 탭과 무관한 표시 (토스트, 예산 알림) | `AppFeature` | TabView 바깥에 둔다 — 어느 탭에서든 보인다 |
+
+### 규칙
+- push: 코디네이터의 `StackState<AppPath.State>` + `@Reducer enum AppPath` (App/Sources/Navigation/AppPath.swift). 탭마다 `Path`를 따로 만들지 않는다 — 같은 화면을 여러 탭에서 push하므로
+- 모달(sheet, fullScreenCover, alert, confirmationDialog): `@Presents var destination` + `@Reducer enum Destination`. 같은 Feature 모듈의 하위 화면만 모달로 띄운다
+- 자식은 직접 이동하지 않고 `.delegate(...)`를 보낸다 → 코디네이터가 `path.append` / `pop`, 부모 Feature가 `destination` 설정·해제
+- **코디네이터는 이동만 한다** — 화면을 그리지 않고(`<Tab>TabCoordinatorView`는 `NavigationStack`과 화면 연결만), Client를 호출하지 않는다. 데이터가 필요한 일은 Feature에 둔다
+- 기능별 이동 규칙(그 기능의 delegate → push/pop)은 `Navigation/AppPath+<기능>.swift`에 한 번만 정의하고, 여러 코디네이터가 함께 쓴다 (예: 거래 저장 → 입력 화면 pop + 토스트)
+- 코디네이터끼리는 서로 모른다. 탭을 넘는 이동은 코디네이터가 `AppFeature`에 delegate로 알린다 (예: 홈의 통계 바로가기 → 통계 탭 전환. 홈 스택에 통계를 push하지 않는다)
+- 탭 루트 화면의 State는 `AppFeature`가 처음에 한 번 만들고 탭을 오가도 유지한다. 다시 보일 때 갱신은 `onAppear`로 한다
 - `NavigationLink(destination:)` 금지 — `NavigationStack(path: $store.scope(state: \.path, action: \.path))` 사용
-- `Path.State`, `Destination.State`에 `Equatable`을 extension으로 선언한다
-- 딥링크는 `AppFeature`에서 `path`를 조립해 처리한다
+- `AppPath.State`, `Destination.State`에 `Equatable`을 extension으로 선언한다
+- 딥링크는 `AppFeature`가 탭을 고르고 그 탭 코디네이터의 `path`를 조립해 처리한다
+- 외부 코디네이터 라이브러리(TCACoordinators 등)는 쓰지 않는다 — `StackState` / `@Presents`로 충분하다
 
 ## 9. 동시성 · 시간 규칙
 - Swift 6 language mode, Strict Concurrency `complete`. 경고를 남기지 않는다
@@ -248,7 +321,8 @@ case .saveButtonTapped:
 - DB 제약(CHECK, 외래 키)이 잘못된 값을 거부하는지도 테스트한다
 - **Domain**: 순수 함수 단위 테스트. `Calendar`/`TimeZone`을 고정한다 (`Asia/Seoul`)
 - **DesignSystem**: 에셋(색상·폰트) 등록 여부를 테스트한다
-- **App**: `AppFeature`의 내비게이션 조립(push/pop, sheet 표시/해제)을 테스트한다
+- **App**: 코디네이터마다 push/pop 조립을, `AppFeature`는 탭 전환과 전역 일(토스트, 예산 알림)을 테스트한다 (`HomeTabCoordinatorTests`, `AppFeatureTests`)
+- 테스트 파일은 대상 파일과 1:1로 둔다 (§2 네이밍). 여러 테스트 파일이 쓰는 도우미는 `Tests/Support/`에 둔다
 - `.skip`, 비어 있는 테스트, 주석 처리된 검증을 남기지 않는다
 
 ```swift

@@ -66,7 +66,7 @@ SolSol/
 SolSolApp (@main) ── prepareDependencies { $0.bootstrapLive(database:) }
  └── AppView ⇄ Store<AppFeature>        ← 탭 선택, 시간 동기화, 온보딩
       ├── TabView
-      │    ├── [홈]  HomeTabCoordinator         루트 Home       + path: StackState<AppPath>
+      │    ├── [홈]  HomeTabCoordinator         루트 Home       + path: StackState<AppPath.State>
       │    ├── [통계] StatisticsTabCoordinator  루트 Statistics + path
       │    └── [설정] SettingsTabCoordinator    루트 Settings   + path
       └── toast · 예산 알림                ← TabView 바깥 — 탭이 바뀌어도 보인다
